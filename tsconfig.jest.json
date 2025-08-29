@@ -3,7 +3,8 @@
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "."
   },
   "include": ["jest.setup.ts", "src/**/*", "src/**/*.tsx", "src/**/*.ts"],
   "exclude": ["node_modules", ".next", "dist"]
