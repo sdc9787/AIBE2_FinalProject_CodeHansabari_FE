@@ -31,15 +31,19 @@ The project has been extended with:
 - `jest`, `@testing-library/*`, `msw` for testing with mocked network requests.
 
 ### React Query
+
 Wrapped in a `Providers` component (`src/components/Providers.tsx`). Example usage on `app/page.tsx` fetching `/api/hello`.
 
 ### Zustand
+
 Counter store at `src/store/useCounterStore.ts` used on the home page.
 
 ### MSW (Mock Service Worker)
+
 Handlers defined in `src/mocks/handlers.ts` and wired for Jest in `jest.setup.ts`. Tests run without hitting real network.
 
 ### Testing
+
 Run tests:
 
 ```bash
