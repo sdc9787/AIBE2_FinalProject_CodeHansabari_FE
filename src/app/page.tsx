@@ -1,9 +1,25 @@
+"use client";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
+import { useCounterStore } from "@/store/useCounterStore";
+import clsx from "clsx";
+
+async function fetchHello(): Promise<{ message: string }> {
+  const res = await fetch("/api/hello");
+  if (!res.ok) throw new Error("Network error");
+  return res.json();
+}
 
 export default function Home() {
+  const { count, increment, decrement, reset } = useCounterStore();
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["hello"],
+    queryFn: fetchHello,
+  });
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start w-full max-w-xl">
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -12,6 +28,54 @@ export default function Home() {
           height={38}
           priority
         />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full"
+        >
+          <h2 className="text-lg font-semibold mb-2">React Query + MSW</h2>
+          <div className="rounded border p-4 text-sm">
+            {isLoading && <p>Loading...</p>}
+            {error && <p className="text-red-600">Error: {(error as Error).message}</p>}
+            {data && <p className="text-emerald-600">{data.message}</p>}
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+          className="w-full"
+        >
+          <h2 className="text-lg font-semibold mb-2">Zustand Counter</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={decrement}
+                className="px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-800"
+              >-
+              </button>
+              <span
+                className={clsx(
+                  "w-12 text-center font-mono",
+                  count % 2 === 0 ? "text-blue-600" : "text-purple-600"
+                )}
+              >
+                {count}
+              </span>
+              <button
+                onClick={increment}
+                className="px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-800"
+              >+
+              </button>
+              <button
+                onClick={reset}
+                className="px-3 py-1 rounded border hover:bg-gray-100 dark:hover:bg-gray-800"
+              >Reset
+              </button>
+            </div>
+        </motion.div>
         <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
           <li className="mb-2 tracking-[-.01em]">
             Get started by editing{" "}
