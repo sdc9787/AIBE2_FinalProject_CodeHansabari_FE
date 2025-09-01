@@ -4,7 +4,7 @@ import "whatwg-fetch";
 // MSW setup (tests only). The server is started in global setup style here.
 // If you later need a custom globalSetup file, move this logic there.
 // Use absolute path alias for clarity in tests.
-import { server } from "@/mocks/server";
+import { server } from "@/shared/mocks/server";
 
 beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
