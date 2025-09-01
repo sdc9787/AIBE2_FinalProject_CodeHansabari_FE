@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR, Roboto } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
 import { MswProvider } from "@/app/msw-provider";
 import { QueryProvider } from "@/app/query-provider";
 
