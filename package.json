@@ -18,6 +18,7 @@
     "next": "15.5.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-hot-toast": "^2.6.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -44,23 +45,9 @@
     "typescript": "^5",
     "whatwg-fetch": "^3.6.20"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": [
-      "<rootDir>/jest.setup.ts"
-    ],
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1",
-      "^.+\\.(css|scss|sass)$": "identity-obj-proxy"
-    },
-    "transform": {
-      "^.+\\.(t|j)sx?$": [
-        "ts-jest",
-        {
-          "tsconfig": "tsconfig.jest.json"
-        }
-      ]
-    }
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

@@ -14,7 +14,7 @@ export function MswProvider({ children }: MswProviderProps) {
       process.env.NODE_ENV === 'development' &&
       typeof window !== 'undefined'
     ) {
-      import('../shared/mocks/browser').then(({ worker }) => {
+      import('@/shared/mocks/browser').then(({ worker }) => {
         worker
           .start({
             onUnhandledRequest: 'bypass',

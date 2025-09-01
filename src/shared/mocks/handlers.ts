@@ -1,7 +1,3 @@
-import { rest } from "msw";
+import { sidebarCreateGoalHandler } from '@/features/mswtest/handler';
 
-export const handlers = [
-  rest.get("/api/hello", (_req, res, ctx) => {
-    return res(ctx.status(200), ctx.json({ message: "Hello from MSW mock!" }));
-  }),
-];
+export const handlers = [...sidebarCreateGoalHandler];
