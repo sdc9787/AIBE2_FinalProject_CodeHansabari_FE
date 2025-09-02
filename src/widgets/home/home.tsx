@@ -27,24 +27,9 @@ const features = [
   },
 ];
 
-export default function Home() {
+export function Home() {
   return (
     <>
-      {/* 헤더 */}
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-black/10 bg-white/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
-            CV Mento
-          </div>
-          <Link
-            href="/auth"
-            className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 font-semibold text-white"
-          >
-            Google로 시작하기
-          </Link>
-        </div>
-      </header>
-
       {/* 히어로 섹션 */}
       <section className="relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-700 pt-32 pb-20 text-center text-white">
         <div className="relative z-10 mx-auto max-w-7xl px-5">

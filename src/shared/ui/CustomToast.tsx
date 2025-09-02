@@ -5,7 +5,7 @@ import toast, { Toaster, useToasterStore } from 'react-hot-toast';
 
 const TOAST_LIMIT = 1; // Or any desired limit
 
-export default function CustomToast() {
+export function CustomToast() {
   const { toasts } = useToasterStore();
   useEffect(() => {
     toasts
