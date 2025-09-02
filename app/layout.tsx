@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Noto_Sans_KR, Roboto } from 'next/font/google';
 import './globals.css';
 import { MswProvider, QueryProvider } from '@/app';
+import { CustomToast, Modal } from '@/shared';
+import { Header } from '@/widgets';
 
 const notoSansKR = Noto_Sans_KR({
   variable: '--font-noto-sans-kr',
@@ -31,7 +33,12 @@ export default function RootLayout({
     <html lang="ko">
       <body className={`${notoSansKR.variable} ${roboto.variable} antialiased`}>
         <MswProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <QueryProvider>
+            <Header />
+            {children}
+            <CustomToast />
+            <Modal />
+          </QueryProvider>
         </MswProvider>
       </body>
     </html>
