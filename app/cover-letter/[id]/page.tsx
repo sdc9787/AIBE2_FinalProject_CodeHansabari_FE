@@ -1,18 +1,15 @@
 import { CoverLetterPage } from '@/pages';
-
-interface CoverLetterDetailPageProps {
-  params: {
-    id: string;
-  };
-}
+import { use } from 'react';
 
 export default function CoverLetterDetailPage({
   params,
-}: CoverLetterDetailPageProps) {
-  const id = parseInt(params.id, 10);
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
 
   // id가 유효한 숫자가 아니면 404나 에러 처리를 할 수 있습니다
-  if (isNaN(id)) {
+  if (!id) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -25,5 +22,5 @@ export default function CoverLetterDetailPage({
     );
   }
 
-  return <CoverLetterPage id={id} />;
+  return <CoverLetterPage id={Number(id)} />;
 }
