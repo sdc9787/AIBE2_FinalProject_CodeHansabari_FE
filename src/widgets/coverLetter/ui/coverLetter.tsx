@@ -9,6 +9,8 @@ interface CoverLetterProps {
 
 export function CoverLetter({ id }: CoverLetterProps) {
   const [text, setText] = useState('');
+  const [jobField, setJobField] = useState('');
+  const [experienceYears, setExperienceYears] = useState('');
   const [charCount, setCharCount] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<{
@@ -31,11 +33,23 @@ export function CoverLetter({ id }: CoverLetterProps) {
   useEffect(() => {
     if (coverLetterDetail && id) {
       setText(coverLetterDetail.content);
+      setJobField(coverLetterDetail.jobField);
+      setExperienceYears(coverLetterDetail.experience);
     }
   }, [coverLetterDetail, id]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
+  };
+
+  const handleJobFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setJobField(e.target.value);
+  };
+
+  const handleExperienceYearsChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setExperienceYears(e.target.value);
   };
 
   const showResumeModal = () => {
@@ -64,6 +78,8 @@ export function CoverLetter({ id }: CoverLetterProps) {
 
   const clearText = () => {
     setText('');
+    setJobField('');
+    setExperienceYears('');
     setAnalysisResult(null);
     setShowNextStep(false);
   };
@@ -134,6 +150,42 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 </h3>
                 <div className="text-sm text-gray-500">
                   {charCount} / {maxLength.toLocaleString()}자
+                </div>
+              </div>
+
+              {/* 직무 분야와 경력 입력 필드 */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="jobField"
+                    className="mb-1 block text-sm font-medium text-gray-700"
+                  >
+                    직무 분야
+                  </label>
+                  <input
+                    id="jobField"
+                    type="text"
+                    value={jobField}
+                    onChange={handleJobFieldChange}
+                    className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                    placeholder="예: 백엔드 개발, 프론트엔드 개발, 마케팅 등"
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="experienceYears"
+                    className="mb-1 block text-sm font-medium text-gray-700"
+                  >
+                    경력
+                  </label>
+                  <input
+                    id="experienceYears"
+                    type="text"
+                    value={experienceYears}
+                    onChange={handleExperienceYearsChange}
+                    className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                    placeholder="예: 신입, 1년, 3년, 5년 이상 등"
+                  />
                 </div>
               </div>
 
