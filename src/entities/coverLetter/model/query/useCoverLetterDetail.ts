@@ -6,10 +6,10 @@ import {
   fetchCoverLetterDetail,
 } from '@/entities';
 
-export const useCoverLetterDetail = (coverLetterId: number) => {
+export const useCoverLetterDetail = (coverLetterId?: number) => {
   return useQuery<CoverLetterDetailResponse, Error, CoverLetterDetailData>({
-    queryKey: coverLetterQueryKeys.detail(coverLetterId),
-    queryFn: () => fetchCoverLetterDetail(coverLetterId),
+    queryKey: coverLetterQueryKeys.detail(coverLetterId || 0),
+    queryFn: () => fetchCoverLetterDetail(coverLetterId!),
     enabled: !!coverLetterId,
     staleTime: 1000 * 60, // 1분
     refetchOnWindowFocus: false, // 윈도우 포커스 시 refetch 하지 않음

@@ -1,9 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useModalStore } from '@/shared';
-import { CoverLetterListModal } from '@/entities';
+import { CoverLetterListModal, useCoverLetterDetail } from '@/entities';
 
-export function CoverLetter() {
+interface CoverLetterProps {
+  id?: number;
+}
+
+export function CoverLetter({ id }: CoverLetterProps) {
   const [text, setText] = useState('');
   const [charCount, setCharCount] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -16,9 +20,19 @@ export function CoverLetter() {
   const { open } = useModalStore();
   const maxLength = 2000;
 
+  // id가 있을 때만 자소서 상세 데이터를 불러옴
+  const { data: coverLetterDetail, isLoading } = useCoverLetterDetail(id);
+
   useEffect(() => {
     setCharCount(text.length);
   }, [text]);
+
+  // 자소서 상세 데이터가 로드되면 텍스트에 설정
+  useEffect(() => {
+    if (coverLetterDetail && id) {
+      setText(coverLetterDetail.content);
+    }
+  }, [coverLetterDetail, id]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
@@ -83,65 +97,79 @@ export function CoverLetter() {
   return (
     <div className="min-h-screen bg-gray-50 p-6 pt-32 pb-20">
       <div className="mx-auto max-w-7xl">
-        {/* 자기소개서 입력 섹션 */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-gray-800">
-              AI 자기소개서 첨삭
-            </h2>
-            <div className="flex gap-3">
-              <button
-                onClick={showResumeModal}
-                className="flex items-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-              >
-                📄 저장된 자소서 불러오기
-              </button>
+        {/* 로딩 상태 */}
+        {id && isLoading && (
+          <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
+            <div className="flex h-32 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
+              <span className="ml-3 text-gray-600">
+                자소서를 불러오는 중...
+              </span>
             </div>
           </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-700">
-                자기소개서 작성
-              </h3>
-              <div className="text-sm text-gray-500">
-                {charCount} / {maxLength.toLocaleString()}자
+        )}
+        {/* 자기소개서 입력 섹션 */}
+        {(!id || !isLoading) && (
+          <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {id && coverLetterDetail
+                  ? coverLetterDetail.title
+                  : 'AI 자기소개서 첨삭'}
+              </h2>
+              <div className="flex gap-3">
+                <button
+                  onClick={showResumeModal}
+                  className="flex items-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                >
+                  📄 저장된 자소서 불러오기
+                </button>
               </div>
             </div>
 
-            <textarea
-              value={text}
-              onChange={handleTextChange}
-              className="w-full rounded-md border border-gray-300 p-4 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-              placeholder="자기소개서를 입력해주세요. 실시간으로 AI가 분석하고 첨삭해드립니다. (최대 4,000자)"
-              maxLength={maxLength}
-              rows={12}
-            />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-700">
+                  자기소개서 작성
+                </h3>
+                <div className="text-sm text-gray-500">
+                  {charCount} / {maxLength.toLocaleString()}자
+                </div>
+              </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={analyzeResume}
-                disabled={isAnalyzing || !text.trim()}
-                className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
-              >
-                {isAnalyzing ? '분석 중...' : 'AI 첨삭 시작'}
-              </button>
-              <button
-                onClick={clearText}
-                className="flex items-center gap-2 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-              >
-                🗑️ 전체 삭제
-              </button>
-              <button
-                onClick={copyText}
-                className="flex items-center gap-2 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
-              >
-                📋 복사하기
-              </button>
+              <textarea
+                value={text}
+                onChange={handleTextChange}
+                className="w-full rounded-md border border-gray-300 p-4 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                placeholder="자기소개서를 입력해주세요. 실시간으로 AI가 분석하고 첨삭해드립니다. (최대 4,000자)"
+                maxLength={maxLength}
+                rows={12}
+              />
+
+              <div className="flex gap-3">
+                <button
+                  onClick={analyzeResume}
+                  disabled={isAnalyzing || !text.trim()}
+                  className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                >
+                  {isAnalyzing ? '분석 중...' : 'AI 첨삭 시작'}
+                </button>
+                <button
+                  onClick={clearText}
+                  className="flex items-center gap-2 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                >
+                  🗑️ 전체 삭제
+                </button>
+                <button
+                  onClick={copyText}
+                  className="flex items-center gap-2 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                >
+                  📋 복사하기
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
+        )}{' '}
         {/* AI 모의 면접 권유 섹션 */}
         {showNextStep && (
           <div className="animate-fade-in mb-8 rounded-lg bg-gradient-to-r from-green-500 to-blue-500 p-6 text-white shadow-md">
@@ -175,7 +203,6 @@ export function CoverLetter() {
             </div>
           </div>
         )}
-
         {/* 분석 결과 섹션 */}
         {analysisResult && (
           <div className="grid gap-6 md:grid-cols-2">

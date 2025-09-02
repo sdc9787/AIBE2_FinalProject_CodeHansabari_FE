@@ -1,5 +1,9 @@
 import { CoverLetter } from '@/widgets';
 
-export function CoverLetterPage() {
-  return <CoverLetter />;
+interface CoverLetterPageProps {
+  id?: number;
+}
+
+export function CoverLetterPage({ id }: CoverLetterPageProps) {
+  return <CoverLetter id={id} />;
 }
