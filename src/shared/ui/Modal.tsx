@@ -2,7 +2,7 @@
 import { useRef, useEffect, MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { useModalStore } from '../model/useModalStore';
+import { useModalStore } from '@/shared';
 import { Backdrop } from './Backdrop';
 
 export const Modal = () => {
