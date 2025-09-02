@@ -7,8 +7,69 @@ import { useModalStore } from '@/shared';
 export function CoverLetterListModal() {
   const router = useRouter();
   const { close } = useModalStore();
-  const { data: coverLetters, isLoading, error } = useCoverLetterList();
+  const [currentPage, setCurrentPage] = useState(0);
+  const {
+    data: coverLetters,
+    isLoading,
+    error,
+  } = useCoverLetterList(currentPage, 'thumbnail');
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    setExpandedIds(new Set()); // 페이지 변경 시 확장된 목록 초기화
+  };
+
+  const renderPaginationButtons = () => {
+    if (!coverLetters || coverLetters.totalPages <= 1) return null;
+
+    const buttons = [];
+    const totalPages = coverLetters.totalPages;
+    const currentPageNumber = coverLetters.pageable.pageNumber;
+
+    // 이전 페이지 버튼
+    buttons.push(
+      <button
+        key="prev"
+        onClick={() => handlePageChange(currentPageNumber - 1)}
+        disabled={currentPageNumber === 0}
+        className="mx-1 rounded bg-gray-200 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        이전
+      </button>,
+    );
+
+    // 페이지 번호 버튼들
+    for (let i = 0; i < totalPages; i++) {
+      buttons.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`mx-1 rounded px-3 py-1 text-sm ${
+            i === currentPageNumber
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          {i + 1}
+        </button>,
+      );
+    }
+
+    // 다음 페이지 버튼
+    buttons.push(
+      <button
+        key="next"
+        onClick={() => handlePageChange(currentPageNumber + 1)}
+        disabled={currentPageNumber === totalPages - 1}
+        className="mx-1 rounded bg-gray-200 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        다음
+      </button>,
+    );
+
+    return buttons;
+  };
 
   const handleCoverLetterSelect = (coverLetterId: number) => {
     close();
@@ -51,7 +112,7 @@ export function CoverLetterListModal() {
   }
 
   return (
-    <div className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white p-6">
+    <div className="flex max-h-[80vh] w-2xl flex-col overflow-hidden rounded-lg bg-white p-6">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-bold">자소서 목록</h2>
         <button onClick={close} className="text-gray-500 hover:text-gray-700">
@@ -102,11 +163,11 @@ export function CoverLetterListModal() {
                     </span>
                   </div>
 
-                  <div className="text-sm text-gray-600">
-                    <p className={isExpanded ? '' : 'line-clamp-2'}>
-                      {coverLetter.content}
-                    </p>
-                  </div>
+                  {isExpanded && (
+                    <div className="text-sm text-gray-600">
+                      <p>{coverLetter.content}</p>
+                    </div>
+                  )}
 
                   <div className="mt-3 flex justify-end">
                     <button
@@ -126,14 +187,16 @@ export function CoverLetterListModal() {
       </div>
 
       {coverLetters && coverLetters.totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between border-t pt-4">
-          <span className="text-sm text-gray-600">
-            총 {coverLetters.totalElements}개 중 {coverLetters.content.length}개
-            표시
-          </span>
-          <span className="text-sm text-gray-600">
-            {coverLetters.pageable.pageNumber + 1} / {coverLetters.totalPages}
-          </span>
+        <div className="mt-4 space-y-3 border-t pt-4">
+          {/* <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-600">
+              총 {coverLetters.totalElements}개
+            </span>
+            <span className="text-sm text-gray-600">
+              {coverLetters.pageable.pageNumber + 1} / {coverLetters.totalPages}
+            </span>
+          </div> */}
+          <div className="flex justify-center">{renderPaginationButtons()}</div>
         </div>
       )}
     </div>

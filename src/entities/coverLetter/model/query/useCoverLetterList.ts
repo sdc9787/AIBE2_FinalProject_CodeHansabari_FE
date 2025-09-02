@@ -6,11 +6,14 @@ import {
   fetchCoverLetterList,
 } from '@/entities';
 
-export const useCoverLetterList = () => {
+export const useCoverLetterList = (
+  page: number,
+  view?: 'thumbnail' | 'all',
+) => {
   return useQuery<CoverLetterListResponse, Error, CoverLetterListData>({
-    queryKey: coverLetterQueryKeys.list,
-    queryFn: () => fetchCoverLetterList(),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    queryKey: coverLetterQueryKeys.list(page),
+    queryFn: () => fetchCoverLetterList(page, view || 'all'),
+    staleTime: 1000 * 60, // 1분
     refetchOnWindowFocus: false,
     select: (data) => data.data,
   });
