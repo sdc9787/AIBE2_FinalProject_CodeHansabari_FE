@@ -1,3 +1,3 @@
-import { sidebarCreateGoalHandler } from '@/features/mswtest/handler';
+import { coverLetterHandlers } from '@/entities';
 
-export const handlers = [...sidebarCreateGoalHandler];
+export const handlers = [...coverLetterHandlers];

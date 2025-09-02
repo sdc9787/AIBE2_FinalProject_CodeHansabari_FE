@@ -1,2 +1,2 @@
-export * from './getCoverLettersDetail';
-export * from './getCoverLettersList';
+export * from './fetchCoverLetterDetail';
+export * from './fetchCoverLetterList';
