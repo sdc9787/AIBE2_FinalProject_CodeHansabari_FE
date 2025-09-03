@@ -1,35 +1,43 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useModalStore } from '@/shared';
+import toast from 'react-hot-toast';
+import { useModalStore, Button, Input, Textarea } from '@/shared';
 import { CoverLetterListModal, useCoverLetterDetail } from '@/entities';
+import { useImproveCoverLetterMutation } from '@/features/improve-cover-letter';
+import { SaveCoverLetterButton } from '@/features/save-cover-letter';
 
 interface CoverLetterProps {
   id?: number;
 }
 
+const MAX_LENGTH = 2000;
+
 export function CoverLetter({ id }: CoverLetterProps) {
+  // 상태 관리
   const [text, setText] = useState('');
   const [jobField, setJobField] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
+  const [customPrompt, setCustomPrompt] = useState('');
   const [charCount, setCharCount] = useState(0);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<{
-    original: string;
-    revised: string;
+    feedback: {
+      strengths: Array<{ description: string; suggestion: string }>;
+      improvements: Array<{ description: string; suggestion: string }>;
+      summary: string;
+    };
+    improvedContent: string;
   } | null>(null);
   const [showNextStep, setShowNextStep] = useState(false);
 
   const { open } = useModalStore();
-  const maxLength = 2000;
-
-  // id가 있을 때만 자소서 상세 데이터를 불러옴
   const { data: coverLetterDetail, isLoading } = useCoverLetterDetail(id);
+  const improveMutation = useImproveCoverLetterMutation();
 
   useEffect(() => {
     setCharCount(text.length);
   }, [text]);
 
-  // 자소서 상세 데이터가 로드되면 텍스트에 설정
+  //id값이 있을때 상세정보 불러와서 폼에 채우기
   useEffect(() => {
     if (coverLetterDetail && id) {
       setText(coverLetterDetail.content);
@@ -38,6 +46,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
     }
   }, [coverLetterDetail, id]);
 
+  // 핸들러들
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
   };
@@ -52,34 +61,46 @@ export function CoverLetter({ id }: CoverLetterProps) {
     setExperienceYears(e.target.value);
   };
 
+  const handleCustomPromptChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setCustomPrompt(e.target.value);
+  };
+
+  //저장된 자소서 리스트 모달 열기
   const showResumeModal = () => {
     open(<CoverLetterListModal />);
   };
 
   const analyzeResume = async () => {
     if (!text.trim()) {
-      alert('자기소개서를 입력해주세요.');
+      toast.error('자기소개서를 입력해주세요.');
       return;
     }
 
-    setIsAnalyzing(true);
-
-    // TODO: API 호출 로직 구현
-    // 임시로 시뮬레이션
-    setTimeout(() => {
-      setAnalysisResult({
-        original: text,
-        revised: text + ' (AI 첨삭 결과 예시)',
-      });
-      setIsAnalyzing(false);
-      setShowNextStep(true);
-    }, 2000);
+    improveMutation.mutate(
+      {
+        content: text,
+        jobField: jobField || '일반',
+        experienceYears: parseInt(experienceYears) || 0,
+        customPrompt: customPrompt || '일반적인 개선사항을 제안해주세요',
+      },
+      {
+        onSuccess: (data) => {
+          if (data.success) {
+            setAnalysisResult(data.data);
+            setShowNextStep(true);
+          }
+        },
+      },
+    );
   };
 
   const clearText = () => {
     setText('');
     setJobField('');
     setExperienceYears('');
+    setCustomPrompt('');
     setAnalysisResult(null);
     setShowNextStep(false);
   };
@@ -87,22 +108,22 @@ export function CoverLetter({ id }: CoverLetterProps) {
   const copyText = async () => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('텍스트가 복사되었습니다.');
+      toast.success('텍스트가 복사되었습니다.');
     } catch (err) {
       console.error('복사 실패:', err);
+      toast.error('텍스트 복사에 실패했습니다.');
     }
   };
 
   const copyRevisedToInput = () => {
-    if (analysisResult?.revised) {
-      setText(analysisResult.revised);
+    if (analysisResult?.improvedContent) {
+      setText(analysisResult.improvedContent);
       setAnalysisResult(null);
       setShowNextStep(false);
     }
   };
 
   const goToMockInterview = () => {
-    // TODO: 모의 면접 페이지로 이동
     console.log('모의 면접 페이지로 이동');
   };
 
@@ -110,36 +131,40 @@ export function CoverLetter({ id }: CoverLetterProps) {
     setShowNextStep(false);
   };
 
+  // 조건부 렌더링 변수들
+  const shouldShowLoading = id && isLoading;
+  const shouldShowForm = !id || !isLoading;
+  const title =
+    id && coverLetterDetail ? coverLetterDetail.title : 'AI 자기소개서 첨삭';
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 pt-32 pb-20">
       <div className="mx-auto max-w-7xl">
-        {/* 로딩 상태 */}
-        {id && isLoading && (
+        {/* 로딩 섹션 */}
+        {shouldShowLoading && (
           <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
             <div className="flex h-32 items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
+              <div className="h-8 w-8 rounded-full border-b-2 border-blue-500"></div>
               <span className="ml-3 text-gray-600">
                 자소서를 불러오는 중...
               </span>
             </div>
           </div>
         )}
+
         {/* 자기소개서 입력 섹션 */}
-        {(!id || !isLoading) && (
+        {shouldShowForm && (
           <div className="mb-8 rounded-lg bg-white p-6 shadow-md">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {id && coverLetterDetail
-                  ? coverLetterDetail.title
-                  : 'AI 자기소개서 첨삭'}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
               <div className="flex gap-3">
-                <button
+                <Button
                   onClick={showResumeModal}
-                  className="flex items-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                  variant="primary"
+                  icon={<span>📄</span>}
                 >
-                  📄 저장된 자소서 불러오기
-                </button>
+                  저장된 자소서 불러오기
+                </Button>
               </div>
             </div>
 
@@ -149,82 +174,76 @@ export function CoverLetter({ id }: CoverLetterProps) {
                   자기소개서 작성
                 </h3>
                 <div className="text-sm text-gray-500">
-                  {charCount} / {maxLength.toLocaleString()}자
+                  {charCount} / {MAX_LENGTH.toLocaleString()}자
                 </div>
               </div>
 
-              {/* 직무 분야와 경력 입력 필드 */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="jobField"
-                    className="mb-1 block text-sm font-medium text-gray-700"
-                  >
-                    직무 분야
-                  </label>
-                  <input
-                    id="jobField"
-                    type="text"
-                    value={jobField}
-                    onChange={handleJobFieldChange}
-                    className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                    placeholder="예: 백엔드 개발, 프론트엔드 개발, 마케팅 등"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="experienceYears"
-                    className="mb-1 block text-sm font-medium text-gray-700"
-                  >
-                    경력
-                  </label>
-                  <input
-                    id="experienceYears"
-                    type="text"
-                    value={experienceYears}
-                    onChange={handleExperienceYearsChange}
-                    className="w-full rounded-md border border-gray-300 p-3 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                    placeholder="예: 신입, 1년, 3년, 5년 이상 등"
-                  />
-                </div>
+                <Input
+                  id="jobField"
+                  label="직무 분야"
+                  value={jobField}
+                  onChange={handleJobFieldChange}
+                  placeholder="예: 백엔드 개발, 프론트엔드 개발, 마케팅 등"
+                />
+                <Input
+                  id="experienceYears"
+                  label="경력"
+                  value={experienceYears}
+                  onChange={handleExperienceYearsChange}
+                  placeholder="예: 신입, 1년, 3년, 5년 이상 등"
+                />
               </div>
 
-              <textarea
+              <Textarea
+                id="customPrompt"
+                label="AI 첨삭 요청사항 (선택)"
+                value={customPrompt}
+                onChange={handleCustomPromptChange}
+                placeholder="AI에게 특별히 요청하고 싶은 첨삭 방향을 입력해주세요. 예: 신입다운 열정과 학습능력을 강조해주세요"
+                rows={2}
+              />
+
+              <Textarea
                 value={text}
                 onChange={handleTextChange}
-                className="w-full rounded-md border border-gray-300 p-4 text-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
                 placeholder="자기소개서를 입력해주세요. 실시간으로 AI가 분석하고 첨삭해드립니다. (최대 4,000자)"
-                maxLength={maxLength}
+                maxLength={MAX_LENGTH}
                 rows={12}
               />
 
               <div className="flex gap-3">
-                <button
+                <Button
                   onClick={analyzeResume}
-                  disabled={isAnalyzing || !text.trim()}
-                  className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:bg-gray-400"
+                  disabled={improveMutation.isPending || !text.trim()}
+                  variant="primary"
+                  size="lg"
+                  loading={improveMutation.isPending}
                 >
-                  {isAnalyzing ? '분석 중...' : 'AI 첨삭 시작'}
-                </button>
-                <button
+                  {improveMutation.isPending ? '분석 중...' : 'AI 첨삭 시작'}
+                </Button>
+                <Button
                   onClick={clearText}
-                  className="flex items-center gap-2 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                  variant="secondary"
+                  icon={<span>🗑️</span>}
                 >
-                  🗑️ 전체 삭제
-                </button>
-                <button
+                  전체 삭제
+                </Button>
+                <Button
                   onClick={copyText}
-                  className="flex items-center gap-2 rounded-md bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+                  variant="secondary"
+                  icon={<span>📋</span>}
                 >
-                  📋 복사하기
-                </button>
+                  복사하기
+                </Button>
               </div>
             </div>
           </div>
-        )}{' '}
+        )}
+
         {/* AI 모의 면접 권유 섹션 */}
         {showNextStep && (
-          <div className="animate-fade-in mb-8 rounded-lg bg-gradient-to-r from-green-500 to-blue-500 p-6 text-white shadow-md">
+          <div className="mb-8 rounded-lg bg-gradient-to-r from-green-500 to-blue-500 p-6 text-white shadow-md">
             <div className="flex items-center gap-4">
               <span className="text-4xl">🎤</span>
               <div className="flex-1">
@@ -238,23 +257,23 @@ export function CoverLetter({ id }: CoverLetterProps) {
                   준비할 수 있습니다.
                 </p>
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     onClick={goToMockInterview}
-                    className="rounded-md bg-white px-6 py-2 text-blue-600 hover:bg-gray-100"
+                    variant="ghost"
+                    size="lg"
+                    icon={<span>🤖</span>}
                   >
-                    🤖 AI 모의 면접 시작하기
-                  </button>
-                  <button
-                    onClick={hideNextStepSection}
-                    className="rounded-md border border-white bg-transparent px-4 py-2 text-white hover:bg-white hover:text-blue-600"
-                  >
+                    AI 모의 면접 시작하기
+                  </Button>
+                  <Button onClick={hideNextStepSection} variant="outline">
                     나중에 하기
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
           </div>
         )}
+
         {/* 분석 결과 섹션 */}
         {analysisResult && (
           <div className="grid gap-6 md:grid-cols-2">
@@ -269,9 +288,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 </span>
               </div>
               <div className="rounded-md bg-gray-50 p-4">
-                <div className="whitespace-pre-wrap text-gray-700">
-                  {analysisResult.original}
-                </div>
+                <div className="whitespace-pre-wrap text-gray-700">{text}</div>
               </div>
             </div>
 
@@ -287,43 +304,101 @@ export function CoverLetter({ id }: CoverLetterProps) {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button
+                  <Button
                     onClick={copyRevisedToInput}
-                    className="rounded-md bg-gray-500 px-3 py-1 text-sm text-white hover:bg-gray-600"
+                    variant="small"
+                    size="sm"
+                    icon={<span>📝</span>}
                   >
-                    📝 편집창으로 복사
-                  </button>
-                  <button className="rounded-md bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600">
-                    💾 저장하기
-                  </button>
+                    편집창으로 복사
+                  </Button>
+                  <SaveCoverLetterButton
+                    data={{
+                      title: title,
+                      content: analysisResult.improvedContent,
+                      jobField: jobField || '일반',
+                      experienceYears: parseInt(experienceYears) || 0,
+                      isAiImproved: true,
+                    }}
+                  />
                 </div>
               </div>
               <div className="rounded-md bg-blue-50 p-4">
                 <div className="whitespace-pre-wrap text-gray-700">
-                  {analysisResult.revised}
+                  {analysisResult.improvedContent}
+                </div>
+              </div>
+            </div>
+
+            {/* AI 피드백 */}
+            <div className="col-span-2 rounded-lg bg-white p-6 shadow-md">
+              <div className="mb-4">
+                <span className="text-lg font-semibold text-green-700">
+                  AI 피드백
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-10">
+                {/* 강점 */}
+                {analysisResult.feedback.strengths.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="mb-2 font-semibold text-green-600">강점</h4>
+                    {analysisResult.feedback.strengths.map(
+                      (strength, index) => (
+                        <div
+                          key={index}
+                          className="mb-2 rounded-md bg-green-50 p-3"
+                        >
+                          <p className="font-medium text-green-800">
+                            {strength.description}
+                          </p>
+                          <p className="text-sm text-green-600">
+                            {strength.suggestion}
+                          </p>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
+                {/* 개선사항 */}
+                {analysisResult.feedback.improvements.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="mb-2 font-semibold text-orange-600">
+                      개선사항
+                    </h4>
+                    {analysisResult.feedback.improvements.map(
+                      (improvement, index) => (
+                        <div
+                          key={index}
+                          className="mb-2 rounded-md bg-orange-50 p-3"
+                        >
+                          <p className="font-medium text-orange-800">
+                            {improvement.description}
+                          </p>
+                          <p className="text-sm text-orange-600">
+                            {improvement.suggestion}
+                          </p>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                )}
+                {/* 요약 */}
+                <div className="col-span-2">
+                  <h4 className="mb-2 font-semibold text-blue-600">
+                    종합 의견
+                  </h4>
+                  <div className="rounded-md bg-blue-50 p-3">
+                    <p className="text-blue-800">
+                      {analysisResult.feedback.summary}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
