@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useModalStore, Button, Input, Textarea } from '@/shared';
 import { CoverLetterListModal, useCoverLetterDetail } from '@/entities';
 import { useImproveCoverLetterMutation } from '@/features/improve-cover-letter';
+import { SaveCoverLetterButton } from '@/features/save-cover-letter';
 
 interface CoverLetterProps {
   id?: number;
@@ -311,9 +312,15 @@ export function CoverLetter({ id }: CoverLetterProps) {
                   >
                     편집창으로 복사
                   </Button>
-                  <Button variant="primary" size="sm" icon={<span>💾</span>}>
-                    저장하기
-                  </Button>
+                  <SaveCoverLetterButton
+                    data={{
+                      title: title,
+                      content: analysisResult.improvedContent,
+                      jobField: jobField || '일반',
+                      experienceYears: parseInt(experienceYears) || 0,
+                      isAiImproved: true,
+                    }}
+                  />
                 </div>
               </div>
               <div className="rounded-md bg-blue-50 p-4">
