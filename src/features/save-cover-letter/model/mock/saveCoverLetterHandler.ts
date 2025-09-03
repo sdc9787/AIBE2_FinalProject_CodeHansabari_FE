@@ -43,6 +43,7 @@ export const saveCoverLetterHandler = [
         { status: 201 },
       );
     } catch (error) {
+      console.error('Save cover letter error:', error);
       // 에러 응답
       return HttpResponse.json(
         {

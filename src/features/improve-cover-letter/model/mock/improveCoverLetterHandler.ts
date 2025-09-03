@@ -16,7 +16,7 @@ export const improveCoverLetterHandlers = [
         return HttpResponse.json(mockErrorResponse, { status: 400 });
       }
 
-      const { content, jobField, experienceYears, customPrompt } = body as any;
+      const { content, jobField, experienceYears, customPrompt } = body;
 
       // 필수 필드 검증
       if (!content || content.trim().length === 0) {

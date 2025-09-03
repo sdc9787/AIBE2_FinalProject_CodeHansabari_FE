@@ -7,7 +7,7 @@ export const coverLetterHandlers = [
   }),
 
   // optional: detail handler
-  http.get('/api/v1/cover-letters/:id', (req) => {
+  http.get('/api/v1/cover-letters/:id', () => {
     // In a simple default handler, always return the mock detail
     return HttpResponse.json(mockCoverLetterDetail);
   }),

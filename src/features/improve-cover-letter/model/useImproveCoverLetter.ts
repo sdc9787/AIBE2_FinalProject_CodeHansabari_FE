@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCustomMutation } from '@/shared/lib/useCustomMutation';
 import { improveCoverLetter } from '../api/improveCoverLetter';
 

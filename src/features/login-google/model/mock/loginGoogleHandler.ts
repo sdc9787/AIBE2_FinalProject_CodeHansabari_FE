@@ -82,6 +82,7 @@ export const loginGoogleHandler = [
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
+      console.error('Login error:', error);
       return HttpResponse.json(
         {
           success: false,

@@ -49,7 +49,7 @@ export const useCustomMutation = <TVariables, TResult, TError = Error>(
       if (mutationOptions?.onError) {
         mutationOptions.onError(error, variables, context);
       }
-      const errorMessage = (error as any)?.message ?? '알 수 없는 에러입니다';
+      const errorMessage = (error as Error)?.message ?? '알 수 없는 에러입니다';
       toast.error(errorMessage, { id: context?.toastId });
     },
     onSettled: (data, error, variables, context) => {
