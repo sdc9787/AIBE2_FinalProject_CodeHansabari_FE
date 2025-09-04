@@ -17,72 +17,6 @@ const DEFAULT_HEADERS: { 'Content-Type'?: string } = {
 };
 
 // URL과 쿼리 파라미터를 조합하여 완전한 URL 생성
-// function buildURL(endpoint: string, params?: Record<string, any>) {
-//   console.log('enter buildurl', endpoint, BASE_URL);
-//   const url = new URL(endpoint, BASE_URL);
-//   console.log('after url');
-
-//   if (params) {
-//     Object.entries(params).forEach(([key, value]) => {
-//       if (value !== undefined && value !== null) {
-//         url.searchParams.append(key, String(value));
-//       }
-//     });
-//   }
-//   return url.toString();
-// }
-
-// 토큰 재발급 상태 관리
-let isRefreshing = false;
-let refreshPromise: Promise<boolean> | null = null;
-
-// 로그인 페이지로 리다이렉트
-function redirectToLogin() {
-  if (typeof window !== 'undefined') {
-    window.location.href = '/auth/login';
-  }
-}
-
-// 엑세스 토큰 재발급 요청
-async function refreshAccessToken(): Promise<boolean> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/auth/reissue`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    return response.ok;
-  } catch (error) {
-    return false;
-  }
-}
-
-// 토큰 재발급 처리 (중복 요청 방지)
-async function handleTokenRefresh(): Promise<boolean> {
-  if (isRefreshing) {
-    // 이미 재발급 중이면 기존 Promise 대기
-    return refreshPromise!;
-  }
-
-  isRefreshing = true;
-  refreshPromise = refreshAccessToken();
-
-  try {
-    const result = await refreshPromise;
-    if (!result) {
-      redirectToLogin(); // 토큰 재발급 실패 시 리다이렉트 처리
-    }
-    return result;
-  } finally {
-    isRefreshing = false;
-    refreshPromise = null;
-  }
-}
-
-// URL과 쿼리 파라미터를 조합하여 완전한 URL 생성
 function buildURL(endpoint: string, params?: Record<string, any>) {
   let url: URL | string;
 
@@ -103,13 +37,13 @@ function buildURL(endpoint: string, params?: Record<string, any>) {
     // 상대 경로 조합 (쿼리스트링 직접 구성)
     const query = params
       ? '?' +
-      Object.entries(params)
-        .filter(([_, value]) => value !== undefined && value !== null)
-        .map(
-          ([key, value]) =>
-            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
-        )
-        .join('&')
+        Object.entries(params)
+          .filter(([_, value]) => value !== undefined && value !== null)
+          .map(
+            ([key, value]) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+          )
+          .join('&')
       : '';
     return `${endpoint}${query}`;
   }
@@ -142,36 +76,6 @@ async function request<T>(
     headers,
     body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
   });
-
-  // HTTP 상태 코드 검사
-  if (!response.ok) {
-    // 401 에러이고 재시도가 아닌 경우에만 토큰 재발급 시도
-    if (
-      response.status === 401 &&
-      !isRetry
-    ) {
-      const refreshSuccess = await handleTokenRefresh();
-
-      if (refreshSuccess) {
-        // 토큰 재발급 성공 시 원래 요청 재시도
-        return request<T>(method, endpoint, data, config, true);
-      }
-    }
-
-    let errorBody: any = null;
-
-    // JSON 파싱을 시도하되 실패하면 null 반환
-    try {
-      errorBody = await response.json();
-    } catch {
-      errorBody = await response.text(); // fallback
-    }
-
-    const error = new Error(`HTTP error! status: ${response.status}`);
-    (error as any).status = response.status;
-    (error as any).body = errorBody;
-    throw error;
-  }
 
   // 응답 본문이 비어 있을 수 있으므로 안전하게 JSON 파싱
   try {
