@@ -96,4 +96,51 @@ export const loginGoogleHandler = [
       );
     }
   }),
+
+  // 인증 상태 확인 API
+  http.get('/auth/status', ({ request }) => {
+    // 쿠키나 Authorization 헤더에서 토큰 확인
+    const authHeader = request.headers.get('Authorization');
+    const cookies = request.headers.get('Cookie');
+
+    // 간단한 토큰 검증 로직 (실제로는 JWT 검증 등이 필요)
+    const hasValidToken =
+      authHeader?.includes('Bearer') || cookies?.includes('accessToken');
+
+    if (hasValidToken) {
+      // 인증된 사용자 정보 반환
+      return HttpResponse.json({
+        success: true,
+        message: '인증된 사용자입니다.',
+        data: {
+          authenticated: true,
+          member: {
+            memberId: 12345,
+            email: 'test@example.com',
+            name: '테스트 사용자',
+            picture: 'https://via.placeholder.com/150',
+          },
+        },
+        errorCode: null,
+        canRetry: true,
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      // 인증되지 않은 사용자
+      return HttpResponse.json(
+        {
+          success: false,
+          message: '인증이 필요합니다.',
+          data: {
+            authenticated: false,
+            member: null,
+          },
+          errorCode: 'AUTHENTICATION_REQUIRED',
+          canRetry: false,
+          timestamp: new Date().toISOString(),
+        },
+        { status: 401 },
+      );
+    }
+  }),
 ];

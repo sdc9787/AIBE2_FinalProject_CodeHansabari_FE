@@ -1,4 +1,4 @@
-import { GoogleLoginButton } from '@/features';
+import { UserInfo } from './ui';
 
 export function Header() {
   return (
@@ -9,13 +9,7 @@ export function Header() {
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-3xl font-bold text-transparent">
             CV Mento
           </div>
-          <GoogleLoginButton className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 font-semibold text-white"></GoogleLoginButton>
-          {/* <Link
-            href="/auth"
-            className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 font-semibold text-white"
-          >
-            Google로 시작하기
-          </Link> */}
+          <UserInfo />
         </div>
       </header>
     </>
