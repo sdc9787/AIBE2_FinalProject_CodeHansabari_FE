@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  memberId: number;
   email: string;
   name: string;
   picture?: string;
@@ -8,5 +8,6 @@ export interface User {
 export interface UserResponse {
   success: boolean;
   data: User;
+  timestamp: string;
   message?: string;
 }

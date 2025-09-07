@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { logoutUser } from '../api';
-import { USER_QUERY_KEYS } from '@/entities/user/model/query/queryKey';
+import { USER_QUERY_KEYS } from '@/entities';
 
 export function useLogout() {
   const queryClient = useQueryClient();
