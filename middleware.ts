@@ -25,15 +25,26 @@ async function checkAuthStatus(request: NextRequest): Promise<boolean> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    // 요청에서 쿠키를 가져와서 API 호출에 포함
-    const cookieHeader = request.headers.get('cookie') || '';
+    // 개발 환경에서 MSW 사용 시
+    const isMswEnabled = process.env.NEXT_PUBLIC_MSW_ENABLED === 'true';
+    const isDevelopment = process.env.NODE_ENV === 'development';
 
-    const response = await fetch(`${apiUrl}/auth/status`, {
+    if (isMswEnabled && isDevelopment && apiUrl?.includes('localhost')) {
+      // MSW 개발 환경에서는 기본적으로 인증된 것으로 처리
+      return true;
+    }
+
+    // 프로덕션 환경에서는 실제 API 호출
+    const cookieHeader = request.headers.get('cookie') || '';
+    const authUrl = `${apiUrl}/auth/status`;
+
+    const response = await fetch(authUrl, {
       method: 'GET',
       headers: {
         Cookie: cookieHeader,
+        'Content-Type': 'application/json',
       },
-      credentials: 'include', // 쿠키 포함
+      credentials: 'include',
     });
 
     if (response.ok) {

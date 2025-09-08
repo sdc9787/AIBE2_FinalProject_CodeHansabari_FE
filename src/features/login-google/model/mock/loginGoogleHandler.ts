@@ -1,5 +1,23 @@
 import { http, HttpResponse } from 'msw';
 
+// 사용자 정보 타입 정의
+interface UserInfo {
+  memberId: number;
+  email: string;
+  name: string;
+  picture: string;
+}
+
+// 로컬 테스트를 위한 인증 상태 관리
+// 테스트를 위해 초기에 인증된 상태로 설정
+let isUserAuthenticated = true;
+let currentUser: UserInfo | null = {
+  memberId: 12345,
+  email: 'test@example.com',
+  name: '테스트 사용자',
+  picture: 'https://via.placeholder.com/150',
+};
+
 export const loginGoogleHandler = [
   http.get('/auth/google/url', ({ request }) => {
     const url = new URL(request.url);
@@ -64,17 +82,23 @@ export const loginGoogleHandler = [
       }
 
       // 성공적인 로그인 응답
+      const userInfo = {
+        memberId: 12345,
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        picture: 'https://via.placeholder.com/150',
+      };
+
+      // 인증 상태 업데이트
+      isUserAuthenticated = true;
+      currentUser = userInfo;
+
       return HttpResponse.json({
         success: true,
         message: '로그인이 성공적으로 완료되었습니다.',
         data: {
           message: '구글 로그인 성공',
-          member: {
-            memberId: 12345,
-            email: 'test@example.com',
-            name: '테스트 사용자',
-            picture: 'https://via.placeholder.com/150',
-          },
+          member: userInfo,
           note: '테스트 계정으로 로그인되었습니다.',
         },
         errorCode: null,
@@ -98,49 +122,80 @@ export const loginGoogleHandler = [
   }),
 
   // 인증 상태 확인 API
-  http.get('/auth/status', ({ request }) => {
-    // 쿠키나 Authorization 헤더에서 토큰 확인
-    const authHeader = request.headers.get('Authorization');
-    const cookies = request.headers.get('Cookie');
-
-    // 간단한 토큰 검증 로직 (실제로는 JWT 검증 등이 필요)
-    const hasValidToken =
-      authHeader?.includes('Bearer') || cookies?.includes('accessToken');
-
-    if (hasValidToken) {
-      // 인증된 사용자 정보 반환
-      return HttpResponse.json({
-        success: true,
-        message: '인증된 사용자입니다.',
-        data: {
-          authenticated: true,
-          member: {
-            memberId: 12345,
-            email: 'test@example.com',
-            name: '테스트 사용자',
-            picture: 'https://via.placeholder.com/150',
-          },
-        },
-        errorCode: null,
-        canRetry: true,
-        timestamp: new Date().toISOString(),
-      });
-    } else {
-      // 인증되지 않은 사용자
+  http.get('/auth/status', () => {
+    // 인증되지 않은 경우
+    if (!isUserAuthenticated || !currentUser) {
       return HttpResponse.json(
         {
           success: false,
-          message: '인증이 필요합니다.',
+          message: '인증되지 않은 사용자입니다.',
           data: {
             authenticated: false,
             member: null,
           },
-          errorCode: 'AUTHENTICATION_REQUIRED',
+          errorCode: 'UNAUTHENTICATED',
           canRetry: false,
           timestamp: new Date().toISOString(),
         },
         { status: 401 },
       );
+    }
+
+    // 인증된 경우
+    return HttpResponse.json({
+      success: true,
+      message: '인증된 사용자입니다.',
+      data: {
+        authenticated: true,
+        member: currentUser,
+      },
+      errorCode: null,
+      canRetry: true,
+      timestamp: new Date().toISOString(),
+    });
+  }),
+
+  // 로그아웃 API
+  http.post('/auth/logout', () => {
+    // 인증 상태 초기화
+    isUserAuthenticated = false;
+    currentUser = null;
+
+    return HttpResponse.json({
+      success: true,
+      message: '로그아웃이 성공적으로 완료되었습니다.',
+      data: null,
+      errorCode: null,
+      canRetry: false,
+      timestamp: new Date().toISOString(),
+    });
+  }),
+
+  // 개발용: 인증 상태 토글 API
+  http.post('/dev/toggle-auth', () => {
+    if (isUserAuthenticated) {
+      // 로그아웃
+      isUserAuthenticated = false;
+      currentUser = null;
+      return HttpResponse.json({
+        success: true,
+        message: '테스트용 로그아웃 완료',
+        data: { authenticated: false },
+      });
+    } else {
+      // 로그인
+      isUserAuthenticated = true;
+      currentUser = {
+        memberId: 12345,
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        picture: 'https://via.placeholder.com/150',
+      };
+      return HttpResponse.json({
+        success: true,
+        message: '테스트용 로그인 완료',
+        data: { authenticated: true, member: currentUser },
+      });
     }
   }),
 ];
