@@ -1,4 +1,4 @@
 export * from './resumePage';
-export * from './resumeDetailPage';
-export * from './resumeCreatePage';
-export * from './resumeEditPage';
+// export * from './resumeDetailPage';
+// export * from './resumeCreatePage';
+// export * from './resumeEditPage';

@@ -1,11 +1,12 @@
-import { ResumeEditPage } from '@/pages/resume';
+// import { ResumeEditPage } from '@/pages/resume';
 
-interface ResumeEditProps {
-  params: {
-    id: string;
-  };
-}
+// interface ResumeEditProps {
+//   params: Promise<{
+//     id: string;
+//   }>;
+// }
 
-export default function ResumeEdit({ params }: ResumeEditProps) {
-  return <ResumeEditPage id={params.id} />;
-}
+// export default async function ResumeEdit({ params }: ResumeEditProps) {
+//   const { id } = await params;
+//   return <ResumeEditPage id={id} />;
+// }
