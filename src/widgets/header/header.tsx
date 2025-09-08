@@ -32,6 +32,7 @@ export function Header() {
           <UserInfo />
         </div>
       </header>
+      <div className="h-30 w-screen"></div>
     </>
   );
 }

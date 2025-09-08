@@ -1,5 +1,6 @@
 'use client';
 import { useResumeList } from '@/entities';
+import { Card } from '@/shared/ui/Card';
 import { useRouter } from 'next/navigation';
 
 export function ResumeList() {
@@ -13,7 +14,9 @@ export function ResumeList() {
   if (error) return <div>Error loading resumes</div>;
   return (
     <div>
-      <div></div>
+      <Card title="이력서 목록">
+        <div></div>
+      </Card>
     </div>
   );
 }
