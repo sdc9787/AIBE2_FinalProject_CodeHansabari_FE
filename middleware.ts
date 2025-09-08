@@ -74,7 +74,6 @@ export async function middleware(request: NextRequest) {
       // 인증되지 않은 경우 홈페이지로 리다이렉트
       const url = request.nextUrl.clone();
       url.pathname = '/';
-      url.searchParams.set('auth', 'required');
       return NextResponse.redirect(url);
     }
   }
