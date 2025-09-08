@@ -1,11 +1,11 @@
-import { ResumeDetailPage } from '@/pages/resume';
+import { ResumeEditPage } from '@/pages/resume';
 
-interface ResumeDetailPageProps {
+interface ResumeEditProps {
   params: {
     id: string;
   };
 }
 
-export default function ResumeDetail({ params }: ResumeDetailPageProps) {
-  return <ResumeDetailPage id={params.id} />;
+export default function ResumeEdit({ params }: ResumeEditProps) {
+  return <ResumeEditPage id={params.id} />;
 }

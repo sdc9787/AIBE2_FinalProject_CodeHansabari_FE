@@ -1,31 +1,18 @@
 'use client';
-import { useState } from 'react';
-import { Resume, ResumeList } from '@/widgets/resume';
+
+import { useRouter } from 'next/navigation';
+import { ResumeList } from '@/widgets/resume';
 
 export function ResumePage() {
-  const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
-  const [editingResumeId, setEditingResumeId] = useState<number | undefined>(
-    undefined,
-  );
+  const router = useRouter();
 
   const handleCreateNew = () => {
-    setEditingResumeId(undefined);
-    setView('create');
+    router.push('/resume/new');
   };
 
   const handleEdit = (resumeId: number) => {
-    setEditingResumeId(resumeId);
-    setView('edit');
+    router.push(`/resume/${resumeId}`);
   };
 
-  const handleBackToList = () => {
-    setView('list');
-    setEditingResumeId(undefined);
-  };
-
-  if (view === 'list') {
-    return <ResumeList onCreateNew={handleCreateNew} onEdit={handleEdit} />;
-  }
-
-  return <Resume id={editingResumeId} />;
+  return <ResumeList onCreateNew={handleCreateNew} onEdit={handleEdit} />;
 }
