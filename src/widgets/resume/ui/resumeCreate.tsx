@@ -6,6 +6,7 @@ import {
   ResumeItem,
   ResumeData,
   ResumeDataItem,
+  ResumeSection,
   IT_JOB_FIELDS,
   ALL_TECH_STACKS,
   DEFAULT_RESUME_ITEMS,
@@ -13,6 +14,17 @@ import {
 } from '../model';
 
 export function ResumeCreate() {
+  // 졸업 상태 옵션들
+  const GRADUATION_STATUS = [
+    '학사 졸업',
+    '석사 졸업',
+    '박사 졸업',
+    '재학중',
+    '휴학중',
+    '중퇴',
+    '수료',
+  ];
+
   // 검색 상태
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -25,6 +37,12 @@ export function ResumeCreate() {
   const [isTechStackOpen, setIsTechStackOpen] = useState(false);
   const [techStackSearch, setTechStackSearch] = useState('');
   const [customTechStacks, setCustomTechStacks] = useState<string[]>([]);
+
+  // 졸업 상태 선택 관련 상태 (각 학력별로 관리)
+  const [graduationStatusOpen, setGraduationStatusOpen] = useState<{
+    sectionIndex: number;
+    educationIndex: number;
+  }>({ sectionIndex: -1, educationIndex: -1 });
 
   // 필터된 직종 목록 (기본 + 사용자 추가)
   const allJobFields = [...IT_JOB_FIELDS, ...customJobFields];
@@ -268,6 +286,29 @@ export function ResumeCreate() {
     }));
   };
 
+  // 졸업 상태 핸들러들
+  const handleGraduationStatusSelect = (
+    educationIndex: number,
+    status: string,
+  ) => {
+    const educationSection = getSection('EDUCATION');
+    if (!educationSection) return;
+
+    const updatedItems = educationSection.items.map((item, idx) =>
+      idx === educationIndex ? { ...item, description: status } : item,
+    );
+    updateSection('EDUCATION', updatedItems);
+    setGraduationStatusOpen({ sectionIndex: -1, educationIndex: -1 });
+  };
+
+  const toggleGraduationStatusDropdown = (educationIndex: number) => {
+    setGraduationStatusOpen(
+      graduationStatusOpen.educationIndex === educationIndex
+        ? { sectionIndex: -1, educationIndex: -1 }
+        : { sectionIndex: 0, educationIndex },
+    );
+  };
+
   // 경력 관련 핸들러들
   const handleAddExperience = () => {
     const newExperience = {
@@ -331,8 +372,8 @@ export function ResumeCreate() {
       endDate: '',
       description: '',
     };
-    const projectItems = getSectionItems('PROJECTS');
-    updateSection('PROJECTS', [...projectItems, newProject]);
+    const projectItems = getSectionItems('PROJECT');
+    updateSection('PROJECT', [...projectItems, newProject]);
   };
 
   const handleProjectChange = (
@@ -340,32 +381,32 @@ export function ResumeCreate() {
     field: keyof ResumeDataItem,
     value: string | string[],
   ) => {
-    const projectItems = getSectionItems('PROJECTS');
+    const projectItems = getSectionItems('PROJECT');
     const updatedItems = projectItems.map((project, i) =>
       i === index ? { ...project, [field]: value } : project,
     );
-    updateSection('PROJECTS', updatedItems);
+    updateSection('PROJECT', updatedItems);
   };
 
   const handleRemoveProject = (index: number) => {
-    const projectItems = getSectionItems('PROJECTS');
+    const projectItems = getSectionItems('PROJECT');
     const filteredItems = projectItems.filter((_, i) => i !== index);
-    updateSection('PROJECTS', filteredItems);
+    updateSection('PROJECT', filteredItems);
   };
 
   const handleMoveProjectUp = (index: number) => {
     if (index === 0) return;
-    const projectItems = getSectionItems('PROJECTS');
+    const projectItems = getSectionItems('PROJECT');
     const newProjects = [...projectItems];
     [newProjects[index], newProjects[index - 1]] = [
       newProjects[index - 1],
       newProjects[index],
     ];
-    updateSection('PROJECTS', newProjects);
+    updateSection('PROJECT', newProjects);
   };
 
   const handleMoveProjectDown = (index: number) => {
-    const projectItems = getSectionItems('PROJECTS');
+    const projectItems = getSectionItems('PROJECT');
     const maxIndex = projectItems.length - 1;
     if (index === maxIndex) return;
     const newProjects = [...projectItems];
@@ -373,7 +414,154 @@ export function ResumeCreate() {
       newProjects[index + 1],
       newProjects[index],
     ];
-    updateSection('PROJECTS', newProjects);
+    updateSection('PROJECT', newProjects);
+  };
+
+  // 자격증 관련 핸들러들
+  const handleAddCertificate = () => {
+    const newCertificate = {
+      title: '',
+      subTitle: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    const certificateItems = getSectionItems('CERTIFICATE');
+    updateSection('CERTIFICATE', [...certificateItems, newCertificate]);
+  };
+
+  const handleCertificateChange = (
+    index: number,
+    field: keyof ResumeDataItem,
+    value: string,
+  ) => {
+    const certificateItems = getSectionItems('CERTIFICATE');
+    const updatedItems = certificateItems.map((cert, i) =>
+      i === index ? { ...cert, [field]: value } : cert,
+    );
+    updateSection('CERTIFICATE', updatedItems);
+  };
+
+  const handleRemoveCertificate = (index: number) => {
+    const certificateItems = getSectionItems('CERTIFICATE');
+    const filteredItems = certificateItems.filter((_, i) => i !== index);
+    updateSection('CERTIFICATE', filteredItems);
+  };
+
+  // 수상내역 관련 핸들러들
+  const handleAddAward = () => {
+    const newAward = {
+      title: '',
+      subTitle: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    const awardItems = getSectionItems('AWARD');
+    updateSection('AWARD', [...awardItems, newAward]);
+  };
+
+  const handleAwardChange = (
+    index: number,
+    field: keyof ResumeDataItem,
+    value: string,
+  ) => {
+    const awardItems = getSectionItems('AWARD');
+    const updatedItems = awardItems.map((award, i) =>
+      i === index ? { ...award, [field]: value } : award,
+    );
+    updateSection('AWARD', updatedItems);
+  };
+
+  const handleRemoveAward = (index: number) => {
+    const awardItems = getSectionItems('AWARD');
+    const filteredItems = awardItems.filter((_, i) => i !== index);
+    updateSection('AWARD', filteredItems);
+  };
+
+  // 어학능력 관련 핸들러들
+  const handleAddLanguage = () => {
+    const newLanguage = {
+      title: '',
+      subTitle: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    const languageItems = getSectionItems('LANGUAGE');
+    updateSection('LANGUAGE', [...languageItems, newLanguage]);
+  };
+
+  const handleLanguageChange = (
+    index: number,
+    field: keyof ResumeDataItem,
+    value: string,
+  ) => {
+    const languageItems = getSectionItems('LANGUAGE');
+    const updatedItems = languageItems.map((lang, i) =>
+      i === index ? { ...lang, [field]: value } : lang,
+    );
+    updateSection('LANGUAGE', updatedItems);
+  };
+
+  const handleRemoveLanguage = (index: number) => {
+    const languageItems = getSectionItems('LANGUAGE');
+    const filteredItems = languageItems.filter((_, i) => i !== index);
+    updateSection('LANGUAGE', filteredItems);
+  };
+
+  // 학력 관련 핸들러들
+  const handleAddEducation = () => {
+    const newEducation = {
+      title: '',
+      subTitle: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    const educationItems = getSectionItems('EDUCATION');
+    updateSection('EDUCATION', [...educationItems, newEducation]);
+  };
+
+  const handleEducationChange = (
+    index: number,
+    field: keyof ResumeDataItem,
+    value: string,
+  ) => {
+    const educationItems = getSectionItems('EDUCATION');
+    const updatedItems = educationItems.map((edu, i) =>
+      i === index ? { ...edu, [field]: value } : edu,
+    );
+    updateSection('EDUCATION', updatedItems);
+  };
+
+  const handleRemoveEducation = (index: number) => {
+    const educationItems = getSectionItems('EDUCATION');
+    const filteredItems = educationItems.filter((_, i) => i !== index);
+    updateSection('EDUCATION', filteredItems);
+  };
+
+  const handleMoveEducationUp = (index: number) => {
+    if (index === 0) return;
+    const educationItems = getSectionItems('EDUCATION');
+    const newEducation = [...educationItems];
+    [newEducation[index], newEducation[index - 1]] = [
+      newEducation[index - 1],
+      newEducation[index],
+    ];
+    updateSection('EDUCATION', newEducation);
+  };
+
+  const handleMoveEducationDown = (index: number) => {
+    const educationItems = getSectionItems('EDUCATION');
+    const maxIndex = educationItems.length - 1;
+    if (index === maxIndex) return;
+    const newEducation = [...educationItems];
+    [newEducation[index], newEducation[index + 1]] = [
+      newEducation[index + 1],
+      newEducation[index],
+    ];
+    updateSection('EDUCATION', newEducation);
   };
 
   // 각 항목의 내용이 입력되었는지 확인하는 함수
@@ -387,7 +575,18 @@ export function ResumeCreate() {
             resumeData.memberInfo.phoneNumber,
         );
       case '학력':
-        return getSectionItems('EDUCATION').length > 0;
+        const educationItems = getSectionItems('EDUCATION');
+        return (
+          educationItems.length > 0 &&
+          educationItems.every(
+            (item) =>
+              item.title &&
+              item.subTitle &&
+              item.startDate &&
+              item.endDate &&
+              item.description,
+          )
+        );
       case '개발직무':
         return Boolean(resumeData.memberInfo.careerType);
       case '기술스택':
@@ -402,20 +601,128 @@ export function ResumeCreate() {
             resumeData.memberInfo.customLinks.length > 0,
         );
       case '경력':
-        return getSectionItems('WORK_EXPERIENCE').length > 0;
+        const experienceItems = getSectionItems('WORK_EXPERIENCE');
+        return (
+          experienceItems.length > 0 &&
+          experienceItems.every(
+            (item) =>
+              item.title &&
+              item.subTitle &&
+              item.startDate &&
+              item.endDate &&
+              item.description,
+          )
+        );
       case '프로젝트':
-        return getSectionItems('PROJECTS').length > 0;
+        const projectItems = getSectionItems('PROJECT');
+        return (
+          projectItems.length > 0 &&
+          projectItems.every(
+            (item) =>
+              item.title && item.startDate && item.endDate && item.description,
+          )
+        );
+      case '자격증':
+        const certificateItems = getSectionItems('CERTIFICATE');
+        return (
+          certificateItems.length > 0 &&
+          certificateItems.every(
+            (item) =>
+              item.title && item.subTitle && item.startDate && item.description,
+          )
+        );
+      case '수상내역':
+        const awardItems = getSectionItems('AWARD');
+        return (
+          awardItems.length > 0 &&
+          awardItems.every(
+            (item) =>
+              item.title && item.subTitle && item.startDate && item.description,
+          )
+        );
+      case '어학능력':
+        const languageItems = getSectionItems('LANGUAGE');
+        return (
+          languageItems.length > 0 &&
+          languageItems.every(
+            (item) => item.title && item.subTitle && item.description,
+          )
+        );
       case '교육이력':
         return getSectionItems('EDUCATION').length > 0;
-      case '자격증':
-        return getSectionItems('CERTIFICATES').length > 0;
-      case '수상내역':
-        return getSectionItems('AWARDS').length > 0;
       case '기타사항':
         return false; // 기타사항은 별도 구현 필요
       default:
         return false;
     }
+  };
+
+  // 저장하기 핸들러 (디버깅용)
+  const handleSave = () => {
+    // 항목 편집에서 활성화된 섹션들만 필터링
+    const getActiveSections = () => {
+      const activeSections: ResumeSection[] = [];
+
+      // 각 항목의 상태를 확인하여 활성화된 섹션만 추가
+      items.forEach((item) => {
+        if (item.state) {
+          switch (item.name) {
+            case '학력':
+              const educationSection = getSection('EDUCATION');
+              if (educationSection) {
+                activeSections.push(educationSection);
+              }
+              break;
+            case '경력':
+              const experienceSection = getSection('WORK_EXPERIENCE');
+              if (experienceSection) {
+                activeSections.push(experienceSection);
+              }
+              break;
+            case '프로젝트':
+              const projectsSection = getSection('PROJECTS');
+              if (projectsSection) {
+                activeSections.push(projectsSection);
+              }
+              break;
+            case '자격증':
+              const certificatesSection = getSection('CERTIFICATES');
+              if (certificatesSection) {
+                activeSections.push(certificatesSection);
+              }
+              break;
+            case '수상내역':
+              const awardsSection = getSection('AWARDS');
+              if (awardsSection) {
+                activeSections.push(awardsSection);
+              }
+              break;
+          }
+        }
+      });
+
+      return activeSections;
+    };
+
+    // 활성화된 섹션들만 포함한 데이터 생성
+    const dataToSend = {
+      ...resumeData,
+      sections: getActiveSections(),
+    };
+
+    console.log('=== 서버에 보낼 데이터 (활성화된 섹션만) ===');
+    console.log(
+      '활성화된 항목들:',
+      items.filter((item) => item.state).map((item) => item.name),
+    );
+    console.log('JSON.stringify:', JSON.stringify(dataToSend, null, 2));
+    console.log('Raw Object:', dataToSend);
+    console.log('전체 섹션 수:', resumeData.sections.length);
+    console.log('활성화된 섹션 수:', dataToSend.sections.length);
+    console.log('============================================');
+
+    // 실제 서버 전송 로직은 여기에 추가
+    alert('콘솔에서 활성화된 섹션만 포함된 데이터를 확인하세요!');
   };
 
   // 외부 클릭으로 셀렉트 박스 닫기
@@ -645,6 +952,168 @@ export function ResumeCreate() {
                     />
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* 학력 섹션 */}
+            {items.find((item) => item.name === '학력')?.state && (
+              <div className="mb-8 rounded-lg border border-gray-200 p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-800">학력</h2>
+                  <button
+                    type="button"
+                    onClick={handleAddEducation}
+                    className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    + 학력 추가
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {getSectionItems('EDUCATION').map(
+                    (education: ResumeDataItem, index: number) => (
+                      <div
+                        key={index}
+                        className={`relative rounded-lg border border-gray-200 p-4 ${
+                          getSectionItems('EDUCATION').length > 1 ? 'pt-12' : ''
+                        }`}
+                      >
+                        {getSectionItems('EDUCATION').length > 1 && (
+                          <div className="absolute top-3 right-3 flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveEducationUp(index)}
+                              disabled={index === 0}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-30"
+                              title="위로 이동"
+                            >
+                              <i className="xi-angle-up"></i>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveEducationDown(index)}
+                              disabled={
+                                index ===
+                                getSectionItems('EDUCATION').length - 1
+                              }
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-30"
+                              title="아래로 이동"
+                            >
+                              <i className="xi-angle-down"></i>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveEducation(index)}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              title="학력 삭제"
+                            >
+                              <i className="xi-close xi-x"></i>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={education.title}
+                              onChange={(e) =>
+                                handleEducationChange(
+                                  index,
+                                  'title',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="학교명 (예: ABC 대학교)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={education.subTitle}
+                              onChange={(e) =>
+                                handleEducationChange(
+                                  index,
+                                  'subTitle',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="전공 (예: 컴퓨터공학과)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={education.startDate}
+                              onChange={(e) =>
+                                handleEducationChange(
+                                  index,
+                                  'startDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="입학일 (예: 2018.03)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={education.endDate}
+                              onChange={(e) =>
+                                handleEducationChange(
+                                  index,
+                                  'endDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="졸업일 (예: 2022.02)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          {/* 졸업 상태 선택 */}
+                          <div className="relative">
+                            <div
+                              className="w-full cursor-pointer rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                              onClick={() =>
+                                toggleGraduationStatusDropdown(index)
+                              }
+                            >
+                              {education.description ||
+                                '졸업 상태를 선택하세요'}
+                              <i className="xi-angle-down absolute top-1/2 right-3 -translate-y-1/2 transform"></i>
+                            </div>
+                            <AnimatePresence>
+                              {graduationStatusOpen.educationIndex ===
+                                index && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="absolute top-full z-10 mt-1 max-h-60 w-full overflow-y-auto rounded border border-gray-300 bg-white shadow-lg"
+                                >
+                                  {GRADUATION_STATUS.map((status) => (
+                                    <div
+                                      key={status}
+                                      className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
+                                      onClick={() =>
+                                        handleGraduationStatusSelect(
+                                          index,
+                                          status,
+                                        )
+                                      }
+                                    >
+                                      {status}
+                                    </div>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
               </div>
             )}
 
@@ -1002,42 +1471,6 @@ export function ResumeCreate() {
               </div>
             )}
 
-            {/* 학력 섹션 */}
-            {items.find((item) => item.name === '학력')?.state && (
-              <div className="mb-8 rounded-lg border border-gray-200 p-6">
-                <h2 className="mb-4 text-xl font-semibold text-gray-800">
-                  학력
-                </h2>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <input
-                      type="text"
-                      placeholder="학교명"
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="전공"
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <input
-                      type="text"
-                      placeholder="재학기간"
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                    />
-                    <select className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
-                      <option>졸업</option>
-                      <option>재학</option>
-                      <option>휴학</option>
-                      <option>중퇴</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* 경력 섹션 */}
             {items.find((item) => item.name === '경력')?.state && (
               <div className="mb-8 rounded-lg border border-gray-200 p-6">
@@ -1130,7 +1563,7 @@ export function ResumeCreate() {
                           </div>
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <input
-                              type="date"
+                              type="text"
                               value={experience.startDate}
                               onChange={(e) =>
                                 handleExperienceChange(
@@ -1139,11 +1572,11 @@ export function ResumeCreate() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="시작일"
+                              placeholder="시작일 (예: 2023.03)"
                               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                             />
                             <input
-                              type="date"
+                              type="text"
                               value={experience.endDate}
                               onChange={(e) =>
                                 handleExperienceChange(
@@ -1152,7 +1585,7 @@ export function ResumeCreate() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="종료일"
+                              placeholder="종료일 (예: 2024.02 또는 현재)"
                               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                             />
                           </div>
@@ -1194,15 +1627,15 @@ export function ResumeCreate() {
                 </div>
 
                 <div className="space-y-6">
-                  {getSectionItems('PROJECTS').map(
+                  {getSectionItems('PROJECT').map(
                     (project: ResumeDataItem, index: number) => (
                       <div
                         key={index}
                         className={`relative rounded-lg border border-gray-200 p-4 ${
-                          getSectionItems('PROJECTS').length > 1 ? 'pt-12' : ''
+                          getSectionItems('PROJECT').length > 1 ? 'pt-12' : ''
                         }`}
                       >
-                        {getSectionItems('PROJECTS').length > 1 && (
+                        {getSectionItems('PROJECT').length > 1 && (
                           <div className="absolute top-3 right-3 flex gap-1">
                             <button
                               type="button"
@@ -1217,7 +1650,7 @@ export function ResumeCreate() {
                               type="button"
                               onClick={() => handleMoveProjectDown(index)}
                               disabled={
-                                index === getSectionItems('PROJECTS').length - 1
+                                index === getSectionItems('PROJECT').length - 1
                               }
                               className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-30"
                               title="아래로 이동"
@@ -1251,7 +1684,7 @@ export function ResumeCreate() {
                           />
                           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                             <input
-                              type="date"
+                              type="text"
                               value={project.startDate}
                               onChange={(e) =>
                                 handleProjectChange(
@@ -1260,11 +1693,11 @@ export function ResumeCreate() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="시작일"
+                              placeholder="시작일 (예: 2023.03)"
                               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                             />
                             <input
-                              type="date"
+                              type="text"
                               value={project.endDate}
                               onChange={(e) =>
                                 handleProjectChange(
@@ -1273,23 +1706,10 @@ export function ResumeCreate() {
                                   e.target.value,
                                 )
                               }
-                              placeholder="종료일"
+                              placeholder="종료일 (예: 2024.02 또는 진행중)"
                               className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                             />
                           </div>
-                          <input
-                            type="text"
-                            value={project.subTitle}
-                            onChange={(e) =>
-                              handleProjectChange(
-                                index,
-                                'subTitle',
-                                e.target.value,
-                              )
-                            }
-                            placeholder="사용 기술스택 (예: React, Node.js, MongoDB)"
-                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                          />
                           <textarea
                             value={project.description}
                             onChange={(e) =>
@@ -1311,6 +1731,341 @@ export function ResumeCreate() {
               </div>
             )}
 
+            {/* 자격증 섹션 */}
+            {items.find((item) => item.name === '자격증')?.state && (
+              <div className="mb-8 rounded-lg border border-gray-200 p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    자격증
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleAddCertificate}
+                    className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    + 자격증 추가
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {getSectionItems('CERTIFICATE').map(
+                    (certificate: ResumeDataItem, index: number) => (
+                      <div
+                        key={index}
+                        className={`relative rounded-lg border border-gray-200 p-4 ${
+                          getSectionItems('CERTIFICATE').length > 1
+                            ? 'pt-12'
+                            : ''
+                        }`}
+                      >
+                        {getSectionItems('CERTIFICATE').length > 1 && (
+                          <div className="absolute top-3 right-3 flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveCertificate(index)}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              title="자격증 삭제"
+                            >
+                              <i className="xi-close xi-x"></i>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={certificate.title}
+                              onChange={(e) =>
+                                handleCertificateChange(
+                                  index,
+                                  'title',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="자격증명 (예: 정보처리기사)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={certificate.subTitle}
+                              onChange={(e) =>
+                                handleCertificateChange(
+                                  index,
+                                  'subTitle',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="발급기관 (예: 한국산업인력공단)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={certificate.startDate}
+                              onChange={(e) =>
+                                handleCertificateChange(
+                                  index,
+                                  'startDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="취득일 (예: 2022.05)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={certificate.endDate}
+                              onChange={(e) =>
+                                handleCertificateChange(
+                                  index,
+                                  'endDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="유효기간 (예: 평생 또는 2025.05)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <textarea
+                            value={certificate.description}
+                            onChange={(e) =>
+                              handleCertificateChange(
+                                index,
+                                'description',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="자격증 상세 설명"
+                            rows={3}
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 수상내역 섹션 */}
+            {items.find((item) => item.name === '수상내역')?.state && (
+              <div className="mb-8 rounded-lg border border-gray-200 p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    수상내역
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleAddAward}
+                    className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    + 수상내역 추가
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {getSectionItems('AWARD').map(
+                    (award: ResumeDataItem, index: number) => (
+                      <div
+                        key={index}
+                        className={`relative rounded-lg border border-gray-200 p-4 ${
+                          getSectionItems('AWARD').length > 1 ? 'pt-12' : ''
+                        }`}
+                      >
+                        {getSectionItems('AWARD').length > 1 && (
+                          <div className="absolute top-3 right-3 flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveAward(index)}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              title="수상내역 삭제"
+                            >
+                              <i className="xi-close xi-x"></i>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={award.title}
+                              onChange={(e) =>
+                                handleAwardChange(
+                                  index,
+                                  'title',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="수상명 (예: 2022 해커톤 대상)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={award.subTitle}
+                              onChange={(e) =>
+                                handleAwardChange(
+                                  index,
+                                  'subTitle',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="주최기관 (예: ABC대학교)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <input
+                            type="text"
+                            value={award.startDate}
+                            onChange={(e) =>
+                              handleAwardChange(
+                                index,
+                                'startDate',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="수상일 (예: 2022.08)"
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                          <textarea
+                            value={award.description}
+                            onChange={(e) =>
+                              handleAwardChange(
+                                index,
+                                'description',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="수상 상세 설명"
+                            rows={3}
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 어학능력 섹션 */}
+            {items.find((item) => item.name === '어학능력')?.state && (
+              <div className="mb-8 rounded-lg border border-gray-200 p-6">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    어학능력
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleAddLanguage}
+                    className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    + 어학능력 추가
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {getSectionItems('LANGUAGE').map(
+                    (language: ResumeDataItem, index: number) => (
+                      <div
+                        key={index}
+                        className={`relative rounded-lg border border-gray-200 p-4 ${
+                          getSectionItems('LANGUAGE').length > 1 ? 'pt-12' : ''
+                        }`}
+                      >
+                        {getSectionItems('LANGUAGE').length > 1 && (
+                          <div className="absolute top-3 right-3 flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveLanguage(index)}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              title="어학능력 삭제"
+                            >
+                              <i className="xi-close xi-x"></i>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={language.title}
+                              onChange={(e) =>
+                                handleLanguageChange(
+                                  index,
+                                  'title',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="언어명 (예: 영어, TOEIC)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={language.subTitle}
+                              onChange={(e) =>
+                                handleLanguageChange(
+                                  index,
+                                  'subTitle',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="등급/점수 (예: 900점, Advanced)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={language.startDate}
+                              onChange={(e) =>
+                                handleLanguageChange(
+                                  index,
+                                  'startDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="취득일 (예: 2022.05)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={language.endDate}
+                              onChange={(e) =>
+                                handleLanguageChange(
+                                  index,
+                                  'endDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="유효기간 (예: 2024.05)"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <textarea
+                            value={language.description}
+                            onChange={(e) =>
+                              handleLanguageChange(
+                                index,
+                                'description',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="어학능력 상세 설명"
+                            rows={3}
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* 저장 버튼 */}
             <div className="mt-8 flex justify-end gap-4">
               <button
@@ -1321,6 +2076,7 @@ export function ResumeCreate() {
               </button>
               <button
                 type="button"
+                onClick={handleSave}
                 className="rounded-lg bg-blue-500 px-6 py-2 text-white hover:bg-blue-600"
               >
                 저장하기

@@ -99,6 +99,7 @@ export const DEFAULT_RESUME_ITEMS = [
   { name: '교육이력', required: false, state: false },
   { name: '자격증', required: false, state: false },
   { name: '수상내역', required: false, state: false },
+  { name: '어학능력', required: false, state: false },
   { name: '기타사항', required: false, state: false },
 ];
 
@@ -122,7 +123,15 @@ export const DEFAULT_RESUME_DATA = {
     {
       sectionType: 'EDUCATION',
       sectionTitle: '학력',
-      items: [],
+      items: [
+        {
+          title: '',
+          subTitle: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
     },
     {
       sectionType: 'WORK_EXPERIENCE',
@@ -138,7 +147,7 @@ export const DEFAULT_RESUME_DATA = {
       ],
     },
     {
-      sectionType: 'PROJECTS',
+      sectionType: 'PROJECT',
       sectionTitle: '프로젝트',
       items: [
         {
@@ -151,14 +160,43 @@ export const DEFAULT_RESUME_DATA = {
       ],
     },
     {
-      sectionType: 'CERTIFICATES',
+      sectionType: 'CERTIFICATE',
       sectionTitle: '자격증',
-      items: [],
+      items: [
+        {
+          title: '',
+          subTitle: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
     },
     {
-      sectionType: 'AWARDS',
-      sectionTitle: '수상',
-      items: [],
+      sectionType: 'AWARD',
+      sectionTitle: '수상이력',
+      items: [
+        {
+          title: '',
+          subTitle: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
+    },
+    {
+      sectionType: 'LANGUAGE',
+      sectionTitle: '어학능력',
+      items: [
+        {
+          title: '',
+          subTitle: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
     },
   ],
 };
