@@ -102,7 +102,7 @@ export const DEFAULT_RESUME_ITEMS = [
   { name: '기타사항', required: false, state: false },
 ];
 
-// 기본 이력서 데이터
+// 서버 스펙에 맞춘 기본 이력서 데이터
 export const DEFAULT_RESUME_DATA = {
   title: '',
   memberInfo: {
@@ -118,11 +118,47 @@ export const DEFAULT_RESUME_DATA = {
     techStack: [],
     customLinks: [],
   },
-  sections: {
-    education: [],
-    experience: [],
-    projects: [],
-    certificates: [],
-    awards: [],
-  },
+  sections: [
+    {
+      sectionType: 'EDUCATION',
+      sectionTitle: '학력',
+      items: [],
+    },
+    {
+      sectionType: 'WORK_EXPERIENCE',
+      sectionTitle: '경력',
+      items: [
+        {
+          title: '',
+          subTitle: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
+    },
+    {
+      sectionType: 'PROJECTS',
+      sectionTitle: '프로젝트',
+      items: [
+        {
+          title: '',
+          subTitle: '',
+          startDate: '',
+          endDate: '',
+          description: '',
+        },
+      ],
+    },
+    {
+      sectionType: 'CERTIFICATES',
+      sectionTitle: '자격증',
+      items: [],
+    },
+    {
+      sectionType: 'AWARDS',
+      sectionTitle: '수상',
+      items: [],
+    },
+  ],
 };

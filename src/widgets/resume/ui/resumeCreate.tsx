@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ResumeItem,
   ResumeData,
+  ResumeDataItem,
   IT_JOB_FIELDS,
   ALL_TECH_STACKS,
   DEFAULT_RESUME_ITEMS,
@@ -46,6 +47,29 @@ export function ResumeCreate() {
 
   // 이력서 데이터
   const [resumeData, setResumeData] = useState<ResumeData>(DEFAULT_RESUME_DATA);
+
+  // 섹션 찾기 유틸리티 함수들
+  const getSection = (sectionType: string) => {
+    return resumeData.sections.find(
+      (section) => section.sectionType === sectionType,
+    );
+  };
+
+  const getSectionItems = (sectionType: string) => {
+    const section = getSection(sectionType);
+    return section ? section.items : [];
+  };
+
+  const updateSection = (sectionType: string, newItems: any[]) => {
+    setResumeData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section) =>
+        section.sectionType === sectionType
+          ? { ...section, items: newItems }
+          : section,
+      ),
+    }));
+  };
 
   // 토글 버튼 핸들러
   const handleToggle = (index: number) => {
@@ -244,6 +268,114 @@ export function ResumeCreate() {
     }));
   };
 
+  // 경력 관련 핸들러들
+  const handleAddExperience = () => {
+    const newExperience = {
+      title: '',
+      subTitle: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    const experienceItems = getSectionItems('WORK_EXPERIENCE');
+    updateSection('WORK_EXPERIENCE', [...experienceItems, newExperience]);
+  };
+
+  const handleExperienceChange = (
+    index: number,
+    field: keyof ResumeDataItem,
+    value: string,
+  ) => {
+    const experienceItems = getSectionItems('WORK_EXPERIENCE');
+    const updatedItems = experienceItems.map((exp, i) =>
+      i === index ? { ...exp, [field]: value } : exp,
+    );
+    updateSection('WORK_EXPERIENCE', updatedItems);
+  };
+
+  const handleRemoveExperience = (index: number) => {
+    const experienceItems = getSectionItems('WORK_EXPERIENCE');
+    const filteredItems = experienceItems.filter((_, i) => i !== index);
+    updateSection('WORK_EXPERIENCE', filteredItems);
+  };
+
+  const handleMoveExperienceUp = (index: number) => {
+    if (index === 0) return;
+    const experienceItems = getSectionItems('WORK_EXPERIENCE');
+    const newExperience = [...experienceItems];
+    [newExperience[index], newExperience[index - 1]] = [
+      newExperience[index - 1],
+      newExperience[index],
+    ];
+    updateSection('WORK_EXPERIENCE', newExperience);
+  };
+
+  const handleMoveExperienceDown = (index: number) => {
+    const experienceItems = getSectionItems('WORK_EXPERIENCE');
+    const maxIndex = experienceItems.length - 1;
+    if (index === maxIndex) return;
+    const newExperience = [...experienceItems];
+    [newExperience[index], newExperience[index + 1]] = [
+      newExperience[index + 1],
+      newExperience[index],
+    ];
+    updateSection('WORK_EXPERIENCE', newExperience);
+  };
+
+  // 프로젝트 관련 핸들러들
+  const handleAddProject = () => {
+    const newProject = {
+      title: '',
+      subTitle: '',
+      startDate: '',
+      endDate: '',
+      description: '',
+    };
+    const projectItems = getSectionItems('PROJECTS');
+    updateSection('PROJECTS', [...projectItems, newProject]);
+  };
+
+  const handleProjectChange = (
+    index: number,
+    field: keyof ResumeDataItem,
+    value: string | string[],
+  ) => {
+    const projectItems = getSectionItems('PROJECTS');
+    const updatedItems = projectItems.map((project, i) =>
+      i === index ? { ...project, [field]: value } : project,
+    );
+    updateSection('PROJECTS', updatedItems);
+  };
+
+  const handleRemoveProject = (index: number) => {
+    const projectItems = getSectionItems('PROJECTS');
+    const filteredItems = projectItems.filter((_, i) => i !== index);
+    updateSection('PROJECTS', filteredItems);
+  };
+
+  const handleMoveProjectUp = (index: number) => {
+    if (index === 0) return;
+    const projectItems = getSectionItems('PROJECTS');
+    const newProjects = [...projectItems];
+    [newProjects[index], newProjects[index - 1]] = [
+      newProjects[index - 1],
+      newProjects[index],
+    ];
+    updateSection('PROJECTS', newProjects);
+  };
+
+  const handleMoveProjectDown = (index: number) => {
+    const projectItems = getSectionItems('PROJECTS');
+    const maxIndex = projectItems.length - 1;
+    if (index === maxIndex) return;
+    const newProjects = [...projectItems];
+    [newProjects[index], newProjects[index + 1]] = [
+      newProjects[index + 1],
+      newProjects[index],
+    ];
+    updateSection('PROJECTS', newProjects);
+  };
+
   // 각 항목의 내용이 입력되었는지 확인하는 함수
   const hasContent = (itemName: string): boolean => {
     switch (itemName) {
@@ -255,7 +387,7 @@ export function ResumeCreate() {
             resumeData.memberInfo.phoneNumber,
         );
       case '학력':
-        return resumeData.sections.education.length > 0;
+        return getSectionItems('EDUCATION').length > 0;
       case '개발직무':
         return Boolean(resumeData.memberInfo.careerType);
       case '기술스택':
@@ -270,15 +402,15 @@ export function ResumeCreate() {
             resumeData.memberInfo.customLinks.length > 0,
         );
       case '경력':
-        return resumeData.sections.experience.length > 0;
+        return getSectionItems('WORK_EXPERIENCE').length > 0;
       case '프로젝트':
-        return resumeData.sections.projects.length > 0;
+        return getSectionItems('PROJECTS').length > 0;
       case '교육이력':
-        return resumeData.sections.education.length > 0;
+        return getSectionItems('EDUCATION').length > 0;
       case '자격증':
-        return resumeData.sections.certificates.length > 0;
+        return getSectionItems('CERTIFICATES').length > 0;
       case '수상내역':
-        return resumeData.sections.awards.length > 0;
+        return getSectionItems('AWARDS').length > 0;
       case '기타사항':
         return false; // 기타사항은 별도 구현 필요
       default:
@@ -500,7 +632,7 @@ export function ResumeCreate() {
                 {items.find((item) => item.name === '간단소개')?.state && (
                   <div className="mb-4">
                     <label className="mb-1 block text-sm font-medium text-gray-700">
-                      기술소개문서 (간단소개)
+                      간단소개
                     </label>
                     <textarea
                       value={resumeData.memberInfo.introduction}
@@ -509,7 +641,7 @@ export function ResumeCreate() {
                       }
                       rows={4}
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                      placeholder="간단한 자기소개를 입력하세요"
+                      placeholder="간단한 자기소개를 3~5줄 정도로 작성해 주세요"
                     />
                   </div>
                 )}
@@ -911,15 +1043,137 @@ export function ResumeCreate() {
               <div className="mb-8 rounded-lg border border-gray-200 p-6">
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-gray-800">경력</h2>
-                  <span className="text-sm font-medium text-green-600">
-                    신입 작성 중
-                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAddExperience}
+                    className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    + 경력 추가
+                  </button>
                 </div>
-                <textarea
-                  placeholder="경력 사항을 입력하세요"
-                  rows={4}
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
+
+                <div className="space-y-6">
+                  {getSectionItems('WORK_EXPERIENCE').map(
+                    (experience: ResumeDataItem, index: number) => (
+                      <div
+                        key={index}
+                        className="relative rounded-lg border border-gray-200 p-4 pt-12"
+                      >
+                        {/* 컨트롤 버튼들 */}
+                        <div className="absolute top-3 right-3 flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveExperienceUp(index)}
+                            disabled={
+                              index === 0 ||
+                              getSectionItems('WORK_EXPERIENCE').length <= 1
+                            }
+                            className="rounded-full p-1 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            title="위로 이동"
+                          >
+                            <i className="xi-angle-up xi-x"></i>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveExperienceDown(index)}
+                            disabled={
+                              index ===
+                                getSectionItems('WORK_EXPERIENCE').length - 1 ||
+                              getSectionItems('WORK_EXPERIENCE').length <= 1
+                            }
+                            className="rounded-full p-1 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            title="아래로 이동"
+                          >
+                            <i className="xi-angle-down xi-x"></i>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExperience(index)}
+                            disabled={
+                              getSectionItems('WORK_EXPERIENCE').length <= 1
+                            }
+                            className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-400"
+                            title="경력 삭제"
+                          >
+                            <i className="xi-close xi-x"></i>
+                          </button>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="text"
+                              value={experience.title}
+                              onChange={(e) =>
+                                handleExperienceChange(
+                                  index,
+                                  'title',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="회사명"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="text"
+                              value={experience.subTitle}
+                              onChange={(e) =>
+                                handleExperienceChange(
+                                  index,
+                                  'subTitle',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="직책/포지션"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="date"
+                              value={experience.startDate}
+                              onChange={(e) =>
+                                handleExperienceChange(
+                                  index,
+                                  'startDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="시작일"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="date"
+                              value={experience.endDate}
+                              onChange={(e) =>
+                                handleExperienceChange(
+                                  index,
+                                  'endDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="종료일"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <textarea
+                            value={experience.description}
+                            onChange={(e) =>
+                              handleExperienceChange(
+                                index,
+                                'description',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="담당 업무 및 성과를 입력하세요"
+                            rows={4}
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  )}
+                </div>
               </div>
             )}
 
@@ -930,33 +1184,129 @@ export function ResumeCreate() {
                   <h2 className="text-xl font-semibold text-gray-800">
                     프로젝트
                   </h2>
-                  <span className="text-sm font-medium text-green-600">
-                    개인 프로젝트 중
-                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAddProject}
+                    className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+                  >
+                    + 프로젝트 추가
+                  </button>
                 </div>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="프로젝트 제목"
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                  />
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <input
-                      type="text"
-                      placeholder="프로젝트 기간"
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="프로젝트 링크"
-                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <textarea
-                    placeholder="프로젝트 설명을 입력하세요"
-                    rows={4}
-                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                  />
+
+                <div className="space-y-6">
+                  {getSectionItems('PROJECTS').map(
+                    (project: ResumeDataItem, index: number) => (
+                      <div
+                        key={index}
+                        className={`relative rounded-lg border border-gray-200 p-4 ${
+                          getSectionItems('PROJECTS').length > 1 ? 'pt-12' : ''
+                        }`}
+                      >
+                        {getSectionItems('PROJECTS').length > 1 && (
+                          <div className="absolute top-3 right-3 flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleMoveProjectUp(index)}
+                              disabled={index === 0}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-30"
+                              title="위로 이동"
+                            >
+                              <i className="xi-angle-up"></i>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMoveProjectDown(index)}
+                              disabled={
+                                index === getSectionItems('PROJECTS').length - 1
+                              }
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-30"
+                              title="아래로 이동"
+                            >
+                              <i className="xi-angle-down"></i>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveProject(index)}
+                              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                              title="프로젝트 삭제"
+                            >
+                              <i className="xi-close xi-x"></i>
+                            </button>
+                          </div>
+                        )}
+
+                        <div className="space-y-4">
+                          <input
+                            type="text"
+                            value={project.title}
+                            onChange={(e) =>
+                              handleProjectChange(
+                                index,
+                                'title',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="프로젝트 제목"
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                              type="date"
+                              value={project.startDate}
+                              onChange={(e) =>
+                                handleProjectChange(
+                                  index,
+                                  'startDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="시작일"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                            <input
+                              type="date"
+                              value={project.endDate}
+                              onChange={(e) =>
+                                handleProjectChange(
+                                  index,
+                                  'endDate',
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="종료일"
+                              className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                            />
+                          </div>
+                          <input
+                            type="text"
+                            value={project.subTitle}
+                            onChange={(e) =>
+                              handleProjectChange(
+                                index,
+                                'subTitle',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="사용 기술스택 (예: React, Node.js, MongoDB)"
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                          <textarea
+                            value={project.description}
+                            onChange={(e) =>
+                              handleProjectChange(
+                                index,
+                                'description',
+                                e.target.value,
+                              )
+                            }
+                            placeholder="프로젝트 설명과 링크를 입력하세요"
+                            rows={4}
+                            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             )}
