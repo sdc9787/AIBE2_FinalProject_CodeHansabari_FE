@@ -39,11 +39,6 @@ export function ResumeList() {
     setOpenMenuId(null);
   };
 
-  // 외부 클릭으로 메뉴 닫기
-  const handleClickOutside = () => {
-    setOpenMenuId(null);
-  };
-
   // 외부 클릭 이벤트 리스너
   useEffect(() => {
     const handleDocumentClick = () => {

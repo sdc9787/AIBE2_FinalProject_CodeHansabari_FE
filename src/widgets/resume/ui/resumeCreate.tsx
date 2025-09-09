@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   ResumeItem,
   ResumeData,
@@ -24,9 +25,6 @@ export function ResumeCreate() {
     '중퇴',
     '수료',
   ];
-
-  // 검색 상태
-  const [searchTerm, setSearchTerm] = useState('');
 
   // 직무 선택 관련 상태
   const [isJobFieldOpen, setIsJobFieldOpen] = useState(false);
@@ -78,7 +76,7 @@ export function ResumeCreate() {
     return section ? section.items : [];
   };
 
-  const updateSection = (sectionType: string, newItems: any[]) => {
+  const updateSection = (sectionType: string, newItems: ResumeDataItem[]) => {
     setResumeData((prev) => ({
       ...prev,
       sections: prev.sections.map((section) =>
@@ -1162,9 +1160,11 @@ export function ResumeCreate() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <img
+                    <Image
                       src="/icon/notion.svg"
                       alt="Notion"
+                      width={48}
+                      height={48}
                       className="h-12 w-12"
                     />
                     <div className="flex-1">
@@ -1316,7 +1316,7 @@ export function ResumeCreate() {
                                     onClick={handleJobFieldAdd}
                                     className="w-full rounded-lg border-2 border-dashed border-blue-300 px-4 py-3 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
                                   >
-                                    + "{jobFieldSearch}" 직무 추가
+                                    + &quot;{jobFieldSearch}&quot; 직무 추가
                                   </button>
                                 </div>
                               )}
@@ -1414,7 +1414,8 @@ export function ResumeCreate() {
                                       onClick={handleTechStackAdd}
                                       className="w-full rounded-lg border-2 border-dashed border-blue-300 px-4 py-3 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
                                     >
-                                      + "{techStackSearch}" 기술스택 추가
+                                      + &quot;{techStackSearch}&quot; 기술스택
+                                      추가
                                     </button>
                                   </div>
                                 )}
