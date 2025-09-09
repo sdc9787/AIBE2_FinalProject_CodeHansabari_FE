@@ -371,7 +371,6 @@ export function CoverLetter({ id }: CoverLetterProps) {
                         <Button
                           onClick={showResumeModal}
                           variant="primary"
-                          icon={<span>📄</span>}
                           className="transform rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700"
                         >
                           저장된 자소서 불러오기
@@ -582,7 +581,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                     {/* 원본 자기소개서 */}
                     <div className="rounded-2xl border border-white/20 bg-white/95 p-8 shadow-xl backdrop-blur-sm">
                       <div className="mb-6 flex items-center justify-between">
-                        <span className="text-xl font-bold text-gray-800">
+                        <span className="h-[40px] text-xl font-bold text-gray-800">
                           원본 자기소개서
                         </span>
                       </div>
