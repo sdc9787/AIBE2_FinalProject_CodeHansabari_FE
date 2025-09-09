@@ -1,7 +1,5 @@
 // 'use client';
 
-// import { ResumeEdit } from '@/widgets/resume';
-
 // interface ResumeEditPageProps {
 //   id: string;
 // }

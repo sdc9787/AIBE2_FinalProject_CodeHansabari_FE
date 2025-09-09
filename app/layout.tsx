@@ -31,6 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <link rel="stylesheet" type="text/css" href="/XEIcon/xeicon.min.css" />
+      </head>
       <body className={`${notoSansKR.variable} ${roboto.variable} antialiased`}>
         <MswProvider>
           <QueryProvider>
