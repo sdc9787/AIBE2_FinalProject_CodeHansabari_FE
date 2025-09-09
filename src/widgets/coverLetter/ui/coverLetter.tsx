@@ -170,6 +170,16 @@ export function CoverLetter({ id }: CoverLetterProps) {
   };
 
   const analyzeResume = async () => {
+    if (!jobField) {
+      toast.error('직무를 선택해주세요.');
+      return;
+    }
+
+    if (!experienceYears) {
+      toast.error('경력을 선택해주세요.');
+      return;
+    }
+
     if (!text.trim()) {
       toast.error('자기소개서를 입력해주세요.');
       return;
@@ -178,12 +188,18 @@ export function CoverLetter({ id }: CoverLetterProps) {
     // Step 1에서는 기본 프롬프트, Step 2에서는 커스텀 프롬프트 사용
     const promptToUse =
       currentStep === 1
-        ? '자기소개서를 전문적이고 효과적으로 개선해주세요.'
+        ? ''
         : customPrompt || '일반적인 개선사항을 제안해주세요';
+
+    // Step 2에서는 AI 첨삭 완료된 자기소개서를 보내고, Step 1에서는 원본을 보냄
+    const contentToSend =
+      currentStep === 2 && analysisResult?.improvedContent
+        ? analysisResult.improvedContent
+        : text;
 
     improveMutation.mutate(
       {
-        content: text,
+        content: contentToSend,
         jobField: jobField || '일반',
         experienceYears: parseInt(experienceYears) || 0,
         customPrompt: promptToUse,
@@ -199,27 +215,6 @@ export function CoverLetter({ id }: CoverLetterProps) {
         },
       },
     );
-  };
-
-  const clearText = () => {
-    setText('');
-    setJobField('');
-    setExperienceYears('');
-    setAnalysisResult(null);
-    setCurrentStep(1);
-    setIsJobFieldOpen(false);
-    setIsExperienceOpen(false);
-    setJobFieldSearch('');
-  };
-
-  const copyText = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success('텍스트가 복사되었습니다.');
-    } catch (err) {
-      console.error('복사 실패:', err);
-      toast.error('텍스트 복사에 실패했습니다.');
-    }
   };
 
   const copyRevisedToInput = () => {
@@ -257,7 +252,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 <motion.div
                   className={`flex items-center gap-4 rounded-lg p-4 transition-all duration-300 ${
                     currentStep === 1
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                      ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                   animate={currentStep === 1 ? { scale: 1.02 } : { scale: 1 }}
@@ -283,7 +278,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 {/* 연결선 */}
                 <div className="flex justify-center">
                   <motion.div
-                    className={`h-8 w-0.5 ${currentStep === 2 ? 'bg-purple-500' : 'bg-gray-300'}`}
+                    className={`h-8 w-0.5 ${currentStep === 2 ? 'bg-blue-600' : 'bg-gray-300'}`}
                     animate={
                       currentStep === 2 ? { scaleY: 1 } : { scaleY: 0.5 }
                     }
@@ -295,7 +290,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 <motion.div
                   className={`flex items-center gap-4 rounded-lg p-4 transition-all duration-300 ${
                     currentStep === 2
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+                      ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                   animate={currentStep === 2 ? { scale: 1.02 } : { scale: 1 }}
@@ -330,7 +325,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                       onClick={goBackToStep1}
                       variant="secondary"
                       icon={<span>←</span>}
-                      className="w-full justify-center rounded-lg border border-purple-200 bg-gradient-to-r from-white to-purple-50/50 px-4 py-3 text-sm font-medium text-purple-600 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:from-purple-50 hover:to-purple-100 hover:shadow-md active:scale-[0.98]"
+                      className="w-full justify-center rounded-lg border border-blue-200 bg-white px-4 py-3 text-sm font-medium text-blue-600 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:bg-blue-50 hover:shadow-md active:scale-[0.98]"
                     >
                       다시 작성하기
                     </Button>
@@ -357,7 +352,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 {shouldShowLoading && (
                   <div className="mb-8 rounded-2xl border border-white/20 bg-white/90 p-8 shadow-xl backdrop-blur-sm">
                     <div className="flex h-32 items-center justify-center">
-                      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-purple-500"></div>
+                      <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
                       <span className="ml-3 font-medium text-gray-700">
                         자소서를 불러오는 중...
                       </span>
@@ -369,7 +364,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                 {shouldShowForm && (
                   <div className="mb-8 rounded-2xl border border-white/20 bg-white/95 p-8 shadow-xl backdrop-blur-sm">
                     <div className="mb-8 flex items-center justify-between">
-                      <h2 className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-3xl font-bold text-transparent">
+                      <h2 className="text-3xl font-bold text-gray-800">
                         {title}
                       </h2>
                       <div className="flex gap-3">
@@ -377,7 +372,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           onClick={showResumeModal}
                           variant="primary"
                           icon={<span>📄</span>}
-                          className="transform rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:from-purple-600 hover:to-blue-600"
+                          className="transform rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-blue-700"
                         >
                           저장된 자소서 불러오기
                         </Button>
@@ -389,7 +384,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                         <h3 className="text-xl font-bold text-gray-800">
                           자기소개서 작성
                         </h3>
-                        <div className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-600">
+                        <div className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-600">
                           {charCount} / {MAX_LENGTH.toLocaleString()}자
                         </div>
                       </div>
@@ -404,7 +399,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                             <motion.button
                               type="button"
                               onClick={handleJobFieldToggle}
-                              className="w-full rounded-xl border border-purple-200 bg-white px-4 py-3 text-left text-gray-700 shadow-sm transition-all duration-200 hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+                              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-left text-gray-700 shadow-sm transition-all duration-200 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                               whileHover={{ scale: 1.01 }}
                               whileTap={{ scale: 0.99 }}
                             >
@@ -443,7 +438,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                                       value={jobFieldSearch}
                                       onChange={handleJobFieldSearchChange}
                                       onClick={handleSearchInputClick}
-                                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+                                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                                     />
                                   </div>
                                   <div className="max-h-60 overflow-x-hidden overflow-y-auto">
@@ -454,7 +449,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                                         onClick={() =>
                                           handleJobFieldSelect(job)
                                         }
-                                        className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-150 hover:translate-x-1 hover:bg-purple-50 hover:text-purple-700"
+                                        className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-150 hover:translate-x-1 hover:bg-blue-50 hover:text-blue-700"
                                         style={{
                                           animationDelay: `${index * 20}ms`,
                                         }}
@@ -483,7 +478,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                             <motion.button
                               type="button"
                               onClick={handleExperienceToggle}
-                              className="w-full rounded-xl border border-purple-200 bg-white px-4 py-3 text-left text-gray-700 shadow-sm transition-all duration-200 hover:border-purple-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+                              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-left text-gray-700 shadow-sm transition-all duration-200 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                               whileHover={{ scale: 1.01 }}
                               whileTap={{ scale: 0.99 }}
                             >
@@ -526,7 +521,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                                           onClick={() =>
                                             handleExperienceSelect(experience)
                                           }
-                                          className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-150 hover:translate-x-1 hover:bg-purple-50 hover:text-purple-700"
+                                          className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-150 hover:translate-x-1 hover:bg-blue-50 hover:text-blue-700"
                                           style={{
                                             animationDelay: `${index * 30}ms`,
                                           }}
@@ -549,7 +544,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                         placeholder="자기소개서를 입력해주세요. 실시간으로 AI가 분석하고 첨삭해드립니다. (최대 4,000자)"
                         maxLength={MAX_LENGTH}
                         rows={12}
-                        className="rounded-xl border-purple-200 focus:border-purple-500 focus:ring-purple-500"
+                        className="rounded-xl border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                       />
 
                       <div className="flex gap-4">
@@ -557,29 +552,13 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           onClick={analyzeResume}
                           disabled={improveMutation.isPending || !text.trim()}
                           variant="primary"
-                          size="lg"
+                          size="md"
                           loading={improveMutation.isPending}
-                          className="transform rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:from-purple-600 hover:to-blue-600"
+                          className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-blue-700"
                         >
                           {improveMutation.isPending
                             ? '분석 중...'
                             : 'AI 첨삭 시작'}
-                        </Button>
-                        <Button
-                          onClick={clearText}
-                          variant="secondary"
-                          icon={<span>🗑️</span>}
-                          className="rounded-xl border border-purple-200 bg-white/80 px-6 py-4 font-semibold text-purple-600 shadow-md transition-all duration-200 hover:bg-white hover:shadow-lg"
-                        >
-                          전체 삭제
-                        </Button>
-                        <Button
-                          onClick={copyText}
-                          variant="secondary"
-                          icon={<span>📋</span>}
-                          className="rounded-xl border border-purple-200 bg-white/80 px-6 py-4 font-semibold text-purple-600 shadow-md transition-all duration-200 hover:bg-white hover:shadow-lg"
-                        >
-                          복사하기
                         </Button>
                       </div>
                     </div>
@@ -606,9 +585,6 @@ export function CoverLetter({ id }: CoverLetterProps) {
                         <span className="text-xl font-bold text-gray-800">
                           원본 자기소개서
                         </span>
-                        <span className="rounded-full bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700">
-                          Original
-                        </span>
                       </div>
                       <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-6">
                         <div className="leading-relaxed whitespace-pre-wrap text-gray-700">
@@ -630,8 +606,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                             onClick={copyRevisedToInput}
                             variant="small"
                             size="sm"
-                            icon={<span>📝</span>}
-                            className="rounded-lg bg-purple-100 px-4 py-2 font-medium text-purple-700 transition-all duration-200 hover:bg-purple-200"
+                            className="rounded-lg bg-blue-100 px-4 py-2 font-medium text-blue-700 transition-all duration-200 hover:bg-blue-200"
                           >
                             편집창으로 복사
                           </Button>
@@ -646,7 +621,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           />
                         </div>
                       </div>
-                      <div className="rounded-xl border border-purple-200 bg-gradient-to-br from-purple-50 to-blue-50 p-6">
+                      <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
                         <div className="leading-relaxed whitespace-pre-wrap text-gray-700">
                           {analysisResult.improvedContent}
                         </div>
@@ -665,7 +640,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           onChange={handleCustomPromptChange}
                           placeholder="현재 결과에서 추가로 개선하고 싶은 부분이 있다면 입력해주세요. 예: 신입다운 열정과 학습능력을 더 강조해주세요"
                           rows={3}
-                          className="rounded-xl border-purple-200 focus:border-purple-500 focus:ring-purple-500"
+                          className="rounded-xl border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                         />
                         <div className="flex gap-3">
                           <Button
@@ -673,7 +648,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                             disabled={improveMutation.isPending || !text.trim()}
                             variant="primary"
                             loading={improveMutation.isPending}
-                            className="rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-purple-600 hover:to-blue-600"
+                            className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
                           >
                             {improveMutation.isPending
                               ? '재분석 중...'
@@ -682,7 +657,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           <Button
                             onClick={() => setCustomPrompt('')}
                             variant="secondary"
-                            className="rounded-xl border border-purple-200 bg-white/80 px-6 py-3 font-semibold text-purple-600 shadow-md transition-all duration-200 hover:bg-white hover:shadow-lg"
+                            className="rounded-xl border border-blue-200 bg-white/80 px-6 py-3 font-semibold text-blue-600 shadow-md transition-all duration-200 hover:bg-white hover:shadow-lg"
                           >
                             요청사항 초기화
                           </Button>
@@ -693,23 +668,23 @@ export function CoverLetter({ id }: CoverLetterProps) {
                     {/* AI 피드백 */}
                     <div className="col-span-2 rounded-2xl border border-white/20 bg-white/95 p-8 shadow-xl backdrop-blur-sm">
                       <div className="mb-6">
-                        <span className="bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-2xl font-bold text-transparent">
-                          🤖 AI 피드백
+                        <span className="text-2xl font-bold text-green-600">
+                          AI 피드백
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-10">
+                      <div className="grid grid-cols-2 gap-7">
                         {/* 강점 */}
                         {analysisResult.feedback.strengths.length > 0 && (
-                          <div className="mb-6">
-                            <h4 className="mb-4 flex items-center gap-2 text-lg font-bold text-green-600">
+                          <div className="">
+                            <h4 className="flex items-center gap-2 text-lg font-bold text-green-600">
                               <span>✅</span> 잘한 부분
                             </h4>
                             {analysisResult.feedback.strengths.map(
                               (strength, index) => (
                                 <div
                                   key={index}
-                                  className="mb-4 rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-4"
+                                  className="mt-4 rounded-xl border border-green-200 bg-green-50 p-4"
                                 >
                                   <p className="mb-2 font-semibold text-green-800">
                                     {strength.description}
@@ -724,15 +699,15 @@ export function CoverLetter({ id }: CoverLetterProps) {
                         )}
                         {/* 개선사항 */}
                         {analysisResult.feedback.improvements.length > 0 && (
-                          <div className="mb-6">
-                            <h4 className="mb-4 flex items-center gap-2 text-lg font-bold text-orange-600">
+                          <div className="">
+                            <h4 className="flex items-center gap-2 text-lg font-bold text-orange-600">
                               <span>⚠️</span> 개선할 부분
                             </h4>
                             {analysisResult.feedback.improvements.map(
                               (improvement, index) => (
                                 <div
                                   key={index}
-                                  className="mb-4 rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 p-4"
+                                  className="mt-4 rounded-xl border border-orange-200 bg-orange-50 p-4"
                                 >
                                   <p className="mb-2 font-semibold text-orange-800">
                                     {improvement.description}
@@ -750,7 +725,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           <h4 className="mb-4 flex items-center gap-2 text-lg font-bold text-blue-600">
                             <span>📝</span> 종합 의견
                           </h4>
-                          <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 p-6">
+                          <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
                             <p className="text-base leading-relaxed text-blue-800">
                               {analysisResult.feedback.summary}
                             </p>

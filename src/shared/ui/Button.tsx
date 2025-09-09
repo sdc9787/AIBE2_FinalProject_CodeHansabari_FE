@@ -43,7 +43,9 @@ export function Button({
         baseStyles,
         buttonVariants[variant],
         buttonSizes[size],
-        icon && 'flex items-center gap-2',
+        (icon || loading) &&
+          'flex flex-nowrap items-center justify-center gap-2 text-nowrap',
+        !disabled && !loading && 'cursor-pointer',
         className,
       )}
       disabled={disabled || loading}
