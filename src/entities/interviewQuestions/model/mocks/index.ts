@@ -51,7 +51,7 @@ export const mockInterviewQnas: InterviewQna[] = [
 
 // 자소서 ID별 면접 질문 매핑
 export const mockInterviewQnaByLetter: Record<number, InterviewQna[]> = {
-  1: mockInterviewQnas.slice(0, 3), // 첫 번째 자소서: 3개 질문
+  1: mockInterviewQnas.slice(0, 0), // 첫 번째 자소서: 3개 질문
   2: mockInterviewQnas.slice(0, 5), // 두 번째 자소서: 5개 질문
   3: mockInterviewQnas.slice(0, 2), // 세 번째 자소서: 2개 질문
 };
