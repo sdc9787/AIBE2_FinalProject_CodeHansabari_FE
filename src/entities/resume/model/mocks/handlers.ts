@@ -5,7 +5,6 @@ import type {
   ResumeListResponse,
   CreateResumeRequest,
   UpdateResumeRequest,
-  AISuggestRequest,
   AISuggestApiResponse,
   Resume,
 } from '../type';

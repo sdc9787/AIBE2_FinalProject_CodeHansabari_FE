@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useUserMe } from '@/entities/user/model/query/useUserMe';
 import { GoogleLoginButton, LogoutButton } from '@/features';
 
@@ -38,9 +39,11 @@ export function UserInfo({ className }: UserInfoProps) {
         className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-gray-100"
       >
         {user.picture && (
-          <img
+          <Image
             src={user.picture}
             alt={user.name}
+            width={32}
+            height={32}
             className="h-8 w-8 rounded-full"
           />
         )}

@@ -1,0 +1,457 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  useCoverLetterDetail,
+  useInterviewQuestions,
+  InterviewQna,
+} from '@/entities';
+import {
+  useCreateInterviewQuestions,
+  useCreateCustomQuestionAnswer,
+} from '@/features';
+import { Button, Textarea } from '@/shared';
+
+interface InterviewQuestionsDetailProps {
+  coverLetterId: number;
+}
+
+export function InterviewQuestionsDetail({
+  coverLetterId,
+}: InterviewQuestionsDetailProps) {
+  const [customQuestion, setCustomQuestion] = useState('');
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
+  const [previousQuestionCount, setPreviousQuestionCount] = useState(0);
+
+  // 자기소개서 상세 정보 가져오기
+  const { data: coverLetterDetail, isLoading: isCoverLetterLoading } =
+    useCoverLetterDetail(coverLetterId);
+
+  // 선택된 자소서의 면접 질문들 가져오기
+  const { data: interviewData, isLoading: isQuestionsLoading } =
+    useInterviewQuestions(coverLetterId);
+
+  // 면접 질문 생성 mutation
+  const createQuestions = useCreateInterviewQuestions({
+    coverLetterId,
+  });
+
+  // 커스텀 질문 답변 생성 mutation
+  const createCustomAnswer = useCreateCustomQuestionAnswer({
+    coverLetterId,
+  });
+
+  // 질문 수 변경 감지 및 새 질문에 포커스
+  useEffect(() => {
+    if (interviewData?.qnaList) {
+      const currentCount = interviewData.qnaList.length;
+      if (currentCount > previousQuestionCount && previousQuestionCount > 0) {
+        // 새로운 질문이 추가된 경우 (가장 최근 질문에 포커스)
+        const newestQuestion = interviewData.qnaList[currentCount - 1];
+        if (newestQuestion) {
+          setExpandedQuestion(newestQuestion.qnaId);
+        }
+      }
+      setPreviousQuestionCount(currentCount);
+    }
+  }, [interviewData?.qnaList, previousQuestionCount]);
+
+  // 처음 사용자가 사용할 때 자동으로 면접 질문 생성
+  useEffect(() => {
+    if (
+      interviewData &&
+      interviewData.totalCount === 0 &&
+      interviewData.generatedCount === 0 &&
+      !isQuestionsLoading &&
+      !createQuestions.isPending
+    ) {
+      // totalCount가 0이고 generatedCount도 0이면 자동으로 면접 질문 생성
+      createQuestions.mutate();
+    }
+  }, [interviewData, isQuestionsLoading, createQuestions]);
+
+  const handleGenerateQuestions = () => {
+    createQuestions.mutate();
+  };
+
+  // 생성 가능 횟수 계산 (generatedCount는 5씩 증가, 최대 15)
+  const getGenerationInfo = () => {
+    const generatedCount = interviewData?.generatedCount || 0;
+    const maxGeneratedCount = 15;
+    const remainingGenerations = Math.max(
+      0,
+      Math.ceil((maxGeneratedCount - generatedCount) / 5),
+    );
+    const canGenerate = generatedCount < maxGeneratedCount;
+
+    return {
+      remainingGenerations,
+      canGenerate,
+      generatedCount,
+      maxGeneratedCount,
+    };
+  };
+
+  const generationInfo = getGenerationInfo();
+
+  const handleCustomQuestionSubmit = async () => {
+    if (!customQuestion.trim()) {
+      alert('질문을 입력해주세요.');
+      return;
+    }
+
+    try {
+      await createCustomAnswer.mutateAsync({
+        question: customQuestion,
+      });
+      // 질문 생성 성공 시 입력 필드 초기화
+      setCustomQuestion('');
+      // 새로운 질문이 추가되면 useEffect에서 자동으로 포커스됨
+    } catch (error) {
+      console.error('AI 답변 생성 실패:', error);
+    }
+  };
+
+  const toggleQuestion = (qnaId: number) => {
+    setExpandedQuestion(expandedQuestion === qnaId ? null : qnaId);
+  };
+
+  if (isCoverLetterLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="mx-auto max-w-4xl px-4">
+          <div className="text-center">
+            <div className="mx-auto h-32 w-32 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <p className="mt-4 text-gray-600">자기소개서를 불러오는 중...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-50">
+      <div className="relative mx-auto flex max-w-7xl gap-10">
+        {/* 왼쪽: 자기소개서 상세 - sticky 고정 */}
+        <div className="sticky top-30 h-[80vh] w-1/2 flex-shrink-0">
+          <div className="h-full rounded-2xl border border-gray-200 bg-white shadow-lg">
+            {coverLetterDetail ? (
+              <div className="flex h-full flex-col">
+                {/* 헤더 */}
+                <div className="border-b border-gray-200 p-6">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                      <svg
+                        className="h-5 w-5 text-blue-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      선택된 자기소개서
+                    </h2>
+                  </div>
+                  <h2 className="mb-3 text-xl font-bold text-gray-900">
+                    {coverLetterDetail.title}
+                  </h2>
+                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">직무분야:</span>
+                      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                        {coverLetterDetail.jobField}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">경력:</span>
+                      <span>{coverLetterDetail.experience}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium">수정일:</span>
+                      <span>
+                        {new Date(
+                          coverLetterDetail.updatedAt,
+                        ).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 내용 */}
+                <div className="flex-1 overflow-y-auto p-6">
+                  <div className="prose max-w-none">
+                    <p className="leading-relaxed whitespace-pre-wrap text-gray-700">
+                      {coverLetterDetail.content}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 하단 버튼 */}
+                <div className="border-t border-gray-200 bg-gray-50 p-6">
+                  <Button
+                    onClick={handleGenerateQuestions}
+                    disabled={
+                      createQuestions.isPending || !generationInfo.canGenerate
+                    }
+                    className={`w-full py-3 text-lg font-semibold shadow-lg ${
+                      generationInfo.canGenerate
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-gray-400 text-gray-600'
+                    } disabled:opacity-50`}
+                  >
+                    {createQuestions.isPending
+                      ? '생성 중...'
+                      : generationInfo.canGenerate
+                        ? `면접 질문 생성하기 (${generationInfo.remainingGenerations}회 남음)`
+                        : '생성 완료 (15개 모두 생성됨)'}
+                  </Button>
+                  {generationInfo.canGenerate && (
+                    <p className="mt-2 text-center text-sm text-gray-500">
+                      생성된 질문: {generationInfo.generatedCount}/
+                      {generationInfo.maxGeneratedCount}개
+                    </p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex h-full items-center justify-center p-8">
+                <div className="text-center">
+                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
+                    <svg
+                      className="h-10 w-10 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={1}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                    자기소개서를 불러오는 중...
+                  </h3>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 오른쪽: 면접 질문과 AI 답변 생성 */}
+        <div className="w-1/2 space-y-8 py-0">
+          {/* 생성된 면접 질문 */}
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-lg">
+            <div className="flex flex-col">
+              {/* 헤더 */}
+              <div className="border-b border-gray-200 p-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                    <svg
+                      className="h-5 w-5 text-blue-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    생성된 면접 질문
+                  </h2>
+                </div>
+              </div>
+
+              {/* 면접 질문 목록 */}
+              <div className="p-6">
+                {isQuestionsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                      <p className="text-gray-600">
+                        면접 질문을 불러오는 중...
+                      </p>
+                    </div>
+                  </div>
+                ) : !interviewData?.qnaList?.length ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
+                        <svg
+                          className="h-10 w-10 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1}
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <h3 className="mb-2 text-lg font-semibold text-gray-900">
+                        생성된 면접 질문이 없습니다
+                      </h3>
+                      <p className="text-gray-600">
+                        왼쪽의 &quot;면접 질문 생성하기&quot; 버튼을 눌러
+                        <br />
+                        AI 면접 질문을 생성해보세요
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {interviewData.qnaList.map(
+                      (qna: InterviewQna, index: number) => (
+                        <motion.div
+                          key={qna.qnaId}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="overflow-hidden rounded-lg border border-gray-200 shadow-sm"
+                        >
+                          <button
+                            onClick={() => toggleQuestion(qna.qnaId)}
+                            className="w-full p-4 text-left transition-colors duration-150 hover:bg-gray-50"
+                          >
+                            <div className="flex items-center justify-between">
+                              <h3 className="pr-4 text-sm font-medium text-gray-900">
+                                Q{index + 1}. {qna.question}
+                              </h3>
+                              <motion.div
+                                animate={{
+                                  rotate:
+                                    expandedQuestion === qna.qnaId ? 180 : 0,
+                                }}
+                                transition={{ duration: 0.2 }}
+                                className="text-gray-400"
+                              >
+                                <svg
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 20 20"
+                                  fill="currentColor"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </motion.div>
+                            </div>
+                          </button>
+
+                          <AnimatePresence>
+                            {expandedQuestion === qna.qnaId && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="space-y-3 border-t border-gray-100 p-4">
+                                  <div>
+                                    <h4 className="mb-2 flex items-center text-sm font-medium text-gray-900">
+                                      <span className="mr-2 h-2 w-2 rounded-full bg-blue-600"></span>
+                                      AI 예상 답변
+                                    </h4>
+                                    <p className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm leading-relaxed whitespace-pre-wrap text-gray-700">
+                                      {qna.answer}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <h4 className="mb-2 flex items-center text-sm font-medium text-gray-900">
+                                      <span className="mr-2 h-2 w-2 rounded-full bg-green-600"></span>
+                                      면접 팁
+                                    </h4>
+                                    <p className="rounded-lg border border-green-100 bg-green-50 p-3 text-sm leading-relaxed whitespace-pre-wrap text-gray-700">
+                                      {qna.tip}
+                                    </p>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      ),
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* AI 답변 생성 섹션 */}
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-lg">
+            <div className="p-6">
+              <div className="mb-6">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                    <svg
+                      className="h-5 w-5 text-purple-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    AI 답변 생성
+                  </h2>
+                </div>
+                <p className="text-sm text-gray-600">
+                  궁금한 면접 질문을 입력하면 AI가 답변과 팁을 제공합니다.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <Textarea
+                  value={customQuestion}
+                  onChange={(e) => setCustomQuestion(e.target.value)}
+                  placeholder="면접 질문을 입력해주세요. (예: 자신의 장점과 단점에 대해 말씀해주세요.)"
+                  rows={3}
+                  className="w-full"
+                />
+                <Button
+                  onClick={handleCustomQuestionSubmit}
+                  disabled={
+                    createCustomAnswer.isPending || !customQuestion.trim()
+                  }
+                  className="bg-purple-600 py-3 text-lg font-semibold text-white shadow-lg hover:bg-purple-700 disabled:opacity-50"
+                >
+                  {createCustomAnswer.isPending
+                    ? 'AI 답변 생성 중...'
+                    : 'AI 답변 생성'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

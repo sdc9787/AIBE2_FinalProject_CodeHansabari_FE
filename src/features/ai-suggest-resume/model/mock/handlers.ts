@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { mockAISuggestResponse } from '@/entities/resume/model/mocks';
-import type { AISuggestRequest, AISuggestApiResponse } from '@/entities/resume';
+import type { AISuggestApiResponse } from '@/entities/resume';
 
 export const aiSuggestResumeHandlers = [
   http.post('/api/v1/resumes/ai-suggest', async () => {
