@@ -13,13 +13,14 @@ import { Button } from '@/shared';
 export default function InterviewQuestionsList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
   const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<
     number | null
   >(null);
 
   // 자기소개서 목록 가져오기
   const { data: coverLetters, isLoading: isCoverLettersLoading } =
-    useCoverLetterList(1, 'thumbnail');
+    useCoverLetterList(currentPage, 'thumbnail');
 
   // 선택된 자기소개서 상세 정보 가져오기
   const { data: selectedCoverLetter, isLoading: isDetailLoading } =
@@ -66,6 +67,70 @@ export default function InterviewQuestionsList() {
   // 자기소개서 선택 핸들러
   const handleSelectCoverLetter = (coverLetterId: number) => {
     setSelectedCoverLetterId(coverLetterId);
+  };
+
+  // 페이지 변경 핸들러
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    setSelectedCoverLetterId(null); // 페이지 변경 시 선택 초기화
+  };
+
+  // 페이지네이션 버튼 렌더링
+  const renderPaginationButtons = () => {
+    if (!coverLetters || coverLetters.totalPages <= 1) return null;
+
+    const buttons = [];
+    const totalPages = coverLetters.totalPages;
+    const currentPageNumber = coverLetters.pageable.pageNumber;
+
+    // 이전 페이지 버튼
+    buttons.push(
+      <motion.button
+        key="prev"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => handlePageChange(currentPageNumber - 1)}
+        disabled={currentPageNumber === 0}
+        className="mx-1 rounded bg-gray-200 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        이전
+      </motion.button>,
+    );
+
+    // 페이지 번호 버튼들
+    for (let i = 0; i < totalPages; i++) {
+      buttons.push(
+        <motion.button
+          key={i}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => handlePageChange(i)}
+          className={`mx-1 rounded px-3 py-1 text-sm ${
+            i === currentPageNumber
+              ? 'bg-blue-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          {i + 1}
+        </motion.button>,
+      );
+    }
+
+    // 다음 페이지 버튼
+    buttons.push(
+      <motion.button
+        key="next"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => handlePageChange(currentPageNumber + 1)}
+        disabled={currentPageNumber === totalPages - 1}
+        className="mx-1 rounded bg-gray-200 px-3 py-1 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        다음
+      </motion.button>,
+    );
+
+    return buttons;
   };
 
   // 면접 시작 핸들러
@@ -247,44 +312,60 @@ export default function InterviewQuestionsList() {
                       </Button>
                     </div>
                   ) : (
-                    filteredCoverLetters.map((coverLetter: CoverLetterItem) => (
-                      <motion.div
-                        key={coverLetter.coverLetterId}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`cursor-pointer rounded-lg border p-4 transition-all duration-200 ${
-                          selectedCoverLetterId === coverLetter.coverLetterId
-                            ? 'border-blue-500 bg-blue-50 shadow-md'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                        }`}
-                        onClick={() =>
-                          handleSelectCoverLetter(coverLetter.coverLetterId)
-                        }
-                      >
-                        <div className="mb-3 flex items-start justify-between">
-                          <h3 className="truncate pr-2 font-semibold text-gray-900">
-                            {highlightText(coverLetter.title, searchTerm)}
-                          </h3>
-                          <span className="flex-shrink-0 text-xs text-gray-400">
-                            {new Date(coverLetter.updatedAt).toLocaleDateString(
-                              'ko-KR',
-                              {
-                                month: '2-digit',
-                                day: '2-digit',
-                              },
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                            {highlightText(coverLetter.jobField, searchTerm)}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {coverLetter.experience}
-                          </span>
-                        </div>
-                      </motion.div>
-                    ))
+                    <>
+                      <div className="space-y-3">
+                        {filteredCoverLetters.map((coverLetter: CoverLetterItem) => (
+                          <motion.div
+                            key={coverLetter.coverLetterId}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`cursor-pointer rounded-lg border p-4 transition-all duration-200 ${
+                              selectedCoverLetterId === coverLetter.coverLetterId
+                                ? 'border-blue-500 bg-blue-50 shadow-md'
+                                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                            }`}
+                            onClick={() =>
+                              handleSelectCoverLetter(coverLetter.coverLetterId)
+                            }
+                          >
+                            <div className="mb-3 flex items-start justify-between">
+                              <h3 className="truncate pr-2 font-semibold text-gray-900">
+                                {highlightText(coverLetter.title, searchTerm)}
+                              </h3>
+                              <span className="flex-shrink-0 text-xs text-gray-400">
+                                {new Date(coverLetter.updatedAt).toLocaleDateString(
+                                  'ko-KR',
+                                  {
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                  },
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                                {highlightText(coverLetter.jobField, searchTerm)}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {coverLetter.experience}
+                              </span>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* 페이지네이션 */}
+                      {coverLetters && coverLetters.totalPages > 1 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="mt-4 flex justify-center space-x-1 border-t pt-4"
+                        >
+                          {renderPaginationButtons()}
+                        </motion.div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

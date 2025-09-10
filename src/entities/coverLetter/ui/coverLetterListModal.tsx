@@ -196,7 +196,6 @@ export function CoverLetterListModal() {
                       duration: 0.3,
                       ease: 'easeOut',
                     }}
-                    whileHover={{ scale: 1.02 }}
                     className="rounded-lg border border-gray-200 p-4 transition-colors hover:bg-gray-50"
                   >
                     <div className="mb-2 flex items-start justify-between">
