@@ -29,18 +29,23 @@ export function GoogleCallback() {
           state: state,
           redirectUri: process.env.NEXT_PUBLIC_REDIRECT_URI,
         })
-        .then((response) => {
+        .then(async (response) => {
           if (response.success && response.data?.member) {
             // Store에 사용자 정보 저장
             setUser(response.data.member);
 
-            // 사용자 쿼리 무효화
-            queryClient.invalidateQueries({
+            // 사용자 쿼리 무효화 및 재실행
+            await queryClient.invalidateQueries({
               queryKey: USER_QUERY_KEYS.me,
             });
 
+            // 잠시 대기하여 상태 동기화
+            await new Promise((resolve) => setTimeout(resolve, 100));
+
             toast.success('로그인에 성공했습니다.');
-            router.push('/');
+
+            // window.location.href를 사용하여 강제 새로고침과 함께 이동
+            window.location.href = '/';
           } else {
             throw new Error('로그인 응답이 올바르지 않습니다.');
           }
@@ -57,5 +62,9 @@ export function GoogleCallback() {
     }
   }, [router, searchParams, queryClient, setUser]);
 
-  return <p>구글 로그인 처리 중...</p>;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
+      <div className="inline-block h-16 w-16 animate-spin rounded-full border-b-4 border-blue-600"></div>
+    </div>
+  );
 }
