@@ -55,7 +55,7 @@ export function Home() {
               <div className="flex flex-col justify-center gap-5 md:flex-row">
                 <Link
                   href="/cover-letter"
-                  className="rounded-full bg-white px-8 py-4 text-lg font-semibold text-indigo-600 transition-transform hover:scale-105"
+                  className="rounded-full border-2 border-white bg-transparent px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white hover:text-indigo-600"
                 >
                   자기소개서 작성하기
                 </Link>
