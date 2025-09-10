@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useUserMe } from '@/entities/user/model/query/useUserMe';
+import { useUserStore } from '@/shared';
 import { GoogleLoginButton, LogoutButton } from '@/features';
 
 interface UserInfoProps {
@@ -10,10 +11,11 @@ interface UserInfoProps {
 }
 
 export function UserInfo({ className }: UserInfoProps) {
-  const { data: userResponse, isLoading, error } = useUserMe();
+  const { isLoading } = useUserMe();
+  const { user, isAuthenticated } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // 로딩 중이거나 에러가 있을 때는 로그인 버튼 표시
+  // 로딩 중일 때는 스켈레톤 표시
   if (isLoading) {
     return (
       <div className={className}>
@@ -24,13 +26,12 @@ export function UserInfo({ className }: UserInfoProps) {
     );
   }
 
-  if (error || !userResponse?.success) {
+  // 인증되지 않았거나 사용자 정보가 없을 때는 로그인 버튼 표시
+  if (!isAuthenticated || !user) {
     return (
       <GoogleLoginButton className="rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 font-semibold text-white" />
     );
   }
-
-  const user = userResponse.data;
 
   return (
     <div className={`relative ${className}`}>
