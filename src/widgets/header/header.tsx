@@ -1,7 +1,21 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { UserInfo } from './ui';
 
 export function Header() {
+  const pathname = usePathname();
+
+  // 현재 경로가 주어진 path와 일치하는지 확인
+  const isActivePath = (path: string) => {
+    if (!pathname) return false;
+    if (path === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(path);
+  };
+
   return (
     <>
       {/* 헤더 */}
@@ -10,26 +24,42 @@ export function Header() {
           <div className="flex items-center gap-8">
             <Link
               href="/"
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-3xl font-bold text-transparent"
+              className={`text-3xl font-bold transition-all duration-200 ${
+                isActivePath('/')
+                  ? 'scale-105 bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent'
+                  : 'bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent hover:scale-105'
+              }`}
             >
               CV Mento
             </Link>
             <nav className="flex gap-6">
               <Link
                 href="/cover-letter"
-                className="font-medium text-gray-700 transition-colors hover:text-indigo-600"
+                className={`font-medium transition-all duration-200 ${
+                  isActivePath('/cover-letter')
+                    ? 'border-b-2 border-indigo-600 pb-1 font-semibold text-indigo-600'
+                    : 'text-gray-700 hover:font-semibold hover:text-indigo-600'
+                }`}
               >
                 자기소개서
               </Link>
               <Link
                 href="/resume"
-                className="font-medium text-gray-700 transition-colors hover:text-indigo-600"
+                className={`font-medium transition-all duration-200 ${
+                  isActivePath('/resume')
+                    ? 'border-b-2 border-indigo-600 pb-1 font-semibold text-indigo-600'
+                    : 'text-gray-700 hover:font-semibold hover:text-indigo-600'
+                }`}
               >
                 이력서
               </Link>
               <Link
                 href="/interview-questions"
-                className="font-medium text-gray-700 transition-colors hover:text-indigo-600"
+                className={`font-medium transition-all duration-200 ${
+                  isActivePath('/interview-questions')
+                    ? 'border-b-2 border-indigo-600 pb-1 font-semibold text-indigo-600'
+                    : 'text-gray-700 hover:font-semibold hover:text-indigo-600'
+                }`}
               >
                 AI 모의면접
               </Link>
