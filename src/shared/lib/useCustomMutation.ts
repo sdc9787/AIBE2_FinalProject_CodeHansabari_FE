@@ -76,21 +76,25 @@ export const useCustomMutation = <TVariables, TResult, TError = Error>(
       let errorMessage = '알 수 없는 에러입니다';
 
       if (error && typeof error === 'object') {
-        const errorObj = error as any;
+        const errorObj = error as Record<string, unknown>;
 
         // 서버에서 오는 구체적인 메시지 우선 사용
-        if (errorObj.message) {
+        if (errorObj.message && typeof errorObj.message === 'string') {
           errorMessage = errorObj.message;
         }
         // 상태 코드별 특별 처리
-        else if (errorObj.status === 429) {
-          errorMessage = '사용 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
-        } else if (errorObj.status === 401) {
-          errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
-        } else if (errorObj.status === 403) {
-          errorMessage = '권한이 없습니다.';
-        } else if (errorObj.status >= 500) {
-          errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+        else if (typeof errorObj.status === 'number') {
+          if (errorObj.status === 429) {
+            errorMessage =
+              '사용 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+          } else if (errorObj.status === 401) {
+            errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
+          } else if (errorObj.status === 403) {
+            errorMessage = '권한이 없습니다.';
+          } else if (errorObj.status >= 500) {
+            errorMessage =
+              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+          }
         }
       }
 
