@@ -6,7 +6,7 @@ export async function createInterviewQuestions(
   coverLetterId: number,
 ): Promise<CreateInterviewQuestionsResponse> {
   const response = await clientFetch.post<CreateInterviewQuestionsResponse>(
-    `/v1/me/cover-letters/${coverLetterId}/interview-questions`,
+    `/api/v1/me/cover-letters/${coverLetterId}/interview-questions`,
   );
 
   return response;

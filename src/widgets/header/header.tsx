@@ -27,6 +27,12 @@ export function Header() {
               >
                 이력서
               </Link>
+              <Link
+                href="/interview-questions"
+                className="font-medium text-gray-700 transition-colors hover:text-indigo-600"
+              >
+                AI 모의면접
+              </Link>
             </nav>
           </div>
           <UserInfo />

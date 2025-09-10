@@ -10,7 +10,7 @@ export async function createCustomQuestionAnswer(
   data: CustomQuestionRequest,
 ): Promise<CustomQuestionAnswerResponse> {
   const response = await clientFetch.post<CustomQuestionAnswerResponse>(
-    `/v1/me/cover-letters/${coverLetterId}/interview-questions/custom-answer`,
+    `/api/v1/me/cover-letters/${coverLetterId}/interview-questions/custom-answer`,
     data,
   );
 
