@@ -21,6 +21,7 @@ export const useCreateCustomQuestionAnswer = ({
       invalidateQueryKeys: [
         [...interviewQuestionsQueryKeys.list(coverLetterId)],
       ],
+      loadingType: 'global',
     },
   );
 };

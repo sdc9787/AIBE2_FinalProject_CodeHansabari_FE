@@ -314,44 +314,51 @@ export default function InterviewQuestionsList() {
                   ) : (
                     <>
                       <div className="space-y-3">
-                        {filteredCoverLetters.map((coverLetter: CoverLetterItem) => (
-                          <motion.div
-                            key={coverLetter.coverLetterId}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`cursor-pointer rounded-lg border p-4 transition-all duration-200 ${
-                              selectedCoverLetterId === coverLetter.coverLetterId
-                                ? 'border-blue-500 bg-blue-50 shadow-md'
-                                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                            }`}
-                            onClick={() =>
-                              handleSelectCoverLetter(coverLetter.coverLetterId)
-                            }
-                          >
-                            <div className="mb-3 flex items-start justify-between">
-                              <h3 className="truncate pr-2 font-semibold text-gray-900">
-                                {highlightText(coverLetter.title, searchTerm)}
-                              </h3>
-                              <span className="flex-shrink-0 text-xs text-gray-400">
-                                {new Date(coverLetter.updatedAt).toLocaleDateString(
-                                  'ko-KR',
-                                  {
+                        {filteredCoverLetters.map(
+                          (coverLetter: CoverLetterItem) => (
+                            <motion.div
+                              key={coverLetter.coverLetterId}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className={`cursor-pointer rounded-lg border p-4 transition-all duration-200 ${
+                                selectedCoverLetterId ===
+                                coverLetter.coverLetterId
+                                  ? 'border-blue-500 bg-blue-50 shadow-md'
+                                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                              }`}
+                              onClick={() =>
+                                handleSelectCoverLetter(
+                                  coverLetter.coverLetterId,
+                                )
+                              }
+                            >
+                              <div className="mb-3 flex items-start justify-between">
+                                <h3 className="truncate pr-2 font-semibold text-gray-900">
+                                  {highlightText(coverLetter.title, searchTerm)}
+                                </h3>
+                                <span className="flex-shrink-0 text-xs text-gray-400">
+                                  {new Date(
+                                    coverLetter.updatedAt,
+                                  ).toLocaleDateString('ko-KR', {
                                     month: '2-digit',
                                     day: '2-digit',
-                                  },
-                                )}
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
-                                {highlightText(coverLetter.jobField, searchTerm)}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {coverLetter.experience}
-                              </span>
-                            </div>
-                          </motion.div>
-                        ))}
+                                  })}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+                                  {highlightText(
+                                    coverLetter.jobField,
+                                    searchTerm,
+                                  )}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {coverLetter.experience}
+                                </span>
+                              </div>
+                            </motion.div>
+                          ),
+                        )}
                       </div>
 
                       {/* 페이지네이션 */}

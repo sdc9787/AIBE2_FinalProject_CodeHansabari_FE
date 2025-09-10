@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Noto_Sans_KR, Roboto } from 'next/font/google';
 import './globals.css';
 import { MswProvider, QueryProvider } from '@/app';
-import { CustomToast, Modal } from '@/shared';
+import { CustomToast, Modal, GlobalLoading } from '@/shared';
 import { Header } from '@/widgets';
 
 const notoSansKR = Noto_Sans_KR({
@@ -41,6 +41,7 @@ export default function RootLayout({
             {children}
             <CustomToast />
             <Modal />
+            <GlobalLoading />
           </QueryProvider>
         </MswProvider>
       </body>

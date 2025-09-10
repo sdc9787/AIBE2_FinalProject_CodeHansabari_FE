@@ -37,5 +37,6 @@ export const useImproveCoverLetterMutation = () => {
   >({
     mutationFn: (requestData) => improveCoverLetter(requestData),
     successMessage: '자소서 AI 개선이 완료되었습니다.',
+    loadingType: 'global',
   });
 };
