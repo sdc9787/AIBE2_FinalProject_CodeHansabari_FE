@@ -27,12 +27,11 @@ async function checkAuthStatus(request: NextRequest): Promise<boolean> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    // 개발 환경에서 MSW 사용 시
+    // MSW 사용 시 인증 우회
     const isMswEnabled = process.env.NEXT_PUBLIC_MSW_ENABLED === 'true';
-    const isDevelopment = process.env.NODE_ENV === 'development';
 
-    if (isMswEnabled && isDevelopment && apiUrl?.includes('localhost')) {
-      // MSW 개발 환경에서는 기본적으로 인증된 것으로 처리
+    if (isMswEnabled) {
+      // MSW 환경에서는 기본적으로 인증된 것으로 처리
       return true;
     }
 
