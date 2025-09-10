@@ -6,6 +6,8 @@ import type { NextRequest } from 'next/server';
  */
 const protectedRoutes = [
   '/cover-letter',
+  '/resume',
+  '/interview-questions',
   // 필요에 따라 더 추가
 ];
 
@@ -93,5 +95,9 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/cover-letter/:path*'],
+  matcher: [
+    '/cover-letter/:path*',
+    '/resume/:path*',
+    '/interview-questions/:path*',
+  ],
 };
