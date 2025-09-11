@@ -1,14 +1,20 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createResume } from '@/entities/resume';
-import { CreateResumeRequest } from '@/entities/resume';
+import { useCustomMutation } from '@/shared/lib';
+import {
+  createResume,
+  CreateResumeRequest,
+  FetchResumeListParams,
+} from '@/entities';
 
-export const useCreateResumeMutation = () => {
-  const queryClient = useQueryClient();
+interface CreateResumeResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
 
-  return useMutation({
+export const useCreateResumeMutation = (params: FetchResumeListParams) => {
+  return useCustomMutation<CreateResumeRequest, Error, CreateResumeResponse>({
     mutationFn: (data: CreateResumeRequest) => createResume(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['resumeList'] });
-    },
+    successMessage: '이력서가 성공적으로 생성되었습니다.',
+    invalidateQueryKeys: [['resumeList', params]],
   });
 };
