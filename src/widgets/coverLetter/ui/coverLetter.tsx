@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useModalStore, Button, Textarea } from '@/shared';
 import { CoverLetterListModal, useCoverLetterDetail } from '@/entities';
 import { useImproveCoverLetterMutation } from '@/features/improve-cover-letter';
-import { SaveCoverLetterButton } from '@/features/save-cover-letter';
+import { SaveCoverLetterButton } from '@/features';
 
 interface CoverLetterProps {
   id?: number;
