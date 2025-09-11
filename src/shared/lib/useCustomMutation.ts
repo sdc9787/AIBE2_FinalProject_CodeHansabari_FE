@@ -6,6 +6,9 @@ import {
 import toast from 'react-hot-toast';
 import { useLoadingStore } from '@/shared';
 
+// 범용 레코드 타입 (any 사용 금지 대응)
+type UnknownRecord = Record<string, unknown>;
+
 // API 에러 형태 정의
 export interface ApiError {
   status?: number;
@@ -14,8 +17,8 @@ export interface ApiError {
   errorCode?: string;
   timestamp?: string;
   errors?: Record<string, string | string[]>;
-  body?: any; // clientFetch에서 err.body로 던지는 경우 지원
-  [key: string]: any;
+  body?: UnknownRecord; // clientFetch에서 err.body로 던지는 경우 지원
+  [key: string]: unknown;
 }
 
 interface UseCustomMutationArgs<TVariables, TResult, TError> {
@@ -86,44 +89,33 @@ export const useCustomMutation = <TVariables, TResult, TError = ApiError>(
 
       // 서버 에러 응답 형식에서 message만 추출하여 표시
       let errorMessage = '알 수 없는 에러입니다';
-      const errAny = error as unknown as ApiError | Record<string, any>;
+      const errAny = error as unknown as ApiError | UnknownRecord;
 
       // support different thrown shapes: parsed body thrown directly, or Error with body
-      const candidateBody =
-        errAny && typeof errAny === 'object'
-          ? (errAny.body ?? errAny)
-          : undefined;
+      let candidateBody: unknown;
+      if (errAny && typeof errAny === 'object' && errAny !== null) {
+        // prefer explicit body field if present
+        candidateBody = 'body' in errAny && (errAny as ApiError).body ? (errAny as ApiError).body : errAny;
+      }
 
-      if (candidateBody) {
+      if (candidateBody != null) {
         if (typeof candidateBody === 'string' && candidateBody.trim()) {
           errorMessage = candidateBody;
-        } else if (
-          typeof candidateBody === 'object' &&
-          candidateBody.message &&
-          typeof candidateBody.message === 'string'
-        ) {
-          errorMessage = candidateBody.message;
-        } else if (
-          typeof candidateBody === 'object' &&
-          candidateBody.error &&
-          typeof candidateBody.error === 'string'
-        ) {
-          errorMessage = candidateBody.error;
-        } else if (
-          typeof candidateBody === 'object' &&
-          candidateBody.errors &&
-          typeof candidateBody.errors === 'object'
-        ) {
-          const vals =
-            Object.values(candidateBody.errors).flat?.() ??
-            Object.values(candidateBody.errors);
-          errorMessage = vals.map(String).join(', ');
+        } else if (typeof candidateBody === 'object') {
+          const cb = candidateBody as UnknownRecord;
+          if (typeof cb['message'] === 'string') {
+            errorMessage = String(cb['message']);
+          } else if (typeof cb['error'] === 'string') {
+            errorMessage = String(cb['error']);
+          } else if (cb['errors'] && typeof cb['errors'] === 'object') {
+            const errs = cb['errors'] as Record<string, unknown>;
+            const rawVals = Object.values(errs) as unknown[];
+            const flattened = (rawVals.flat ? rawVals.flat() : rawVals) as unknown[];
+            errorMessage = flattened.map(String).join(', ');
+          }
         }
-      } else if (
-        (errAny as any)?.message &&
-        typeof (errAny as any).message === 'string'
-      ) {
-        errorMessage = (errAny as any).message;
+      } else if (errAny && typeof errAny === 'object' && typeof (errAny as UnknownRecord)['message'] === 'string') {
+        errorMessage = String((errAny as UnknownRecord)['message']);
       }
 
       // 로딩 타입에 따른 에러 처리 (토스트는 여기서만 출력)
