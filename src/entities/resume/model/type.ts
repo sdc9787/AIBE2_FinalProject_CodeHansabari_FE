@@ -19,6 +19,65 @@ export interface ResponseResumeList {
   };
 }
 
+// 기술 스택 메타데이터
+export interface TechStackMetadata {
+  id: number;
+  name: string;
+  category: string;
+}
+
+// 이력서 타입 메타데이터
+export interface ResumeTypeMetadata {
+  value: ResumeType;
+  description: string;
+}
+
+// 경력 타입 메타데이터
+export interface CareerTypeMetadata {
+  value: CareerType;
+  description: string;
+}
+
+// 학위 수준 메타데이터
+export interface DegreeLevelMetadata {
+  value: DegreeLevel;
+  description: string;
+}
+
+// 숙련도 수준 메타데이터
+export interface ProficiencyLevelMetadata {
+  value: ProficiencyLevel;
+  description: string;
+}
+
+// 프로젝트 타입 메타데이터
+export interface ProjectTypeMetadata {
+  value: ProjectType;
+  description: string;
+}
+
+// 추가 정보 카테고리 메타데이터
+export interface AdditionalInfoCategoryMetadata {
+  value: AdditionalInfoCategory;
+  description: string;
+}
+
+// 이력서 메타데이터 전체 응답
+export interface ResumeMetadata {
+  success: boolean;
+  message: string;
+  data: {
+    techStacks: TechStackMetadata[];
+    resumeTypes: ResumeTypeMetadata[];
+    careerTypes: CareerTypeMetadata[];
+    degreeLevels: DegreeLevelMetadata[];
+    proficiencyLevels: ProficiencyLevelMetadata[];
+    projectTypes: ProjectTypeMetadata[];
+    additionalInfoCategories: AdditionalInfoCategoryMetadata[];
+  };
+  timestamp: string;
+}
+
 // -----------------------------------------------------
 
 //학력

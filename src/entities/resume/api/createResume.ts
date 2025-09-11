@@ -1,8 +1,8 @@
 import { clientFetch } from '@/shared';
-import { CreateResumeRequest, ResumeResponse } from '../model';
+import { CreateResumeRequest } from '../model';
 
 export const createResume = async (
   data: CreateResumeRequest,
-): Promise<ResumeResponse> => {
+): Promise<void> => {
   return clientFetch.post('/api/v1/resumes', data);
 };

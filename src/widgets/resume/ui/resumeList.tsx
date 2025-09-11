@@ -4,10 +4,13 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeList } from '@/entities';
 import { Button } from '@/shared';
+import { useDeleteResumeMutation } from '@/features';
 
 export function ResumeList() {
   const router = useRouter();
-  const { data: resumeListData, isLoading, error } = useResumeList();
+  const param = { page: 0, size: 10 };
+  const { data: resumeListData, isLoading, error } = useResumeList(param);
+  const deleteMutation = useDeleteResumeMutation(param);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const resumes = resumeListData?.content || [];
@@ -34,11 +37,21 @@ export function ResumeList() {
 
   const handleDelete = (resumeId: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    // TODO: 삭제 로직 구현
-    if (confirm('정말 이 이력서를 삭제하시겠습니까?')) {
-      console.log('삭제:', resumeId);
+    if (!confirm('정말 이 이력서를 삭제하시겠습니까?')) {
+      setOpenMenuId(null);
+      return;
     }
-    setOpenMenuId(null);
+
+    // 실제 삭제 수행
+    deleteMutation.mutate(resumeId, {
+      onError: () => {
+        // 실패시 추가 처리 필요하면 여기서
+      },
+      onSettled: () => {
+        // 메뉴 닫기
+        setOpenMenuId(null);
+      },
+    });
   };
 
   // 외부 클릭 이벤트 리스너
