@@ -1,32 +1,63 @@
-// 항목 편집 리스트 타입
+// Import and re-export types from entities
+import type {
+  ResumeType,
+  CareerType,
+  DegreeLevel,
+  ProficiencyLevel,
+  ProjectType,
+  AdditionalInfoCategory,
+  Education,
+  TechStack,
+  ProjectTechStack,
+  CustomLink,
+  Career,
+  Project,
+  Training,
+  AdditionalInfo,
+  Resume,
+  CreateResumeRequest,
+  UpdateResumeRequest,
+  AISuggestRequest,
+  AISuggestResponse,
+  ResumeListItem,
+  ResumeListData,
+  AISuggestApiResponse,
+} from '@/entities/resume/model/type';
+
+// Re-export for widget use
+export type {
+  ResumeType,
+  CareerType,
+  DegreeLevel,
+  ProficiencyLevel,
+  ProjectType,
+  AdditionalInfoCategory,
+  Education,
+  TechStack,
+  ProjectTechStack,
+  CustomLink,
+  Career,
+  Project,
+  Training,
+  AdditionalInfo,
+  Resume,
+  CreateResumeRequest,
+  UpdateResumeRequest,
+  AISuggestRequest,
+  AISuggestResponse,
+  ResumeListItem,
+  ResumeListData,
+  AISuggestApiResponse,
+};
+
+// Widget-specific types
 export interface ResumeItem {
   name: string;
   required: boolean;
   state: boolean;
 }
 
-// 커스텀 링크 타입
-export interface CustomLink {
-  title: string;
-  url: string;
-}
-
-// 멤버 정보 타입
-export interface MemberInfo {
-  name: string;
-  age: string;
-  careerType: string;
-  email: string;
-  phoneNumber: string;
-  blogUrl: string;
-  githubUrl: string;
-  notionUrl: string;
-  introduction: string;
-  techStack: string[];
-  customLinks: CustomLink[];
-}
-
-// 이력서 아이템 타입
+// Legacy support - will be removed
 export interface ResumeDataItem {
   title: string;
   subTitle: string;
@@ -35,28 +66,25 @@ export interface ResumeDataItem {
   description: string;
 }
 
-// 이력서 섹션 타입
 export interface ResumeSection {
   sectionType: string;
   sectionTitle: string;
   items: ResumeDataItem[];
 }
 
-// 이력서 데이터 타입
 export interface ResumeData {
   title: string;
-  memberInfo: MemberInfo;
+  memberInfo: any; // Legacy - to be removed
   sections: ResumeSection[];
 }
 
-// 서버 응답용 이력서 데이터 타입 (id, timestamps 포함)
+// Server response types for widgets
+export interface WidgetResumeResponse {
+  data: Resume[];
+}
+
 export interface ServerResumeData extends ResumeData {
   id: number;
   createdAt: string;
   updatedAt: string;
-}
-
-// 서버 응답 타입
-export interface ResumeResponse {
-  data: ServerResumeData[];
 }

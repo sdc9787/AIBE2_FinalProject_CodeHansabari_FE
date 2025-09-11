@@ -1,11 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchResumeList } from '../../api';
-import { Resume, ResumeListResponse } from '../type';
+import {
+  fetchResumeList,
+  FetchResumeListParams,
+  ResponseResumeList,
+} from '@/entities';
 
-export const useResumeList = () => {
-  return useQuery<ResumeListResponse, Error, Resume[]>({
-    queryKey: ['resumeList'],
-    queryFn: fetchResumeList,
+export const useResumeList = (params: FetchResumeListParams) => {
+  return useQuery<ResponseResumeList, Error, ResponseResumeList['data']>({
+    queryKey: ['resumeList', params],
+    queryFn: () => fetchResumeList(params),
     select: (res) => res.data,
   });
 };
