@@ -95,7 +95,10 @@ export const useCustomMutation = <TVariables, TResult, TError = ApiError>(
       let candidateBody: unknown;
       if (errAny && typeof errAny === 'object' && errAny !== null) {
         // prefer explicit body field if present
-        candidateBody = 'body' in errAny && (errAny as ApiError).body ? (errAny as ApiError).body : errAny;
+        candidateBody =
+          'body' in errAny && (errAny as ApiError).body
+            ? (errAny as ApiError).body
+            : errAny;
       }
 
       if (candidateBody != null) {
@@ -110,11 +113,17 @@ export const useCustomMutation = <TVariables, TResult, TError = ApiError>(
           } else if (cb['errors'] && typeof cb['errors'] === 'object') {
             const errs = cb['errors'] as Record<string, unknown>;
             const rawVals = Object.values(errs) as unknown[];
-            const flattened = (rawVals.flat ? rawVals.flat() : rawVals) as unknown[];
+            const flattened = (
+              rawVals.flat ? rawVals.flat() : rawVals
+            ) as unknown[];
             errorMessage = flattened.map(String).join(', ');
           }
         }
-      } else if (errAny && typeof errAny === 'object' && typeof (errAny as UnknownRecord)['message'] === 'string') {
+      } else if (
+        errAny &&
+        typeof errAny === 'object' &&
+        typeof (errAny as UnknownRecord)['message'] === 'string'
+      ) {
         errorMessage = String((errAny as UnknownRecord)['message']);
       }
 

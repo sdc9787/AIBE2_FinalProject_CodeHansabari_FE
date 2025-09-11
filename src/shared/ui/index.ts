@@ -4,3 +4,4 @@ export * from './CustomToast';
 export * from './Button';
 export * from './Input';
 export * from './GlobalLoading';
+export * from './RouteChangeHandler';

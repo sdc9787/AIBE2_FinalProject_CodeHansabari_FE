@@ -4,6 +4,7 @@ interface LoadingState {
   isLoading: boolean;
   loadingMessage: string;
   setLoading: (isLoading: boolean, message?: string) => void;
+  resetLoading: () => void;
 }
 
 export const useLoadingStore = create<LoadingState>((set) => ({
@@ -11,4 +12,5 @@ export const useLoadingStore = create<LoadingState>((set) => ({
   loadingMessage: '로딩 중...',
   setLoading: (isLoading: boolean, message = '로딩 중...') =>
     set({ isLoading, loadingMessage: message }),
+  resetLoading: () => set({ isLoading: false, loadingMessage: '로딩 중...' }),
 }));
