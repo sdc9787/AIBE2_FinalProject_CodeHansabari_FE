@@ -2,16 +2,31 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useResumeList } from '@/entities';
+import { useResumeList, useResumeMetadata } from '@/entities';
 import { Button } from '@/shared';
 import { useDeleteResumeMutation } from '@/features';
 
 export function ResumeList() {
   const router = useRouter();
-  const param = { page: 0, size: 10 };
-  const { data: resumeListData, isLoading, error } = useResumeList(param);
-  const deleteMutation = useDeleteResumeMutation(param);
+  const [page, setPage] = useState<number>(0);
+  const size = 6; // 한 페이지에 보여줄 항목 수
+  const {
+    data: resumeListData,
+    isLoading,
+    error,
+  } = useResumeList({ page, size });
+  const deleteMutation = useDeleteResumeMutation({ page, size });
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  const completedSectionsList = {
+    educations: '학력',
+    techStacks: '기술스택',
+    customLinks: '링크',
+    careers: '경력',
+    projects: '프로젝트',
+    trainings: '교육',
+    additionalInfos: '추가정보',
+  };
 
   const resumes = resumeListData?.content || [];
 
@@ -152,7 +167,7 @@ export function ResumeList() {
               </Button>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-3 gap-10">
+            <div className="grid w-full grid-cols-3 gap-10">
               <AnimatePresence>
                 {resumes.map((resume, index) => (
                   <motion.div
@@ -165,13 +180,14 @@ export function ResumeList() {
                       duration: 0.3,
                       ease: 'easeOut',
                     }}
-                    className="relative rounded-xl border border-gray-200 bg-white p-6 shadow-md transition-all duration-200"
+                    className="relative w-full rounded-xl border border-gray-200 bg-white p-6 shadow-md transition-all duration-200"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
+                    <div className="flex w-full items-start justify-between">
+                      <div className="w-full flex-1">
+                        <div className="flex w-full items-start justify-between">
                           <motion.h3
-                            className="mr-2 mb-2 flex-1 cursor-pointer text-xl font-semibold text-gray-800 transition-colors duration-200 hover:text-blue-600"
+                            className="mb-2 block w-full flex-1 cursor-pointer truncate text-xl font-semibold text-gray-800 transition-colors duration-200 hover:text-blue-600"
+                            title={resume.title}
                             onClick={() => handleResumeEdit(resume.resumeId)}
                           >
                             {resume.title}
@@ -221,38 +237,21 @@ export function ResumeList() {
                         {/* 기본 정보 */}
                         <div className="mb-3 flex flex-wrap gap-2">
                           {/* 완료된 섹션들 표시 */}
-                          {resume.completedSections
-                            .slice(0, 3)
-                            .map((section, idx) => (
-                              <span
-                                key={idx}
-                                className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
-                              >
-                                {section === 'educations'
-                                  ? '학력'
-                                  : section === 'techStacks'
-                                    ? '기술스택'
-                                    : section === 'careers'
-                                      ? '경력'
-                                      : section === 'projects'
-                                        ? '프로젝트'
-                                        : section === 'trainings'
-                                          ? '교육/훈련'
-                                          : section === 'additionalInfos'
-                                            ? '추가정보'
-                                            : section}
-                              </span>
-                            ))}
-                          {resume.completedSections.length > 3 && (
-                            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
-                              +{resume.completedSections.length - 3}
+                          {resume.completedSections.map((section, idx) => (
+                            <span
+                              key={idx}
+                              className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                            >
+                              {completedSectionsList[
+                                section as keyof typeof completedSectionsList
+                              ] || section}
                             </span>
-                          )}
+                          ))}
                         </div>
 
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span>
-                            수정일:{' '}
+                            수정일 :&nbsp;
                             {new Date(resume.updatedAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -266,6 +265,41 @@ export function ResumeList() {
         </motion.div>
 
         {/* 통계 정보 */}
+        {/* 페이지네이션 */}
+        {resumeListData && resumeListData.totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page <= 0}
+              className="rounded-md border px-3 py-1 text-sm text-gray-700 disabled:opacity-40"
+            >
+              이전
+            </button>
+
+            {Array.from({ length: resumeListData.totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={`rounded-md px-3 py-1 text-sm ${i === page ? 'bg-blue-600 text-white' : 'border text-gray-700'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() =>
+                setPage((p) =>
+                  Math.min((resumeListData.totalPages || 1) - 1, p + 1),
+                )
+              }
+              disabled={page >= (resumeListData.totalPages || 1) - 1}
+              className="rounded-md border px-3 py-1 text-sm text-gray-700 disabled:opacity-40"
+            >
+              다음
+            </button>
+          </div>
+        )}
+
         {resumeListData && resumeListData.content.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
