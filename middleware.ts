@@ -17,13 +17,16 @@ const protectedRoutes = [
 const publicRoutes = [
   '/',
   '/auth/callback/google',
+  '/auth/refresh', // 토큰 갱신 페이지 추가
   // 필요에 따라 더 추가
 ];
 
 /**
  * 인증 상태를 확인하는 함수
  */
-async function checkAuthStatus(request: NextRequest): Promise<boolean> {
+async function checkAuthStatus(
+  request: NextRequest,
+): Promise<boolean | 'refresh_needed'> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -56,31 +59,11 @@ async function checkAuthStatus(request: NextRequest): Promise<boolean> {
     // 1) 초기 인증 상태 확인
     let response = await makeStatusRequest();
 
-    // 2) 인증 실패(401)인 경우 refresh 시도
+    // 2) 인증 실패(401)인 경우 토큰 갱신이 필요함을 표시
     if (!response.ok && response.status === 401) {
-      try {
-        const refreshUrl = `${apiUrl}/auth/refresh`;
-        const refreshRes = await fetch(refreshUrl, {
-          method: 'POST',
-          headers: {
-            Cookie: cookieHeader,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          cache: 'no-store',
-        });
-
-        if (refreshRes.ok) {
-          // 리프레시 성공하면 다시 인증 상태 조회
-          response = await makeStatusRequest();
-        } else {
-          // refresh 실패하면 인증 실패 처리
-          return false;
-        }
-      } catch (e) {
-        console.error('Token refresh failed in middleware:', e);
-        return false;
-      }
+      // 미들웨어에서는 토큰 갱신을 시도하지 않고
+      // 클라이언트에서 처리하도록 특별한 상태 반환
+      return 'refresh_needed' as any;
     }
 
     if (response.ok) {
@@ -115,9 +98,17 @@ export async function middleware(request: NextRequest) {
 
   if (isProtectedRoute) {
     // 실제 API를 통한 인증 상태 확인
-    const isAuthenticated = await checkAuthStatus(request);
+    const authResult = await checkAuthStatus(request);
 
-    if (!isAuthenticated) {
+    if (authResult === 'refresh_needed') {
+      // 토큰 갱신이 필요한 경우 갱신 페이지로 리다이렉트
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/refresh';
+      url.searchParams.set('redirect', pathname); // 원래 가려던 페이지 저장
+      return NextResponse.redirect(url);
+    }
+
+    if (!authResult) {
       // 인증되지 않은 경우 홈페이지로 리다이렉트
       const url = request.nextUrl.clone();
       url.pathname = '/';
