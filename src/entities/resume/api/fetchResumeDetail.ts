@@ -1,8 +1,8 @@
 import { clientFetch } from '@/shared';
-import { ResumeResponse } from '../model';
+import { ResponseResumeDetail } from '../model';
 
 export const fetchResumeDetail = async (
   resumeId: number,
-): Promise<ResumeResponse> => {
+): Promise<ResponseResumeDetail> => {
   return clientFetch.get(`/api/v1/resumes/${resumeId}`);
 };

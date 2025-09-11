@@ -50,6 +50,31 @@ function buildURL(endpoint: string, params?: Record<string, any>) {
   }
 }
 
+// 토큰 리프레시 시도 함수
+async function handleTokenRefresh(): Promise<boolean> {
+  try {
+    const refreshUrl = buildURL('/auth/refresh');
+    const res = await fetch(refreshUrl, {
+      method: 'POST',
+      credentials: 'include', // refresh token is expected to be in httpOnly cookie
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      // refresh 실패 (ex: 401)
+      return false;
+    }
+
+    // refresh 성공하면 서버가 새로운 액세스 토큰을 Set-Cookie 하거나
+    // 클라이언트에 전달했을 수 있음. 여기서는 성공 여부만 반환.
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function request<T>(
   method: string, // HTTP 메서드 (GET, POST, PATCH, PUT, DELETE)
   endpoint: string, // API 엔드포인트 경로 (예: '/users', '/goals')
@@ -81,17 +106,14 @@ async function request<T>(
   // HTTP 상태 코드 검사
   if (!response.ok) {
     // 401 에러이고 재시도가 아닌 경우에만 토큰 재발급 시도
-    // if (
-    //   response.status === 401 &&
-    //   !isRetry
-    // ) {
-    //   const refreshSuccess = await handleTokenRefresh();
+    if (response.status === 401 && !isRetry) {
+      const refreshSuccess = await handleTokenRefresh();
 
-    //   if (refreshSuccess) {
-    //     // 토큰 재발급 성공 시 원래 요청 재시도
-    //     return request<T>(method, endpoint, data, config, true);
-    //   }
-    // }
+      if (refreshSuccess) {
+        // 토큰 재발급 성공 시 원래 요청 재시도
+        return request<T>(method, endpoint, data, config, true);
+      }
+    }
 
     let errorBody: any = null;
 

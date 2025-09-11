@@ -2,13 +2,33 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useResumeList } from '@/entities';
+import { useResumeList, useResumeMetadata } from '@/entities';
 import { Button } from '@/shared';
+import { useDeleteResumeMutation } from '@/features';
 
 export function ResumeList() {
   const router = useRouter();
-  const { data: resumes, isLoading, error } = useResumeList();
+  const [page, setPage] = useState<number>(0);
+  const size = 6; // 한 페이지에 보여줄 항목 수
+  const {
+    data: resumeListData,
+    isLoading,
+    error,
+  } = useResumeList({ page, size });
+  const deleteMutation = useDeleteResumeMutation({ page, size });
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+
+  const completedSectionsList = {
+    educations: '학력',
+    techStacks: '기술스택',
+    customLinks: '링크',
+    careers: '경력',
+    projects: '프로젝트',
+    trainings: '교육',
+    additionalInfos: '추가정보',
+  };
+
+  const resumes = resumeListData?.content || [];
 
   const handleResumeEdit = (resumeId: number) => {
     router.push(`/resume/edit/${resumeId}`);
@@ -32,11 +52,21 @@ export function ResumeList() {
 
   const handleDelete = (resumeId: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    // TODO: 삭제 로직 구현
-    if (confirm('정말 이 이력서를 삭제하시겠습니까?')) {
-      console.log('삭제:', resumeId);
+    if (!confirm('정말 이 이력서를 삭제하시겠습니까?')) {
+      setOpenMenuId(null);
+      return;
     }
-    setOpenMenuId(null);
+
+    // 실제 삭제 수행
+    deleteMutation.mutate(resumeId, {
+      onError: () => {
+        // 실패시 추가 처리 필요하면 여기서
+      },
+      onSettled: () => {
+        // 메뉴 닫기
+        setOpenMenuId(null);
+      },
+    });
   };
 
   // 외부 클릭 이벤트 리스너
@@ -137,11 +167,11 @@ export function ResumeList() {
               </Button>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-3 gap-10">
+            <div className="grid w-full grid-cols-3 gap-10">
               <AnimatePresence>
                 {resumes.map((resume, index) => (
                   <motion.div
-                    key={resume.id}
+                    key={resume.resumeId || `resume-${index}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
@@ -150,28 +180,31 @@ export function ResumeList() {
                       duration: 0.3,
                       ease: 'easeOut',
                     }}
-                    className="relative rounded-xl border border-gray-200 bg-white p-6 shadow-md transition-all duration-200"
+                    className="relative w-full rounded-xl border border-gray-200 bg-white p-6 shadow-md transition-all duration-200"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
+                    <div className="flex w-full items-start justify-between">
+                      <div className="w-full flex-1">
+                        <div className="flex w-full items-start justify-between">
                           <motion.h3
-                            className="mr-2 mb-2 flex-1 cursor-pointer text-xl font-semibold text-gray-800 transition-colors duration-200 hover:text-blue-600"
-                            onClick={() => handleResumeEdit(resume.id)}
+                            className="mb-2 block w-full flex-1 cursor-pointer truncate text-xl font-semibold text-gray-800 transition-colors duration-200 hover:text-blue-600"
+                            title={resume.title}
+                            onClick={() => handleResumeEdit(resume.resumeId)}
                           >
                             {resume.title}
                           </motion.h3>
                           {/* 메뉴 버튼 */}
                           <div className="relative">
                             <motion.button
-                              onClick={(e) => handleMenuToggle(resume.id, e)}
+                              onClick={(e) =>
+                                handleMenuToggle(resume.resumeId, e)
+                              }
                               className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-gray-400 transition-colors"
                             >
                               <i className="xi-ellipsis-v xi-x"></i>
                             </motion.button>
                             {/* 드롭다운 메뉴 */}
                             <AnimatePresence>
-                              {openMenuId === resume.id && (
+                              {openMenuId === resume.resumeId && (
                                 <motion.div
                                   initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -181,14 +214,16 @@ export function ResumeList() {
                                 >
                                   <button
                                     onClick={(e) =>
-                                      handleDownload(resume.id, e)
+                                      handleDownload(resume.resumeId, e)
                                     }
                                     className="w-full cursor-pointer px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
                                   >
                                     다운로드
                                   </button>
                                   <button
-                                    onClick={(e) => handleDelete(resume.id, e)}
+                                    onClick={(e) =>
+                                      handleDelete(resume.resumeId, e)
+                                    }
                                     className="w-full cursor-pointer px-4 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50"
                                   >
                                     삭제하기
@@ -201,57 +236,25 @@ export function ResumeList() {
 
                         {/* 기본 정보 */}
                         <div className="mb-3 flex flex-wrap gap-2">
-                          {resume.sections.slice(0, 3).map((section, idx) => (
+                          {/* 완료된 섹션들 표시 */}
+                          {resume.completedSections.map((section, idx) => (
                             <span
                               key={idx}
                               className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
                             >
-                              {section.sectionTitle}
+                              {completedSectionsList[
+                                section as keyof typeof completedSectionsList
+                              ] || section}
                             </span>
                           ))}
-                          {resume.sections.length > 3 && (
-                            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
-                              +{resume.sections.length - 3}
-                            </span>
-                          )}
-                          {resume.memberInfo.careerType && (
-                            <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
-                              {resume.memberInfo.careerType}
-                            </span>
-                          )}
-                          {resume.memberInfo.techStack &&
-                            resume.memberInfo.techStack.length > 0 && (
-                              <span className="rounded-full bg-purple-100 px-3 py-1 text-sm text-purple-700">
-                                {resume.memberInfo.techStack
-                                  .slice(0, 3)
-                                  .join(', ')}
-                                {resume.memberInfo.techStack.length > 3 &&
-                                  ' 외'}
-                              </span>
-                            )}
                         </div>
 
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <span>
-                            생성일:{' '}
-                            {new Date(resume.createdAt).toLocaleDateString()}
-                          </span>
-                          <span>
-                            수정일:{' '}
+                            수정일 :&nbsp;
                             {new Date(resume.updatedAt).toLocaleDateString()}
                           </span>
                         </div>
-
-                        {/* 자기소개 미리보기 */}
-                        {resume.memberInfo.introduction && (
-                          <div className="mt-3">
-                            <p className="text-sm text-gray-600">
-                              {resume.memberInfo.introduction.length > 100
-                                ? `${resume.memberInfo.introduction.slice(0, 100)}...`
-                                : resume.memberInfo.introduction}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -262,7 +265,42 @@ export function ResumeList() {
         </motion.div>
 
         {/* 통계 정보 */}
-        {resumes && resumes.length > 0 && (
+        {/* 페이지네이션 */}
+        {resumeListData && resumeListData.totalPages > 1 && (
+          <div className="mt-6 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page <= 0}
+              className="rounded-md border px-3 py-1 text-sm text-gray-700 disabled:opacity-40"
+            >
+              이전
+            </button>
+
+            {Array.from({ length: resumeListData.totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={`rounded-md px-3 py-1 text-sm ${i === page ? 'bg-blue-600 text-white' : 'border text-gray-700'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() =>
+                setPage((p) =>
+                  Math.min((resumeListData.totalPages || 1) - 1, p + 1),
+                )
+              }
+              disabled={page >= (resumeListData.totalPages || 1) - 1}
+              className="rounded-md border px-3 py-1 text-sm text-gray-700 disabled:opacity-40"
+            >
+              다음
+            </button>
+          </div>
+        )}
+
+        {resumeListData && resumeListData.content.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -270,14 +308,19 @@ export function ResumeList() {
             className="mt-8 border-t border-gray-200 pt-6"
           >
             <div className="flex items-center justify-between text-sm text-gray-600">
-              <span>총 {resumes.length}개의 이력서</span>
+              <span>
+                총 {resumeListData.totalElements}개의 이력서 (페이지{' '}
+                {resumeListData.number + 1}/{resumeListData.totalPages})
+              </span>
               <span>
                 마지막 업데이트:{' '}
-                {new Date(
-                  Math.max(
-                    ...resumes.map((r) => new Date(r.updatedAt).getTime()),
-                  ),
-                ).toLocaleDateString()}
+                {resumes.length > 0
+                  ? new Date(
+                      Math.max(
+                        ...resumes.map((r) => new Date(r.updatedAt).getTime()),
+                      ),
+                    ).toLocaleDateString()
+                  : '-'}
               </span>
             </div>
           </motion.div>

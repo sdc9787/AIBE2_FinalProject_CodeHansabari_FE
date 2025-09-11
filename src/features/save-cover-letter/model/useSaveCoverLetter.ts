@@ -18,6 +18,5 @@ interface SaveCoverLetterResponse {
 export const useSaveCoverLetter = () => {
   return useCustomMutation<SaveCoverLetterRequest, SaveCoverLetterResponse>({
     mutationFn: (requestData) => saveCoverLetter(requestData),
-    loadingType: 'global',
   });
 };

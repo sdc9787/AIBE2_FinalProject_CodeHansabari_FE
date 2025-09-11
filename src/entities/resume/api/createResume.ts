@@ -1,8 +1,14 @@
 import { clientFetch } from '@/shared';
-import { CreateResumeRequest, ResumeResponse } from '../model';
+import { CreateResumeRequest } from '../model';
+
+interface CreateResumeResponse {
+  success: boolean;
+  message: string;
+  data: null;
+}
 
 export const createResume = async (
   data: CreateResumeRequest,
-): Promise<ResumeResponse> => {
+): Promise<CreateResumeResponse> => {
   return clientFetch.post('/api/v1/resumes', data);
 };

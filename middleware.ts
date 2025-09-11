@@ -39,18 +39,49 @@ async function checkAuthStatus(request: NextRequest): Promise<boolean> {
     const cookieHeader = request.headers.get('cookie') || '';
     const authUrl = `${apiUrl}/auth/status`;
 
-    const response = await fetch(authUrl, {
-      method: 'GET',
-      headers: {
-        Cookie: cookieHeader,
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
-      credentials: 'include',
-      cache: 'no-store',
-    });
+    const makeStatusRequest = async () =>
+      fetch(authUrl, {
+        method: 'GET',
+        headers: {
+          Cookie: cookieHeader,
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+        credentials: 'include',
+        cache: 'no-store',
+      });
+
+    // 1) 초기 인증 상태 확인
+    let response = await makeStatusRequest();
+
+    // 2) 인증 실패(401)인 경우 refresh 시도
+    if (!response.ok && response.status === 401) {
+      try {
+        const refreshUrl = `${apiUrl}/auth/refresh`;
+        const refreshRes = await fetch(refreshUrl, {
+          method: 'POST',
+          headers: {
+            Cookie: cookieHeader,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (refreshRes.ok) {
+          // 리프레시 성공하면 다시 인증 상태 조회
+          response = await makeStatusRequest();
+        } else {
+          // refresh 실패하면 인증 실패 처리
+          return false;
+        }
+      } catch (e) {
+        console.error('Token refresh failed in middleware:', e);
+        return false;
+      }
+    }
 
     if (response.ok) {
       const data = await response.json();

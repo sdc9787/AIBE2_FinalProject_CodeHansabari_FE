@@ -4,7 +4,6 @@ import { interviewQuestionsHandlers } from '@/entities/interviewQuestions';
 import { loginGoogleHandler } from '@/features';
 import { improveCoverLetterHandlers } from '@/features/improve-cover-letter';
 import { saveCoverLetterHandler } from '@/features/save-cover-letter';
-import { aiSuggestResumeHandlers } from '@/features/ai-suggest-resume';
 
 export const handlers = [
   ...coverLetterHandlers,
@@ -12,6 +11,5 @@ export const handlers = [
   ...interviewQuestionsHandlers,
   ...improveCoverLetterHandlers,
   ...saveCoverLetterHandler,
-  ...aiSuggestResumeHandlers,
   ...loginGoogleHandler,
 ];

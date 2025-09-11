@@ -3,6 +3,7 @@ export * from './save-cover-letter';
 export * from './login-google';
 export * from './logout-google';
 export * from './create-resume';
-export * from './ai-suggest-resume';
 export * from './create-interview-questions';
 export * from './create-interview-questions-custom';
+export * from './delete-resume';
+export * from './update-resume';
