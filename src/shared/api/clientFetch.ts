@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
 // 요청 설정 옵션
+
 interface RequestConfig {
   params?: Record<string, any>; // URL 쿼리 파라미터
   headers?: Record<string, string | undefined>; // 추가 HTTP 헤더 (delete 연산자 지원)
@@ -76,6 +77,37 @@ async function request<T>(
     headers,
     body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
   });
+
+  // HTTP 상태 코드 검사
+  if (!response.ok) {
+    // 401 에러이고 재시도가 아닌 경우에만 토큰 재발급 시도
+    // if (
+    //   response.status === 401 &&
+    //   !isRetry
+    // ) {
+    //   const refreshSuccess = await handleTokenRefresh();
+
+    //   if (refreshSuccess) {
+    //     // 토큰 재발급 성공 시 원래 요청 재시도
+    //     return request<T>(method, endpoint, data, config, true);
+    //   }
+    // }
+
+    let errorBody: any = null;
+
+    // JSON 파싱을 시도하되 실패하면 null 반환
+    try {
+      errorBody = await response.json();
+    } catch {
+      errorBody = await response.text(); // fallback
+    }
+
+    const error = new Error(`HTTP error! status: ${response.status}`);
+    (error as any).status = response.status;
+    (error as any).body = errorBody;
+    console.log(error);
+    throw error;
+  }
 
   // 응답 본문이 비어 있을 수 있으므로 안전하게 JSON 파싱
   try {

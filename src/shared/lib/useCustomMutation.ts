@@ -6,6 +6,18 @@ import {
 import toast from 'react-hot-toast';
 import { useLoadingStore } from '@/shared';
 
+// API 에러 형태 정의
+export interface ApiError {
+  status?: number;
+  message?: string;
+  error?: string;
+  errorCode?: string;
+  timestamp?: string;
+  errors?: Record<string, string | string[]>;
+  body?: any; // clientFetch에서 err.body로 던지는 경우 지원
+  [key: string]: any;
+}
+
 interface UseCustomMutationArgs<TVariables, TResult, TError> {
   mutationFn: (variables: TVariables) => Promise<TResult>;
   invalidateQueryKeys?: Array<Array<string | number | object>>;
@@ -18,7 +30,7 @@ interface MutationContext {
   toastId?: string;
 }
 
-export const useCustomMutation = <TVariables, TResult, TError = Error>(
+export const useCustomMutation = <TVariables, TResult, TError = ApiError>(
   args: UseCustomMutationArgs<TVariables, TResult, TError>,
 ) => {
   const queryClient = useQueryClient();
@@ -72,33 +84,49 @@ export const useCustomMutation = <TVariables, TResult, TError = Error>(
         mutationOptions.onError(error, variables, context);
       }
 
-      // 서버 에러 응답 형식에 맞게 메시지 추출
+      // 서버 에러 응답 형식에서 message만 추출하여 표시
       let errorMessage = '알 수 없는 에러입니다';
+      const errAny = error as unknown as ApiError | Record<string, any>;
 
-      if (error && typeof error === 'object') {
-        const errorObj = error as Record<string, unknown>;
+      // support different thrown shapes: parsed body thrown directly, or Error with body
+      const candidateBody =
+        errAny && typeof errAny === 'object'
+          ? (errAny.body ?? errAny)
+          : undefined;
 
-        // 서버에서 오는 구체적인 메시지 우선 사용
-        if (errorObj.message && typeof errorObj.message === 'string') {
-          errorMessage = errorObj.message;
+      if (candidateBody) {
+        if (typeof candidateBody === 'string' && candidateBody.trim()) {
+          errorMessage = candidateBody;
+        } else if (
+          typeof candidateBody === 'object' &&
+          candidateBody.message &&
+          typeof candidateBody.message === 'string'
+        ) {
+          errorMessage = candidateBody.message;
+        } else if (
+          typeof candidateBody === 'object' &&
+          candidateBody.error &&
+          typeof candidateBody.error === 'string'
+        ) {
+          errorMessage = candidateBody.error;
+        } else if (
+          typeof candidateBody === 'object' &&
+          candidateBody.errors &&
+          typeof candidateBody.errors === 'object'
+        ) {
+          const vals =
+            Object.values(candidateBody.errors).flat?.() ??
+            Object.values(candidateBody.errors);
+          errorMessage = vals.map(String).join(', ');
         }
-        // 상태 코드별 특별 처리
-        else if (typeof errorObj.status === 'number') {
-          if (errorObj.status === 429) {
-            errorMessage =
-              '사용 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
-          } else if (errorObj.status === 401) {
-            errorMessage = '인증이 필요합니다. 다시 로그인해주세요.';
-          } else if (errorObj.status === 403) {
-            errorMessage = '권한이 없습니다.';
-          } else if (errorObj.status >= 500) {
-            errorMessage =
-              '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
-          }
-        }
+      } else if (
+        (errAny as any)?.message &&
+        typeof (errAny as any).message === 'string'
+      ) {
+        errorMessage = (errAny as any).message;
       }
 
-      // 로딩 타입에 따른 에러 처리
+      // 로딩 타입에 따른 에러 처리 (토스트는 여기서만 출력)
       if (loadingType === 'toast') {
         toast.error(errorMessage, { id: context?.toastId });
       } else if (loadingType === 'global') {

@@ -18,6 +18,18 @@ export const improveCoverLetterHandlers = [
 
       const { content, jobField, experienceYears, customPrompt } = body;
 
+      // 테스트용: 클라이언트에서 forceError true 또는 content==='trigger-error'로 500 에러 시뮬레이션
+      if ((body as any).forceError === true || content === 'trigger-error') {
+        return HttpResponse.json(
+          {
+            success: false,
+            message: '의도된 서버 에러 (테스트 목적)',
+            data: null,
+          },
+          { status: 500 },
+        );
+      }
+
       // 필수 필드 검증
       if (!content || content.trim().length === 0) {
         return HttpResponse.json(
