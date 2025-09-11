@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-
 function RefreshHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -48,7 +47,9 @@ function RefreshHandler() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="mb-4 text-red-500">{error}</div>
-          <div className="text-sm text-gray-500">잠시 후 홈페이지로 이동합니다...</div>
+          <div className="text-sm text-gray-500">
+            잠시 후 홈페이지로 이동합니다...
+          </div>
         </div>
       </div>
     );
