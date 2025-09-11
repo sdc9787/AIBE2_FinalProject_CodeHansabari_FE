@@ -171,7 +171,7 @@ export interface ResponseResumeDetail {
 }
 
 // 이력서 수정 요청
-export interface UpdateResumeRequest extends CreateResumeRequest {}
+export type UpdateResumeRequest = CreateResumeRequest;
 
 // 이력서 생성 요청
 export interface CreateResumeRequest {

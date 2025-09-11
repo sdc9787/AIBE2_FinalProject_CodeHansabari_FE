@@ -12,7 +12,7 @@ interface CreateResumeResponse {
 }
 
 export const useCreateResumeMutation = (params: FetchResumeListParams) => {
-  return useCustomMutation<CreateResumeRequest, Error, CreateResumeResponse>({
+  return useCustomMutation<CreateResumeRequest, CreateResumeResponse>({
     mutationFn: (data: CreateResumeRequest) => createResume(data),
     successMessage: '이력서가 성공적으로 생성되었습니다.',
     invalidateQueryKeys: [['resumeList', params]],
