@@ -1,1 +1,1 @@
-export { SaveCoverLetterButton } from './SaveCoverLetterButton';
+export * from './SaveCoverLetterButton';
