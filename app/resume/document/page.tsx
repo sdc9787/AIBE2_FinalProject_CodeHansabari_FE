@@ -1,5 +1,5 @@
-import { ResumeDocument } from '@/widgets';
+import { ResumeCreatePage } from '@/pages';
 
 export default function ResumeDocumentPage() {
-  return <ResumeDocument></ResumeDocument>;
+  return <ResumeCreatePage />;
 }

@@ -1,7 +1,7 @@
-// 'use client';
+'use client';
 
-// import { ResumeCreate } from '@/widgets/resume';
+import { ResumeDocument } from '@/widgets';
 
-// export function ResumeCreatePage() {
-//   return <ResumeCreate />;
-// }
+export function ResumeCreatePage() {
+  return <ResumeDocument />;
+}

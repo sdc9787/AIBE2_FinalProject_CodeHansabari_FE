@@ -1,21 +1,14 @@
 'use client';
 
-import { CreateResumeRequest, useResumeMetadata } from '@/entities';
+import { CreateResumeRequest, useResumeMetadata, ResumeType } from '@/entities';
+import { useCreateResumeMutation } from '@/features';
 import { useState, Dispatch, SetStateAction } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-
-interface SectionMenuType {
-  introduction: boolean;
-  link: boolean;
-  education: boolean;
-  techStacks: boolean;
-  customLinks: boolean;
-  careers: boolean;
-  projects: boolean;
-  trainings: boolean;
-  additionalInfos: boolean;
-}
+import { SearchableDropdown, TechStackTags, useModalStore } from '@/shared';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
+import { ResumeTemplateModal } from './ResumeTemplateModal';
 
 type ItemType = {
   name: string;
@@ -24,30 +17,6 @@ type ItemType = {
   meta: string;
 };
 
-const FieldNameList = [
-  '프론트엔드 개발자',
-  '백엔드 개발자',
-  '풀스택 개발자',
-  '모바일 앱 개발자',
-  '게임 개발자',
-  '데이터 사이언티스트',
-  '데이터 엔지니어',
-  '머신러닝 엔지니어',
-  'AI 엔지니어',
-  'DevOps 엔지니어',
-  '시스템 엔지니어',
-  '네트워크 엔지니어',
-  '보안 엔지니어',
-  '클라우드 엔지니어',
-  'QA 엔지니어',
-  'UI/UX 디자이너',
-  '프로덕트 매니저',
-  '프로젝트 매니저',
-  'IT 컨설턴트',
-  '기술 영업',
-  '기타',
-];
-
 export function ResumeDocument() {
   // 메타 데이터 api (not used directly for items, kept for context)
   const {
@@ -55,99 +24,78 @@ export function ResumeDocument() {
     isError: metaError,
     isLoading: metaLoading,
   } = useResumeMetadata();
+
   const [DataForm, setDataForm] = useState<CreateResumeRequest>({
     title: '',
-    type: 'DEFAULT',
+    type: 'DEFAULT', // 'DEFAULT' or 'MODERN'
     name: '',
     email: '',
     phone: '',
-    birthYear: 0,
+    birthYear: 2000,
     careerType: 'FRESHMAN',
-    introduction: '',
     fieldName: '',
+    introduction: '',
     githubUrl: '',
     blogUrl: '',
     notionUrl: '',
-    techStacks: [
-      {
-        techStackId: 0, // 기술 스택 ID
-        proficiencyLevel: 'BEGINNER', //숙련도 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-      },
-    ],
+    techStacks: [],
     educations: [
       {
-        schoolName: '', // 학교명
-        degreeLevel: 'HIGH_SCHOOL', //학위 'HIGH_SCHOOL' | 'ASSOCIATE' | 'BACHELOR' | 'MASTER' | 'DOCTORATE';
-        graduationDate: '', // 졸업일
-        major: '', // 전공(선택)
-        personalGpa: null, // 개인 학점(선택)
-        totalGpa: null, // 총 학점(선택)
+        schoolName: '',
+        degreeLevel: 'HIGH_SCHOOL',
+        graduationDate: '',
+        major: '',
+        personalGpa: null,
+        totalGpa: null,
       },
     ],
     projects: [
       {
-        startDate: '', // 프로젝트 시작일
-        endDate: '', // 프로젝트 종료일
-        name: '', // 프로젝트명
-        description: '', // 프로젝트 설명(선택)
-        deployUrl: '', // 배포 URL(선택)
-        repositoryUrl: '', // 저장소 URL(선택)
-        detailedDescription: '', // 상세 설명(선택)
-        projectType: 'PERSONAL', // 프로젝트 유형 'PERSONAL' | 'TEAM';
-        techStacks: [
-          {
-            techStackId: 0, // 기술 스택 ID
-          },
-        ], // 사용 기술 스택
+        name: '',
+        startDate: '',
+        endDate: '',
+        deployUrl: '',
+        repositoryUrl: '',
+        description: '',
+        detailedDescription: '',
+        projectType: 'PERSONAL',
+        techStacks: [],
       },
     ],
     careers: [
       {
-        companyName: '', // 회사명
-        departmentPosition: '', // 부서 및 직위
-        startDate: '', // 재직 시작일
-        endDate: '', // 재직 종료일
-        companyDescription: '', // 회사 설명(선택)
-        mainTasks: '', // 주요 업무 및 성과(선택)
-        techStacks: [
-          {
-            techStackId: 0, // 기술 스택 ID
-          },
-        ], // 사용 기술 스택
+        companyName: '',
+        departmentPosition: '',
+        startDate: '',
+        endDate: '',
+        mainTasks: '',
+        companyDescription: '',
+        techStacks: [],
       },
     ],
     trainings: [
       {
-        courseName: '', // 과정명
-        startDate: '', // 교육 시작일
-        endDate: '', // 교육 종료일
-        institutionName: '', // 교육 기관명(선택)
-        detailedContent: '', // 상세 내용(선택)
-        techStacks: [
-          {
-            techStackId: 0, // 기술 스택 ID
-          },
-        ],
+        courseName: '',
+        institutionName: '',
+        startDate: '',
+        endDate: '',
+        detailedContent: '',
+        techStacks: [],
       },
     ],
     additionalInfos: [
       {
-        activityName: '', // 활동명
-        category: 'AWARD', //활동 유형 'AWARD' | 'CERTIFICATION' | 'LANGUAGE' | 'ETC';
-        relatedOrganization: '', // 관련 기관(선택)
-        startDate: '', // 활동 시작일(선택)
-        endDate: '', // 활동 종료일(선택)
-        certificateNumber: '', // 자격증 번호(선택)
-        detailedContent: '', // 상세 내용(선택)
-        languageLevel: '', // 어학 수준(선택)
+        startDate: '',
+        endDate: '',
+        category: 'AWARD',
+        activityName: '',
+        relatedOrganization: '',
+        detailedContent: '',
+        certificateNumber: '',
+        languageLevel: '',
       },
     ],
-    customLinks: [
-      {
-        name: '', // 링크 이름(예: 포트폴리오, 블로그)
-        url: '', // 링크 URL
-      },
-    ],
+    customLinks: [],
   });
 
   // Initial item list (static mapping to DataForm fields)
@@ -336,6 +284,7 @@ export function ResumeDocument() {
               items={items}
               DataForm={DataForm}
               setDataForm={setDataForm}
+              hasContent={hasContent}
             />
           </div>
         </div>
@@ -427,85 +376,79 @@ type RightSectionProps = {
   items: ItemType[];
   DataForm: CreateResumeRequest;
   setDataForm: Dispatch<SetStateAction<CreateResumeRequest>>;
+  hasContent: (name: string) => boolean;
 };
 
-function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
+function RightSection({
+  items,
+  DataForm,
+  setDataForm,
+  hasContent,
+}: RightSectionProps) {
+  // 메타데이터 가져오기
+  const {
+    data: metaData,
+    isError: metaError,
+    isLoading: metaLoading,
+  } = useResumeMetadata();
+  const router = useRouter();
+  const { open, close } = useModalStore();
+  // 이력서 생성 mutation
+  const mutation = useCreateResumeMutation({ page: 0, size: 10 });
+
   // 상태 관리
-  const [isJobFieldOpen, setIsJobFieldOpen] = useState(false);
-  const [jobFieldSearch, setJobFieldSearch] = useState('');
   const [isTechStackOpen, setIsTechStackOpen] = useState(false);
   const [techStackSearch, setTechStackSearch] = useState('');
   const [graduationStatusOpen, setGraduationStatusOpen] = useState({
     educationIndex: -1,
   });
 
-  // 상수 정의
-  const TECH_STACKS = [
-    'JavaScript',
-    'TypeScript',
-    'React',
-    'Vue.js',
-    'Angular',
-    'Node.js',
-    'Express',
-    'Python',
-    'Django',
-    'Flask',
-    'Java',
-    'Spring',
-    'Spring Boot',
-    'C++',
-    'C#',
-    'PHP',
-    'Laravel',
-    'Ruby',
-    'Rails',
-    'Go',
-    'Rust',
-    'Swift',
-    'Kotlin',
-    'MySQL',
-    'PostgreSQL',
-    'MongoDB',
-    'Redis',
-    'Docker',
-    'Kubernetes',
-    'AWS',
-    'Azure',
-    'GCP',
-    'Git',
-    'GitHub',
-    'GitLab',
-    'Jenkins',
-    'CI/CD',
-  ];
+  // 경력 기술스택 드롭다운 상태 관리
+  const [careerTechStackStates, setCareerTechStackStates] = useState<{
+    [key: number]: { isOpen: boolean; search: string };
+  }>({});
+
+  // 프로젝트 기술스택 드롭다운 상태 관리
+  const [projectTechStackStates, setProjectTechStackStates] = useState<{
+    [key: number]: { isOpen: boolean; search: string };
+  }>({});
+
+  // 교육이력 기술스택 드롭다운 상태 관리
+  const [trainingTechStackStates, setTrainingTechStackStates] = useState<{
+    [key: number]: { isOpen: boolean; search: string };
+  }>({});
+
+  // 메타데이터에서 데이터 추출
+  const techStacks = metaData?.techStacks || [];
+  const degreeLevels = metaData?.degreeLevels || [];
+  const proficiencyLevels = metaData?.proficiencyLevels || [];
+
+  // 로딩 상태 처리
+  if (metaLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-gray-500">메타데이터를 불러오는 중...</div>
+      </div>
+    );
+  }
+
+  if (metaError || !metaData) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="text-red-500">
+          메타데이터를 불러오는데 실패했습니다.
+        </div>
+      </div>
+    );
+  }
 
   // 핸들러 함수들
-  const handleJobFieldToggle = () => setIsJobFieldOpen(!isJobFieldOpen);
   const handleTechStackToggle = () => setIsTechStackOpen(!isTechStackOpen);
 
-  const handleJobFieldSearchChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setJobFieldSearch(e.target.value);
-  };
-
-  const handleTechStackSearchChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    setTechStackSearch(e.target.value);
-  };
-
-  const handleJobFieldSelect = (job: string) => {
-    setDataForm((prev) => ({ ...prev, fieldName: job }));
-    setIsJobFieldOpen(false);
-    setJobFieldSearch('');
-  };
-
-  const handleTechStackSelect = (tech: string) => {
+  const handleTechStackSelect = (tech: any) => {
     // 중복 체크
     const isAlreadySelected = DataForm.techStacks?.some(
-      (stack) => stack.techStackId === TECH_STACKS.indexOf(tech),
+      (stack) => stack.techStackId === tech.id,
     );
     if (!isAlreadySelected) {
       setDataForm((prev) => ({
@@ -513,7 +456,7 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
         techStacks: [
           ...(prev.techStacks || []),
           {
-            techStackId: TECH_STACKS.indexOf(tech),
+            techStackId: tech.id,
             proficiencyLevel: 'BEGINNER',
           },
         ],
@@ -530,18 +473,159 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
     }));
   };
 
-  const filteredJobFields = FieldNameList.filter((job) =>
-    job.toLowerCase().includes(jobFieldSearch.toLowerCase()),
-  );
-
   const getFilteredTechStacks = () => {
-    return TECH_STACKS.filter(
-      (tech) =>
-        tech.toLowerCase().includes(techStackSearch.toLowerCase()) &&
-        !DataForm.techStacks?.some(
-          (stack) => stack.techStackId === TECH_STACKS.indexOf(tech),
-        ),
+    return techStacks.filter(
+      (tech: any) =>
+        tech.name.toLowerCase().includes(techStackSearch.toLowerCase()) &&
+        !DataForm.techStacks?.some((stack) => stack.techStackId === tech.id),
     );
+  };
+
+  // 경력 기술스택 필터링 함수
+  const getFilteredCareerTechStacks = (careerIndex: number, search: string) => {
+    const career = DataForm.careers?.[careerIndex];
+    return techStacks.filter(
+      (tech: any) =>
+        tech.name.toLowerCase().includes(search.toLowerCase()) &&
+        !career?.techStacks?.some((stack) => stack.techStackId === tech.id),
+    );
+  };
+
+  // 프로젝트 기술스택 필터링 함수
+  const getFilteredProjectTechStacks = (
+    projectIndex: number,
+    search: string,
+  ) => {
+    const project = DataForm.projects?.[projectIndex];
+    return techStacks.filter(
+      (tech: any) =>
+        tech.name.toLowerCase().includes(search.toLowerCase()) &&
+        !project?.techStacks?.some((stack) => stack.techStackId === tech.id),
+    );
+  };
+
+  // 교육이력 기술스택 필터링 함수
+  const getFilteredTrainingTechStacks = (
+    trainingIndex: number,
+    search: string,
+  ) => {
+    const training = DataForm.trainings?.[trainingIndex];
+    return techStacks.filter(
+      (tech: any) =>
+        tech.name.toLowerCase().includes(search.toLowerCase()) &&
+        !training?.techStacks?.some((stack) => stack.techStackId === tech.id),
+    );
+  };
+
+  // 경력 기술스택 드롭다운 토글
+  const handleCareerTechStackToggle = (careerIndex: number) => {
+    setCareerTechStackStates((prev) => ({
+      ...prev,
+      [careerIndex]: {
+        isOpen: !prev[careerIndex]?.isOpen,
+        search: prev[careerIndex]?.search || '',
+      },
+    }));
+  };
+
+  // 프로젝트 기술스택 드롭다운 토글
+  const handleProjectTechStackToggle = (projectIndex: number) => {
+    setProjectTechStackStates((prev) => ({
+      ...prev,
+      [projectIndex]: {
+        isOpen: !prev[projectIndex]?.isOpen,
+        search: prev[projectIndex]?.search || '',
+      },
+    }));
+  };
+
+  // 교육이력 기술스택 드롭다운 토글
+  const handleTrainingTechStackToggle = (trainingIndex: number) => {
+    setTrainingTechStackStates((prev) => ({
+      ...prev,
+      [trainingIndex]: {
+        isOpen: !prev[trainingIndex]?.isOpen,
+        search: prev[trainingIndex]?.search || '',
+      },
+    }));
+  };
+
+  // 경력 기술스택 검색 변경
+  const handleCareerTechStackSearchChange = (
+    careerIndex: number,
+    search: string,
+  ) => {
+    setCareerTechStackStates((prev) => ({
+      ...prev,
+      [careerIndex]: {
+        isOpen: prev[careerIndex]?.isOpen || false,
+        search,
+      },
+    }));
+  };
+
+  // 프로젝트 기술스택 검색 변경
+  const handleProjectTechStackSearchChange = (
+    projectIndex: number,
+    search: string,
+  ) => {
+    setProjectTechStackStates((prev) => ({
+      ...prev,
+      [projectIndex]: {
+        isOpen: prev[projectIndex]?.isOpen || false,
+        search,
+      },
+    }));
+  };
+
+  // 교육이력 기술스택 검색 변경
+  const handleTrainingTechStackSearchChange = (
+    trainingIndex: number,
+    search: string,
+  ) => {
+    setTrainingTechStackStates((prev) => ({
+      ...prev,
+      [trainingIndex]: {
+        isOpen: prev[trainingIndex]?.isOpen || false,
+        search,
+      },
+    }));
+  };
+
+  // 경력 기술스택 선택
+  const handleCareerTechStackSelect = (careerIndex: number, tech: any) => {
+    handleAddCareerTechStack(careerIndex, tech);
+    setCareerTechStackStates((prev) => ({
+      ...prev,
+      [careerIndex]: {
+        isOpen: false,
+        search: '',
+      },
+    }));
+  };
+
+  // 프로젝트 기술스택 선택
+  const handleProjectTechStackSelect = (projectIndex: number, tech: any) => {
+    handleAddProjectTechStack(projectIndex, tech);
+    setProjectTechStackStates((prev) => ({
+      ...prev,
+      [projectIndex]: {
+        isOpen: false,
+        search: '',
+      },
+    }));
+  };
+
+  // 교육이력 기술스택 선택
+  const handleTrainingTechStackSelect = (trainingIndex: number, tech: any) => {
+    handleAddTrainingTechStack(trainingIndex, tech);
+    setTrainingTechStackStates((prev) => ({
+      ...prev,
+      [trainingIndex]: {
+        isOpen: false,
+        search: '',
+      },
+    }));
   };
 
   const handleAddEducation = () => {
@@ -562,7 +646,7 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
   };
 
   const handleRemoveEducation = (index: number) => {
-    if ((DataForm.educations?.length || 0) > 1) {
+    if ((DataForm.educations?.length || 0) > 0) {
       setDataForm((prev) => ({
         ...prev,
         educations: prev.educations?.filter((_, i) => i !== index) || [],
@@ -619,6 +703,496 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
       customLinks:
         prev.customLinks?.map((link, i) =>
           i === index ? { ...link, [field]: value } : link,
+        ) || [],
+    }));
+  };
+
+  // 이력서 저장 핸들러 (템플릿 선택 후 저장)
+  const handleSaveResumeWithTemplate = () => {
+    // 필수 필드 검증
+    if (!DataForm.title.trim()) {
+      toast.error('이력서 제목을 입력해주세요.');
+      return;
+    }
+    if (!DataForm.name.trim()) {
+      toast.error('이름을 입력해주세요.');
+      return;
+    }
+    if (!DataForm.email.trim()) {
+      toast.error('이메일을 입력해주세요.');
+      return;
+    }
+    if (!DataForm.phone.trim()) {
+      toast.error('연락처를 입력해주세요.');
+      return;
+    }
+    if (!DataForm.fieldName.trim()) {
+      toast.error('직무 분야를 입력해주세요.');
+      return;
+    }
+
+    // 이력서 필터링
+    // 필수 항목들은 무조건 포함, 선택 항목들은 state가 true이고 내용이 있을 때만 포함
+    // 선택 항목에서 state가 true이지만 내용이 없으면 에러 알림
+    const filteredDataForm: CreateResumeRequest = { ...DataForm };
+
+    try {
+      items.forEach((item) => {
+        // 선택 항목이 활성화되어 있지만 내용이 없는 경우 에러
+        if (!item.required && item.state && !hasContent(item.name)) {
+          throw new Error(`"${item.name}" 항목의 내용을 모두 입력해주세요.`);
+        }
+
+        // 선택 항목이 비활성화된 경우 해당 속성을 제거
+        if (!item.required && !item.state) {
+          switch (item.meta) {
+            case 'introduction':
+              delete filteredDataForm.introduction;
+              break;
+            case 'education':
+              delete filteredDataForm.educations;
+              break;
+            case 'techStack':
+              delete filteredDataForm.techStacks;
+              break;
+            case 'link':
+              delete filteredDataForm.githubUrl;
+              delete filteredDataForm.blogUrl;
+              delete filteredDataForm.notionUrl;
+              delete filteredDataForm.customLinks;
+              break;
+            case 'career':
+              delete filteredDataForm.careers;
+              break;
+            case 'project':
+              delete filteredDataForm.projects;
+              break;
+            case 'training':
+              delete filteredDataForm.trainings;
+              break;
+            case 'additionalInfo':
+              delete filteredDataForm.additionalInfos;
+              break;
+            default:
+              break;
+          }
+        }
+      });
+    } catch (error) {
+      toast.error((error as Error).message);
+      return;
+    }
+
+    // 검증 완료 후 템플릿 선택 모달 열기
+    const handleTemplateSelect = (type: ResumeType) => {
+      const finalDataForm = { ...filteredDataForm, type };
+      saveResumeWithCurrentTemplate(finalDataForm);
+      close();
+    };
+
+    const handleCancel = () => {
+      close();
+    };
+
+    open(
+      <ResumeTemplateModal
+        onSelect={handleTemplateSelect}
+        onCancel={handleCancel}
+      />,
+    );
+  };
+
+  // 템플릿 선택만 하는 함수 (저장 없음)
+  const handleSelectTemplate = () => {
+    showTemplateSelectionModal();
+  };
+
+  // 현재 선택된 템플릿으로 이력서 저장하는 함수
+  const handleSaveResume = () => {
+    // 필수 필드 검증
+    if (!DataForm.title.trim()) {
+      toast.error('이력서 제목을 입력해주세요.');
+      return;
+    }
+    if (!DataForm.name.trim()) {
+      toast.error('이름을 입력해주세요.');
+      return;
+    }
+    if (!DataForm.email.trim()) {
+      toast.error('이메일을 입력해주세요.');
+      return;
+    }
+    if (!DataForm.phone.trim()) {
+      toast.error('연락처를 입력해주세요.');
+      return;
+    }
+    if (!DataForm.fieldName.trim()) {
+      toast.error('직무 분야를 입력해주세요.');
+      return;
+    }
+
+    // 이력서 필터링
+    const filteredDataForm: CreateResumeRequest = { ...DataForm };
+
+    try {
+      items.forEach((item) => {
+        // 선택 항목이 활성화되어 있지만 내용이 없는 경우 에러
+        if (!item.required && item.state && !hasContent(item.name)) {
+          throw new Error(`"${item.name}" 항목의 내용을 모두 입력해주세요.`);
+        }
+
+        // 선택 항목이 비활성화된 경우 해당 속성을 제거
+        if (!item.required && !item.state) {
+          switch (item.meta) {
+            case 'introduction':
+              delete filteredDataForm.introduction;
+              break;
+            case 'education':
+              delete filteredDataForm.educations;
+              break;
+            case 'techStack':
+              delete filteredDataForm.techStacks;
+              break;
+            case 'link':
+              delete filteredDataForm.githubUrl;
+              delete filteredDataForm.blogUrl;
+              delete filteredDataForm.notionUrl;
+              delete filteredDataForm.customLinks;
+              break;
+            case 'career':
+              delete filteredDataForm.careers;
+              break;
+            case 'project':
+              delete filteredDataForm.projects;
+              break;
+            case 'training':
+              delete filteredDataForm.trainings;
+              break;
+            case 'additionalInfo':
+              delete filteredDataForm.additionalInfos;
+              break;
+            default:
+              break;
+          }
+        }
+      });
+    } catch (error) {
+      toast.error((error as Error).message);
+      return;
+    }
+
+    // 현재 FormData의 type을 사용해서 저장
+    saveResumeWithCurrentTemplate(filteredDataForm);
+  };
+
+  // 템플릿 선택 모달 표시
+  const showTemplateSelectionModal = () => {
+    const handleTemplateSelect = (type: ResumeType) => {
+      // FormData의 type만 변경
+      setDataForm((prev) => ({
+        ...prev,
+        type,
+      }));
+      close();
+    };
+
+    const handleCancel = () => {
+      close();
+    };
+
+    open(
+      <ResumeTemplateModal
+        onSelect={handleTemplateSelect}
+        onCancel={handleCancel}
+      />,
+    );
+  };
+
+  // 현재 선택된 템플릿으로 이력서 저장
+  const saveResumeWithCurrentTemplate = (formData: CreateResumeRequest) => {
+    mutation.mutate(formData, {
+      onSuccess: () => {
+        // 성공 토스트는 useCustomMutation의 successMessage에서 처리되므로 중복 방지
+        router.push('/resume'); // 이력서 목록 페이지로 이동
+      },
+      onError: (error: any) => {
+        console.error('이력서 저장 실패:', error);
+        // 에러 토스트는 useCustomMutation에서 처리되므로 중복 방지
+      },
+    });
+  };
+
+  // 경력 관련 핸들러
+  const handleAddCareer = () => {
+    setDataForm((prev) => ({
+      ...prev,
+      careers: [
+        ...(prev.careers || []),
+        {
+          companyName: '',
+          departmentPosition: '',
+          startDate: '',
+          endDate: '',
+          companyDescription: '',
+          mainTasks: '',
+          techStacks: [],
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveCareer = (index: number) => {
+    setDataForm((prev) => ({
+      ...prev,
+      careers: prev.careers?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
+  const handleCareerChange = (index: number, field: string, value: string) => {
+    setDataForm((prev) => ({
+      ...prev,
+      careers:
+        prev.careers?.map((career, i) =>
+          i === index ? { ...career, [field]: value } : career,
+        ) || [],
+    }));
+  };
+
+  // 경력 기술스택 관련 핸들러
+  const handleAddCareerTechStack = (careerIndex: number, tech: any) => {
+    setDataForm((prev) => ({
+      ...prev,
+      careers:
+        prev.careers?.map((career, i) =>
+          i === careerIndex
+            ? {
+                ...career,
+                techStacks: [
+                  ...(career.techStacks || []),
+                  { techStackId: tech.id },
+                ],
+              }
+            : career,
+        ) || [],
+    }));
+  };
+
+  const handleRemoveCareerTechStack = (
+    careerIndex: number,
+    techStackIndex: number,
+  ) => {
+    setDataForm((prev) => ({
+      ...prev,
+      careers:
+        prev.careers?.map((career, i) =>
+          i === careerIndex
+            ? {
+                ...career,
+                techStacks:
+                  career.techStacks?.filter(
+                    (_, idx) => idx !== techStackIndex,
+                  ) || [],
+              }
+            : career,
+        ) || [],
+    }));
+  };
+
+  // 프로젝트 관련 핸들러
+  const handleAddProject = () => {
+    setDataForm((prev) => ({
+      ...prev,
+      projects: [
+        ...(prev.projects || []),
+        {
+          startDate: '',
+          endDate: '',
+          name: '',
+          description: '',
+          deployUrl: '',
+          repositoryUrl: '',
+          detailedDescription: '',
+          projectType: 'PERSONAL',
+          techStacks: [],
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveProject = (index: number) => {
+    setDataForm((prev) => ({
+      ...prev,
+      projects: prev.projects?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
+  const handleProjectChange = (index: number, field: string, value: string) => {
+    setDataForm((prev) => ({
+      ...prev,
+      projects:
+        prev.projects?.map((project, i) =>
+          i === index ? { ...project, [field]: value } : project,
+        ) || [],
+    }));
+  };
+
+  // 프로젝트 기술스택 관련 핸들러
+  const handleAddProjectTechStack = (projectIndex: number, tech: any) => {
+    setDataForm((prev) => ({
+      ...prev,
+      projects:
+        prev.projects?.map((project, i) =>
+          i === projectIndex
+            ? {
+                ...project,
+                techStacks: [
+                  ...(project.techStacks || []),
+                  { techStackId: tech.id },
+                ],
+              }
+            : project,
+        ) || [],
+    }));
+  };
+
+  const handleRemoveProjectTechStack = (
+    projectIndex: number,
+    techStackIndex: number,
+  ) => {
+    setDataForm((prev) => ({
+      ...prev,
+      projects:
+        prev.projects?.map((project, i) =>
+          i === projectIndex
+            ? {
+                ...project,
+                techStacks:
+                  project.techStacks?.filter(
+                    (_, idx) => idx !== techStackIndex,
+                  ) || [],
+              }
+            : project,
+        ) || [],
+    }));
+  };
+
+  // 교육이력 관련 핸들러
+  const handleAddTraining = () => {
+    setDataForm((prev) => ({
+      ...prev,
+      trainings: [
+        ...(prev.trainings || []),
+        {
+          startDate: '',
+          endDate: '',
+          courseName: '',
+          institutionName: '',
+          detailedContent: '',
+          techStacks: [],
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveTraining = (index: number) => {
+    setDataForm((prev) => ({
+      ...prev,
+      trainings: prev.trainings?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
+  const handleTrainingChange = (
+    index: number,
+    field: string,
+    value: string,
+  ) => {
+    setDataForm((prev) => ({
+      ...prev,
+      trainings:
+        prev.trainings?.map((training, i) =>
+          i === index ? { ...training, [field]: value } : training,
+        ) || [],
+    }));
+  };
+
+  // 교육이력 기술스택 관련 핸들러
+  const handleAddTrainingTechStack = (trainingIndex: number, tech: any) => {
+    setDataForm((prev) => ({
+      ...prev,
+      trainings:
+        prev.trainings?.map((training, i) =>
+          i === trainingIndex
+            ? {
+                ...training,
+                techStacks: [
+                  ...(training.techStacks || []),
+                  { techStackId: tech.id },
+                ],
+              }
+            : training,
+        ) || [],
+    }));
+  };
+
+  const handleRemoveTrainingTechStack = (
+    trainingIndex: number,
+    techStackIndex: number,
+  ) => {
+    setDataForm((prev) => ({
+      ...prev,
+      trainings:
+        prev.trainings?.map((training, i) =>
+          i === trainingIndex
+            ? {
+                ...training,
+                techStacks:
+                  training.techStacks?.filter(
+                    (_, idx) => idx !== techStackIndex,
+                  ) || [],
+              }
+            : training,
+        ) || [],
+    }));
+  };
+
+  // 기타사항 관련 핸들러
+  const handleAddAdditionalInfo = () => {
+    setDataForm((prev) => ({
+      ...prev,
+      additionalInfos: [
+        ...(prev.additionalInfos || []),
+        {
+          startDate: '',
+          endDate: '',
+          category: 'AWARD',
+          activityName: '',
+          relatedOrganization: '',
+          detailedContent: '',
+          certificateNumber: '',
+          languageLevel: '',
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveAdditionalInfo = (index: number) => {
+    setDataForm((prev) => ({
+      ...prev,
+      additionalInfos:
+        prev.additionalInfos?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
+  const handleAdditionalInfoChange = (
+    index: number,
+    field: string,
+    value: string,
+  ) => {
+    setDataForm((prev) => ({
+      ...prev,
+      additionalInfos:
+        prev.additionalInfos?.map((info, i) =>
+          i === index ? { ...info, [field]: value } : info,
         ) || [],
     }));
   };
@@ -695,6 +1269,34 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
             </div>
           </div>
 
+          <div className="mb-4">
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+              경력 구분
+            </label>
+            <div className="flex gap-4">
+              {(metaData?.careerTypes || []).map((careerType: any) => (
+                <label key={careerType.value} className="flex items-center">
+                  <input
+                    type="radio"
+                    name="careerType"
+                    value={careerType.value}
+                    checked={DataForm.careerType === careerType.value}
+                    onChange={(e) =>
+                      setDataForm((prev) => ({
+                        ...prev,
+                        careerType: e.target.value as any,
+                      }))
+                    }
+                    className="mr-2"
+                  />
+                  <span className="text-sm text-gray-700">
+                    {careerType.description}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           {items.find((item) => item.name === '간단소개')?.state && (
             <div className="mb-4">
               <label className="mb-1 block text-sm font-medium text-gray-700">
@@ -736,21 +1338,19 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
               <div
                 key={index}
                 className={`relative rounded-lg border border-gray-200 p-4 ${
-                  (DataForm.educations?.length || 0) > 1 ? 'pt-12' : ''
+                  (DataForm.educations?.length || 0) > 0 ? 'pt-12' : ''
                 }`}
               >
-                {(DataForm.educations?.length || 0) > 1 && (
-                  <div className="absolute top-3 right-3 flex gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveEducation(index)}
-                      className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                      title="학력 삭제"
-                    >
-                      <i className="xi-close xi-x"></i>
-                    </button>
-                  </div>
-                )}
+                <div className="absolute top-3 right-3 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveEducation(index)}
+                    className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    title="학력 삭제"
+                  >
+                    <i className="xi-close xi-x"></i>
+                  </button>
+                </div>
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -797,7 +1397,10 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
                         className="w-full cursor-pointer rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                         onClick={() => toggleGraduationStatusDropdown(index)}
                       >
-                        {education.degreeLevel || '학위 수준을 선택하세요'}
+                        {degreeLevels.find(
+                          (degree: any) =>
+                            degree.value === education.degreeLevel,
+                        )?.description || '학위 수준을 선택하세요'}
                         <i className="xi-angle-down absolute top-1/2 right-3 -translate-y-1/2 transform"></i>
                       </div>
                       <AnimatePresence>
@@ -809,21 +1412,18 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
                             transition={{ duration: 0.2 }}
                             className="absolute top-full z-10 mt-1 max-h-60 w-full overflow-y-auto rounded border border-gray-300 bg-white shadow-lg"
                           >
-                            {[
-                              'HIGH_SCHOOL',
-                              'ASSOCIATE',
-                              'BACHELOR',
-                              'MASTER',
-                              'DOCTORATE',
-                            ].map((status) => (
+                            {degreeLevels.map((degree: any) => (
                               <div
-                                key={status}
+                                key={degree.value}
                                 className="cursor-pointer px-3 py-2 text-sm hover:bg-gray-100"
                                 onClick={() =>
-                                  handleGraduationStatusSelect(index, status)
+                                  handleGraduationStatusSelect(
+                                    index,
+                                    degree.value,
+                                  )
                                 }
                               >
-                                {status}
+                                {degree.description}
                               </div>
                             ))}
                           </motion.div>
@@ -962,71 +1562,19 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
       <div className="mb-8 rounded-lg border border-gray-200 p-6">
         <h2 className="mb-4 text-xl font-semibold text-gray-800">개발직무</h2>
 
-        <div className="relative" data-select="job-field">
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">
             직무 분야
           </label>
-          <div className="relative">
-            <motion.button
-              type="button"
-              onClick={handleJobFieldToggle}
-              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-left text-gray-700 shadow-sm transition-all duration-200 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-            >
-              <span
-                className={
-                  DataForm.fieldName ? 'text-gray-900' : 'text-gray-500'
-                }
-              >
-                {DataForm.fieldName || '직무를 선택해주세요'}
-              </span>
-              <motion.span
-                className="absolute right-3 text-gray-400"
-                animate={{ rotate: isJobFieldOpen ? 180 : 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                ▼
-              </motion.span>
-            </motion.button>
-
-            <AnimatePresence>
-              {isJobFieldOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                  transition={{
-                    duration: 0.15,
-                    ease: 'easeOut',
-                  }}
-                  className="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-xl"
-                >
-                  <div className="p-3">
-                    <input
-                      type="text"
-                      placeholder="직무 검색..."
-                      value={jobFieldSearch}
-                      onChange={handleJobFieldSearchChange}
-                      className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                    />
-                  </div>
-                  <div className="max-h-60 overflow-x-hidden overflow-y-auto">
-                    {filteredJobFields.map((job, index) => (
-                      <button
-                        key={job}
-                        type="button"
-                        onClick={() => handleJobFieldSelect(job)}
-                        className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-150 hover:translate-x-1 hover:bg-blue-50 hover:text-blue-700"
-                      >
-                        {job}
-                      </button>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          <input
+            type="text"
+            value={DataForm.fieldName}
+            onChange={(e) =>
+              setDataForm((prev) => ({ ...prev, fieldName: e.target.value }))
+            }
+            placeholder="직무를 입력해주세요 (예: 프론트엔드 개발자)"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
         </div>
       </div>
 
@@ -1035,109 +1583,712 @@ function RightSection({ items, DataForm, setDataForm }: RightSectionProps) {
         <div className="mb-8 rounded-lg border border-gray-200 p-6">
           <h2 className="mb-4 text-xl font-semibold text-gray-800">기술스택</h2>
 
-          <div className="mb-6 space-y-4">
-            <div className="relative" data-select="tech-stack">
-              <label className="mb-2 block text-sm font-semibold text-gray-700">
-                기술스택 선택
-              </label>
-              <div className="relative">
-                <motion.button
-                  type="button"
-                  onClick={handleTechStackToggle}
-                  className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-left text-gray-700 shadow-sm transition-all duration-200 hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <span className="text-gray-500">
-                    기술스택을 검색하여 선택하세요
-                  </span>
-                  <motion.span
-                    className="absolute right-3 text-gray-400"
-                    animate={{ rotate: isTechStackOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    ▼
-                  </motion.span>
-                </motion.button>
-
-                <AnimatePresence>
-                  {isTechStackOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{
-                        duration: 0.15,
-                        ease: 'easeOut',
-                      }}
-                      className="absolute z-50 mt-2 w-full rounded-xl border border-gray-200 bg-white shadow-xl"
-                    >
-                      <div className="border-b border-gray-100 p-3">
-                        <input
-                          type="text"
-                          placeholder="기술스택 검색..."
-                          value={techStackSearch}
-                          onChange={handleTechStackSearchChange}
-                          className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-                        />
-                      </div>
-                      <div className="max-h-60 overflow-x-hidden overflow-y-auto">
-                        {getFilteredTechStacks().map((tech, index) => (
-                          <button
-                            key={tech}
-                            type="button"
-                            onClick={() => handleTechStackSelect(tech)}
-                            className="w-full px-4 py-3 text-left text-sm text-gray-700 transition-all duration-150 hover:translate-x-1 hover:bg-blue-50 hover:text-blue-700"
-                          >
-                            {tech}
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
+          <SearchableDropdown
+            label="기술스택 선택"
+            placeholder="기술스택을 검색하여 선택하세요"
+            searchPlaceholder="기술스택 검색..."
+            options={getFilteredTechStacks().map((tech: any) => ({
+              id: tech.id,
+              name: tech.name,
+            }))}
+            onSelect={handleTechStackSelect}
+            searchValue={techStackSearch}
+            onSearchChange={setTechStackSearch}
+            isOpen={isTechStackOpen}
+            onToggle={handleTechStackToggle}
+            className="mb-6"
+          />
 
           {/* 선택된 기술스택 표시 */}
           {(DataForm.techStacks?.length || 0) > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              transition={{ duration: 0.3 }}
-            >
+            <div>
               <h3 className="mb-2 text-sm font-medium text-gray-700">
                 선택된 기술스택 ({DataForm.techStacks?.length || 0}개)
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {(DataForm.techStacks || []).map((techStack, index) => (
-                  <motion.span
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                    className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800"
-                  >
-                    {TECH_STACKS[techStack.techStackId] ||
-                      `Tech ${techStack.techStackId}`}
-                    <motion.button
-                      type="button"
-                      onClick={() => handleRemoveTechStack(index)}
-                      whileHover={{ scale: 1.2 }}
-                      whileTap={{ scale: 0.8 }}
-                      className="ml-1 text-blue-600 hover:text-blue-800"
-                    >
-                      ×
-                    </motion.button>
-                  </motion.span>
-                ))}
-              </div>
-            </motion.div>
+              <TechStackTags
+                techStacks={DataForm.techStacks || []}
+                allTechStacks={techStacks}
+                onRemove={handleRemoveTechStack}
+                colorScheme="blue"
+              />
+            </div>
           )}
         </div>
       )}
+
+      {/* 경력 섹션 */}
+      {items.find((item) => item.name === '경력')?.state && (
+        <div className="mb-8 rounded-lg border border-gray-200 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">경력</h2>
+            <button
+              type="button"
+              onClick={handleAddCareer}
+              className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+            >
+              + 경력 추가
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {(DataForm.careers || []).map((career, index) => (
+              <div
+                key={index}
+                className={`relative rounded-lg border border-gray-200 p-4 ${
+                  (DataForm.careers?.length || 0) > 0 ? 'pt-12' : ''
+                }`}
+              >
+                <div className="absolute top-3 right-3 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveCareer(index)}
+                    className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    title="경력 삭제"
+                  >
+                    <i className="xi-close xi-x"></i>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="text"
+                      value={career.companyName || ''}
+                      onChange={(e) =>
+                        handleCareerChange(index, 'companyName', e.target.value)
+                      }
+                      placeholder="회사명"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={career.departmentPosition || ''}
+                      onChange={(e) =>
+                        handleCareerChange(
+                          index,
+                          'departmentPosition',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="부서/직책"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="text"
+                      value={career.startDate || ''}
+                      onChange={(e) =>
+                        handleCareerChange(index, 'startDate', e.target.value)
+                      }
+                      placeholder="시작일 (예: 2023.03)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={career.endDate || ''}
+                      onChange={(e) =>
+                        handleCareerChange(index, 'endDate', e.target.value)
+                      }
+                      placeholder="종료일 (예: 2024.02 또는 현재)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <textarea
+                    value={career.mainTasks || ''}
+                    onChange={(e) =>
+                      handleCareerChange(index, 'mainTasks', e.target.value)
+                    }
+                    placeholder="주요 업무 및 성과를 입력하세요"
+                    rows={4}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  <textarea
+                    value={career.companyDescription || ''}
+                    onChange={(e) =>
+                      handleCareerChange(
+                        index,
+                        'companyDescription',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="회사 설명 (선택사항)"
+                    rows={2}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+
+                  {/* 경력 기술스택 선택 */}
+                  <div>
+                    <SearchableDropdown
+                      label="사용 기술스택"
+                      placeholder="기술스택을 검색하여 선택하세요"
+                      searchPlaceholder="기술스택 검색..."
+                      options={getFilteredCareerTechStacks(
+                        index,
+                        careerTechStackStates[index]?.search || '',
+                      ).map((tech: any) => ({
+                        id: tech.id,
+                        name: tech.name,
+                      }))}
+                      onSelect={(tech) =>
+                        handleCareerTechStackSelect(index, tech)
+                      }
+                      searchValue={careerTechStackStates[index]?.search || ''}
+                      onSearchChange={(search) =>
+                        handleCareerTechStackSearchChange(index, search)
+                      }
+                      isOpen={careerTechStackStates[index]?.isOpen || false}
+                      onToggle={() => handleCareerTechStackToggle(index)}
+                    />
+
+                    {/* 선택된 기술스택 표시 */}
+                    <TechStackTags
+                      techStacks={career.techStacks || []}
+                      allTechStacks={techStacks}
+                      onRemove={(techIndex) =>
+                        handleRemoveCareerTechStack(index, techIndex)
+                      }
+                      colorScheme="green"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 프로젝트 섹션 */}
+      {items.find((item) => item.name === '프로젝트')?.state && (
+        <div className="mb-8 rounded-lg border border-gray-200 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">프로젝트</h2>
+            <button
+              type="button"
+              onClick={handleAddProject}
+              className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+            >
+              + 프로젝트 추가
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {(DataForm.projects || []).map((project, index) => (
+              <div
+                key={index}
+                className={`relative rounded-lg border border-gray-200 p-4 ${
+                  (DataForm.projects?.length || 0) > 0 ? 'pt-12' : ''
+                }`}
+              >
+                <div className="absolute top-3 right-3 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveProject(index)}
+                    className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    title="프로젝트 삭제"
+                  >
+                    <i className="xi-close xi-x"></i>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={project.name || ''}
+                    onChange={(e) =>
+                      handleProjectChange(index, 'name', e.target.value)
+                    }
+                    placeholder="프로젝트 제목"
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="text"
+                      value={project.startDate || ''}
+                      onChange={(e) =>
+                        handleProjectChange(index, 'startDate', e.target.value)
+                      }
+                      placeholder="시작일 (예: 2023.03)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={project.endDate || ''}
+                      onChange={(e) =>
+                        handleProjectChange(index, 'endDate', e.target.value)
+                      }
+                      placeholder="종료일 (예: 2024.02 또는 진행중)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="url"
+                      value={project.deployUrl || ''}
+                      onChange={(e) =>
+                        handleProjectChange(index, 'deployUrl', e.target.value)
+                      }
+                      placeholder="배포 URL (선택사항)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="url"
+                      value={project.repositoryUrl || ''}
+                      onChange={(e) =>
+                        handleProjectChange(
+                          index,
+                          'repositoryUrl',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="저장소 URL (선택사항)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <textarea
+                    value={project.description || ''}
+                    onChange={(e) =>
+                      handleProjectChange(index, 'description', e.target.value)
+                    }
+                    placeholder="프로젝트 설명"
+                    rows={3}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  <textarea
+                    value={project.detailedDescription || ''}
+                    onChange={(e) =>
+                      handleProjectChange(
+                        index,
+                        'detailedDescription',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="상세 설명 (선택사항)"
+                    rows={3}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+
+                  {/* 프로젝트 유형 선택 */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      프로젝트 유형
+                    </label>
+                    <div className="flex gap-4">
+                      {(metaData?.projectTypes || []).map(
+                        (projectType: any) => (
+                          <label
+                            key={projectType.value}
+                            className="flex items-center"
+                          >
+                            <input
+                              type="radio"
+                              name={`projectType_${index}`}
+                              value={projectType.value}
+                              checked={
+                                project.projectType === projectType.value
+                              }
+                              onChange={(e) =>
+                                handleProjectChange(
+                                  index,
+                                  'projectType',
+                                  e.target.value,
+                                )
+                              }
+                              className="mr-2"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {projectType.description}
+                            </span>
+                          </label>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 프로젝트 기술스택 선택 */}
+                  <div>
+                    <SearchableDropdown
+                      label="사용 기술스택"
+                      placeholder="기술스택을 검색하여 선택하세요"
+                      searchPlaceholder="기술스택 검색..."
+                      options={getFilteredProjectTechStacks(
+                        index,
+                        projectTechStackStates[index]?.search || '',
+                      ).map((tech: any) => ({
+                        id: tech.id,
+                        name: tech.name,
+                      }))}
+                      onSelect={(tech) =>
+                        handleProjectTechStackSelect(index, tech)
+                      }
+                      searchValue={projectTechStackStates[index]?.search || ''}
+                      onSearchChange={(search) =>
+                        handleProjectTechStackSearchChange(index, search)
+                      }
+                      isOpen={projectTechStackStates[index]?.isOpen || false}
+                      onToggle={() => handleProjectTechStackToggle(index)}
+                    />
+
+                    {/* 선택된 기술스택 표시 */}
+                    <TechStackTags
+                      techStacks={project.techStacks || []}
+                      allTechStacks={techStacks}
+                      onRemove={(techIndex) =>
+                        handleRemoveProjectTechStack(index, techIndex)
+                      }
+                      colorScheme="purple"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 교육이력 섹션 */}
+      {items.find((item) => item.name === '교육이력')?.state && (
+        <div className="mb-8 rounded-lg border border-gray-200 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">교육이력</h2>
+            <button
+              type="button"
+              onClick={handleAddTraining}
+              className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+            >
+              + 교육 추가
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {(DataForm.trainings || []).map((training, index) => (
+              <div
+                key={index}
+                className="relative rounded-lg border border-gray-200 p-4 pt-12"
+              >
+                <div className="absolute top-3 right-3 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTraining(index)}
+                    className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    title="교육이력 삭제"
+                  >
+                    <i className="xi-close xi-x"></i>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={training.courseName || ''}
+                    onChange={(e) =>
+                      handleTrainingChange(index, 'courseName', e.target.value)
+                    }
+                    placeholder="과정명"
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={training.institutionName || ''}
+                    onChange={(e) =>
+                      handleTrainingChange(
+                        index,
+                        'institutionName',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="교육 기관명"
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="text"
+                      value={training.startDate || ''}
+                      onChange={(e) =>
+                        handleTrainingChange(index, 'startDate', e.target.value)
+                      }
+                      placeholder="시작일 (예: 2023-03-01)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={training.endDate || ''}
+                      onChange={(e) =>
+                        handleTrainingChange(index, 'endDate', e.target.value)
+                      }
+                      placeholder="종료일 (예: 2023-06-30)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+                  <textarea
+                    value={training.detailedContent || ''}
+                    onChange={(e) =>
+                      handleTrainingChange(
+                        index,
+                        'detailedContent',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="상세 내용 (선택사항)"
+                    rows={3}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+
+                  {/* 교육이력 기술스택 선택 */}
+                  <div>
+                    <SearchableDropdown
+                      label="관련 기술스택"
+                      placeholder="기술스택을 검색하여 선택하세요"
+                      searchPlaceholder="기술스택 검색..."
+                      options={getFilteredTrainingTechStacks(
+                        index,
+                        trainingTechStackStates[index]?.search || '',
+                      ).map((tech: any) => ({
+                        id: tech.id,
+                        name: tech.name,
+                      }))}
+                      onSelect={(tech) =>
+                        handleTrainingTechStackSelect(index, tech)
+                      }
+                      searchValue={trainingTechStackStates[index]?.search || ''}
+                      onSearchChange={(search) =>
+                        handleTrainingTechStackSearchChange(index, search)
+                      }
+                      isOpen={trainingTechStackStates[index]?.isOpen || false}
+                      onToggle={() => handleTrainingTechStackToggle(index)}
+                    />
+
+                    {/* 선택된 기술스택 표시 */}
+                    <TechStackTags
+                      techStacks={training.techStacks || []}
+                      allTechStacks={techStacks}
+                      onRemove={(techIndex) =>
+                        handleRemoveTrainingTechStack(index, techIndex)
+                      }
+                      colorScheme="orange"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 기타사항 섹션 */}
+      {items.find((item) => item.name === '기타사항')?.state && (
+        <div className="mb-8 rounded-lg border border-gray-200 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-800">기타사항</h2>
+            <button
+              type="button"
+              onClick={handleAddAdditionalInfo}
+              className="rounded-lg border-2 border-dashed border-blue-300 px-4 py-2 text-sm text-blue-600 transition-all duration-150 hover:border-blue-400 hover:bg-blue-50"
+            >
+              + 활동 추가
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {(DataForm.additionalInfos || []).map((info, index) => (
+              <div
+                key={index}
+                className="relative rounded-lg border border-gray-200 p-4 pt-12"
+              >
+                <div className="absolute top-3 right-3 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAdditionalInfo(index)}
+                    className="rounded-full p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    title="기타사항 삭제"
+                  >
+                    <i className="xi-close xi-x"></i>
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={info.activityName || ''}
+                    onChange={(e) =>
+                      handleAdditionalInfoChange(
+                        index,
+                        'activityName',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="활동명/수상명/자격명"
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={info.relatedOrganization || ''}
+                    onChange={(e) =>
+                      handleAdditionalInfoChange(
+                        index,
+                        'relatedOrganization',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="관련 기관/수여처"
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+
+                  {/* 카테고리 선택 */}
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                      활동 유형
+                    </label>
+                    <div className="flex gap-4">
+                      {(metaData?.additionalInfoCategories || []).map(
+                        (category: any) => (
+                          <label
+                            key={category.value}
+                            className="flex items-center"
+                          >
+                            <input
+                              type="radio"
+                              name={`category_${index}`}
+                              value={category.value}
+                              checked={info.category === category.value}
+                              onChange={(e) =>
+                                handleAdditionalInfoChange(
+                                  index,
+                                  'category',
+                                  e.target.value,
+                                )
+                              }
+                              className="mr-2"
+                            />
+                            <span className="text-sm text-gray-700">
+                              {category.description}
+                            </span>
+                          </label>
+                        ),
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="text"
+                      value={info.startDate || ''}
+                      onChange={(e) =>
+                        handleAdditionalInfoChange(
+                          index,
+                          'startDate',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="시작일 (예: 2023-03-01)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={info.endDate || ''}
+                      onChange={(e) =>
+                        handleAdditionalInfoChange(
+                          index,
+                          'endDate',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="종료일 (선택사항)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* 자격증 번호 (자격증인 경우만) */}
+                  {info.category === 'CERTIFICATE' && (
+                    <input
+                      type="text"
+                      value={info.certificateNumber || ''}
+                      onChange={(e) =>
+                        handleAdditionalInfoChange(
+                          index,
+                          'certificateNumber',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="자격증 번호"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  )}
+
+                  {/* 어학 수준 (어학인 경우만) */}
+                  {info.category === 'LANGUAGE' && (
+                    <input
+                      type="text"
+                      value={info.languageLevel || ''}
+                      onChange={(e) =>
+                        handleAdditionalInfoChange(
+                          index,
+                          'languageLevel',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="어학 수준 (예: TOEIC 850점, 회화 가능)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                  )}
+
+                  <textarea
+                    value={info.detailedContent || ''}
+                    onChange={(e) =>
+                      handleAdditionalInfoChange(
+                        index,
+                        'detailedContent',
+                        e.target.value,
+                      )
+                    }
+                    placeholder="상세 내용 (선택사항)"
+                    rows={3}
+                    className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/*현재 템플릿 타입 표시 */}
+      {DataForm.type && (
+        <div className="mb-4 rounded-lg border border-gray-200 p-4 text-center text-sm text-gray-600">
+          현재 선택된 템플릿 :&nbsp;
+          <span className="font-medium">
+            {DataForm.type === 'DEFAULT' ? '클래식' : '모던'}
+          </span>
+        </div>
+      )}
+
+      {/* 저장 버튼 */}
+      <div className="mt-12 flex justify-center gap-4">
+        {/* 템플릿 선택 버튼 */}
+        <motion.button
+          onClick={handleSelectTemplate}
+          disabled={mutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          템플릿 선택
+        </motion.button>
+
+        {/* 이력서 저장 버튼 */}
+        <motion.button
+          onClick={handleSaveResume}
+          disabled={mutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="transform rounded-xl border-2 border-blue-600 bg-white px-8 py-4 text-lg font-semibold text-blue-600 shadow-lg transition-all duration-200 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {mutation.isPending ? '저장 중...' : '이력서 저장'}
+        </motion.button>
+      </div>
     </div>
   );
 }
