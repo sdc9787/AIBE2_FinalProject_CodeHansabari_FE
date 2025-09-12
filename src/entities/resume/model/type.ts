@@ -99,7 +99,7 @@ export interface TechStack {
 // 프로젝트에서 사용하는 기술스택 (용도 포함)
 export interface ProjectTechStack {
   techStackId: number; // 기술 스택 ID
-  usageType: string; // 해당 기술의 사용 용도나 역할 ("백엔드 프레임워크", "프론트엔드")
+  usageType?: string; // 해당 기술의 사용 용도나 역할 ("백엔드 프레임워크", "프론트엔드")
 }
 
 // 커스텀 링크

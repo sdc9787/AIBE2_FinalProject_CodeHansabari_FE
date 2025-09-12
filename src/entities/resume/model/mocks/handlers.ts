@@ -24,7 +24,7 @@ export const resumeHandlers = [
   }),
 
   // 이력서 메타데이터 조회 핸들러
-  http.get('/api/v1/resumes/metadata', () => {
+  http.get('/api/v1/resume-metadata', () => {
     return HttpResponse.json(resumeMetadata);
   }),
 
