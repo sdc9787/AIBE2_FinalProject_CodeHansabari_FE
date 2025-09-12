@@ -1,6 +1,6 @@
 'use client';
 
-import { ResumeDocument } from '@/widgets';
+import { ResumeDocumentEdit } from '@/widgets/resume/ui/resumeEdit';
 
 interface ResumeEditPageProps {
   id: string;
@@ -8,5 +8,5 @@ interface ResumeEditPageProps {
 
 export function ResumeEditPage({ id }: ResumeEditPageProps) {
   const resumeId = parseInt(id, 10);
-  return <ResumeDocument />;
+  return <ResumeDocumentEdit resumeId={resumeId} />;
 }
