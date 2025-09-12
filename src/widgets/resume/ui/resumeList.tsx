@@ -35,7 +35,7 @@ export function ResumeList() {
   };
 
   const handleCreateNew = () => {
-    router.push('/resume/create');
+    router.push('/resume/document');
   };
 
   const handleMenuToggle = (resumeId: number, event: React.MouseEvent) => {

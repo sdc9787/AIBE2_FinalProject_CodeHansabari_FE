@@ -5,7 +5,6 @@ import {
   useResumeMetadata,
   ResumeType,
   useResumeDetail,
-  UpdateResumeRequest,
 } from '@/entities';
 import { useCreateResumeMutation, useUpdateResumeMutation } from '@/features';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
@@ -30,13 +29,6 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
     isError: detailError,
     isLoading: detailLoading,
   } = useResumeDetail(resumeId);
-
-  // 메타 데이터 api (not used directly for items, kept for context)
-  const {
-    data: metaData,
-    isError: metaError,
-    isLoading: metaLoading,
-  } = useResumeMetadata();
 
   const [DataForm, setDataForm] = useState<CreateResumeRequest>({
     title: '',
@@ -202,6 +194,14 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
               ],
         customLinks: resumeDetailData.customLinks || [],
       });
+
+      // 이력서 값이 있을때 item state 자동 토글
+      setItems((prevItems) =>
+        prevItems.map((item) => ({
+          ...item,
+          state: hasContent(item.name, resumeDetailData) ? true : item.state,
+        })),
+      );
     }
   }, [resumeDetailData]);
 
@@ -219,7 +219,10 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
   ]);
 
   // 항목에 실제 내용이 있는지 확인하는 함수 (필수 속성들이 모두 있을 때만 true)
-  const hasContent = (itemName: string): boolean => {
+  const hasContent = (
+    itemName: string,
+    DataForm: CreateResumeRequest,
+  ): boolean => {
     const allHaveProps = (arr: any[], props: string[]) => {
       if (!Array.isArray(arr) || arr.length === 0) return false;
       return arr.every((it) =>
@@ -320,22 +323,19 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
     );
   };
 
-  if (metaLoading) return <div>Loading...</div>;
-  if (metaError || !metaData) return <div>No data</div>;
-
   return (
-    <div className="mx-auto max-w-7xl p-8">
+    <div className="mx-auto mb-30 max-w-7xl">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         {/* 좌측 - 항목 편집 */}
         <div className="lg:col-span-1">
-          <div className="sticky top-8 rounded-2xl border border-white/20 bg-white/95 p-4 shadow-xl backdrop-blur-sm">
+          <div className="sticky top-30 rounded-2xl border border-white/20 bg-white/95 p-4 shadow-xl backdrop-blur-sm">
             <h2 className="mb-4 text-lg font-bold text-gray-800">항목 편집</h2>
 
             {/* 항목 편집 컨테이너 (분리된 함수 호출) */}
             <LeftSection
               items={items}
               setItems={setItems}
-              hasContent={hasContent}
+              hasContent={(name) => hasContent(name, DataForm)}
             />
 
             {/* 선택된 항목 수 표시 */}
@@ -346,7 +346,7 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
                   <span className="font-semibold">
                     {
                       items.filter(
-                        (item) => hasContent(item.name) && item.state,
+                        (item) => hasContent(item.name, DataForm) && item.state,
                       ).length
                     }
                   </span>
@@ -391,8 +391,9 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
               items={items}
               DataForm={DataForm}
               setDataForm={setDataForm}
-              hasContent={hasContent}
+              hasContent={(name) => hasContent(name, DataForm)}
               resumeId={resumeId}
+              editLoading={detailLoading}
             />
           </div>
         </div>
@@ -486,6 +487,7 @@ type RightSectionProps = {
   setDataForm: Dispatch<SetStateAction<CreateResumeRequest>>;
   hasContent: (name: string) => boolean;
   resumeId: number;
+  editLoading: boolean;
 };
 
 function RightSection({
@@ -494,6 +496,7 @@ function RightSection({
   setDataForm,
   hasContent,
   resumeId,
+  editLoading,
 }: RightSectionProps) {
   // 메타데이터 가져오기
   const {
@@ -504,15 +507,10 @@ function RightSection({
   const router = useRouter();
   const { open, close } = useModalStore();
 
-  // 이력서 생성/수정 mutation
-  const createMutation = useCreateResumeMutation({ page: 0, size: 10 });
   const updateMutation = useUpdateResumeMutation({
     params: { page: 0, size: 10 },
     resumeId: resumeId || 0,
   });
-
-  // edit 모드인지 확인
-  const isEditMode = !!resumeId;
 
   // 상태 관리
   const [isTechStackOpen, setIsTechStackOpen] = useState(false);
@@ -542,12 +540,12 @@ function RightSection({
   const proficiencyLevels = metaData?.proficiencyLevels || [];
 
   // 로딩 상태 처리
-  if (metaLoading || isEditMode) {
+  if (metaLoading || editLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="text-gray-500">
           {metaLoading && '메타데이터를 불러오는 중...'}
-          {isEditMode && '이력서 정보를 불러오는 중...'}
+          {editLoading && '이력서 정보를 불러오는 중...'}
         </div>
       </div>
     );
@@ -1031,7 +1029,7 @@ function RightSection({
 
   // 현재 선택된 템플릿으로 이력서 저장
   const saveResumeWithCurrentTemplate = (formData: CreateResumeRequest) => {
-    const mutation = isEditMode ? updateMutation : createMutation;
+    const mutation = updateMutation;
 
     mutation.mutate(formData, {
       onSuccess: () => {
@@ -1039,7 +1037,7 @@ function RightSection({
         router.push('/resume'); // 이력서 목록 페이지로 이동
       },
       onError: (error: any) => {
-        console.error(`이력서 ${isEditMode ? '수정' : '저장'} 실패:`, error);
+        console.error(`이력서 ${editLoading ? '수정' : '저장'} 실패:`, error);
         // 에러 토스트는 useCustomMutation에서 처리되므로 중복 방지
       },
     });
@@ -2393,7 +2391,7 @@ function RightSection({
         {/* 템플릿 선택 버튼 */}
         <motion.button
           onClick={handleSelectTemplate}
-          disabled={createMutation.isPending || updateMutation.isPending}
+          disabled={updateMutation.isPending}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -2404,14 +2402,14 @@ function RightSection({
         {/* 이력서 저장 버튼 */}
         <motion.button
           onClick={handleSaveResume}
-          disabled={createMutation.isPending || updateMutation.isPending}
+          disabled={updateMutation.isPending}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="transform rounded-xl border-2 border-blue-600 bg-white px-8 py-4 text-lg font-semibold text-blue-600 shadow-lg transition-all duration-200 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {createMutation.isPending || updateMutation.isPending
+          {updateMutation.isPending
             ? '저장 중...'
-            : isEditMode
+            : editLoading
               ? '이력서 수정'
               : '이력서 저장'}
         </motion.button>

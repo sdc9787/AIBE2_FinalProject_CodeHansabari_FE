@@ -217,11 +217,11 @@ export function ResumeDocument() {
   if (metaError || !metaData) return <div>No data</div>;
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
+    <div className="mx-auto mb-30 max-w-7xl">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
         {/* 좌측 - 항목 편집 */}
         <div className="lg:col-span-1">
-          <div className="sticky top-8 rounded-2xl border border-white/20 bg-white/95 p-4 shadow-xl backdrop-blur-sm">
+          <div className="sticky top-30 rounded-2xl border border-white/20 bg-white/95 p-4 shadow-xl backdrop-blur-sm">
             <h2 className="mb-4 text-lg font-bold text-gray-800">항목 편집</h2>
 
             {/* 항목 편집 컨테이너 (분리된 함수 호출) */}
