@@ -36,7 +36,7 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
     name: '',
     email: '',
     phone: '',
-    birthYear: 2000,
+    birthYear: 0,
     careerType: 'FRESHMAN',
     fieldName: '',
     introduction: '',
@@ -1342,7 +1342,7 @@ function RightSection({
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                생년월일(연도)
+                나이(연도)
               </label>
               <input
                 type="number"
@@ -1509,7 +1509,7 @@ function RightSection({
                           e.target.value,
                         )
                       }
-                      placeholder="졸업일 (예: 2022.02)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     {/* 졸업 상태 선택 */}
@@ -1797,21 +1797,21 @@ function RightSection({
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={career.startDate || ''}
                       onChange={(e) =>
                         handleCareerChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023.03)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={career.endDate || ''}
                       onChange={(e) =>
                         handleCareerChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2024.02 또는 현재)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -1925,21 +1925,21 @@ function RightSection({
                   />
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={project.startDate || ''}
                       onChange={(e) =>
                         handleProjectChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023.03)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={project.endDate || ''}
                       onChange={(e) =>
                         handleProjectChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2024.02 또는 진행중)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>

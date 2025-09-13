@@ -31,7 +31,7 @@ export function ResumeDocument() {
     name: '',
     email: '',
     phone: '',
-    birthYear: 2000,
+    birthYear: 0,
     careerType: 'FRESHMAN',
     fieldName: '',
     introduction: '',
@@ -99,17 +99,24 @@ export function ResumeDocument() {
   });
 
   // Initial item list (static mapping to DataForm fields)
-  const [items, setItems] = useState<ItemType[]>([
-    { name: '프로필', required: true, state: true, meta: 'profile' },
-    { name: '간단소개', required: false, state: false, meta: 'introduction' },
-    { name: '학력', required: false, state: false, meta: 'education' },
-    { name: '기술스택', required: false, state: false, meta: 'techStack' },
-    { name: '링크', required: false, state: false, meta: 'link' },
-    { name: '경력', required: false, state: false, meta: 'career' },
-    { name: '프로젝트', required: false, state: false, meta: 'project' },
-    { name: '교육이력', required: false, state: false, meta: 'training' },
-    { name: '기타사항', required: false, state: false, meta: 'additionalInfo' },
-  ]);
+  const [items, setItems] = useState<ItemType[]>(
+    [
+      { name: '프로필', required: true, state: true, meta: 'profile' },
+      { name: '간단소개', required: false, state: false, meta: 'introduction' },
+      { name: '학력', required: false, state: false, meta: 'education' },
+      { name: '기술스택', required: false, state: false, meta: 'techStack' },
+      { name: '링크', required: false, state: false, meta: 'link' },
+      { name: '경력', required: false, state: false, meta: 'career' },
+      { name: '프로젝트', required: false, state: false, meta: 'project' },
+      { name: '교육이력', required: false, state: false, meta: 'training' },
+      {
+        name: '기타사항',
+        required: false,
+        state: false,
+        meta: 'additionalInfo',
+      },
+    ].map((it) => ({ ...it, state: true })),
+  );
 
   // 항목에 실제 내용이 있는지 확인하는 함수 (필수 속성들이 모두 있을 때만 true)
   const hasContent = (itemName: string): boolean => {
@@ -1221,7 +1228,7 @@ function RightSection({
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                생년월일(연도)
+                나이(연도)
               </label>
               <input
                 type="number"
@@ -1388,7 +1395,7 @@ function RightSection({
                           e.target.value,
                         )
                       }
-                      placeholder="졸업일 (예: 2022.02)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     {/* 졸업 상태 선택 */}
@@ -1676,21 +1683,21 @@ function RightSection({
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={career.startDate || ''}
                       onChange={(e) =>
                         handleCareerChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023.03)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={career.endDate || ''}
                       onChange={(e) =>
                         handleCareerChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2024.02 또는 현재)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -1804,21 +1811,21 @@ function RightSection({
                   />
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={project.startDate || ''}
                       onChange={(e) =>
                         handleProjectChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023.03)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={project.endDate || ''}
                       onChange={(e) =>
                         handleProjectChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2024.02 또는 진행중)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -2004,21 +2011,21 @@ function RightSection({
                   />
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={training.startDate || ''}
                       onChange={(e) =>
                         handleTrainingChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023-03-01)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={training.endDate || ''}
                       onChange={(e) =>
                         handleTrainingChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2023-06-30)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -2174,7 +2181,7 @@ function RightSection({
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={info.startDate || ''}
                       onChange={(e) =>
                         handleAdditionalInfoChange(
@@ -2183,11 +2190,11 @@ function RightSection({
                           e.target.value,
                         )
                       }
-                      placeholder="시작일 (예: 2023-03-01)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={info.endDate || ''}
                       onChange={(e) =>
                         handleAdditionalInfoChange(
@@ -2196,7 +2203,7 @@ function RightSection({
                           e.target.value,
                         )
                       }
-                      placeholder="종료일 (선택사항)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
