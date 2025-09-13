@@ -1,5 +1,4 @@
-'use client';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Document,
   Page,
@@ -12,6 +11,47 @@ import {
 } from '@react-pdf/renderer';
 import { CreateResumeRequest, ResumeMetadata } from '@/entities';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// 한글 폰트 등록 (Noto Sans KR - 로컬 파일 사용)
+// 주의: public/fonts 폴더에 한글을 지원하는 폰트 파일을 넣어야 합니다.
+// 예: public/fonts/NotoSansKR-Regular.otf, public/fonts/NotoSansKR-Bold.otf
+// NEXT_PUBLIC_APP_URL 환경변수를 사용하여 기본 URL을 가져옵니다.
+Font.register({
+  family: 'NotoSansKR',
+  fonts: [
+    {
+      src: `/font/NotoSansKR-Bold.ttf`,
+      fontWeight: 'bold',
+    },
+    {
+      src: `/font/NotoSansKR-Light.ttf`,
+      fontWeight: 'light',
+    },
+    {
+      src: `/font/NotoSansKR-Medium.ttf`,
+      fontWeight: 'medium',
+    },
+    {
+      src: `/font/NotoSansKR-Regular.ttf`,
+      fontWeight: 'normal',
+    },
+    {
+      src: `/font/NotoSansKR-SemiBold.ttf`,
+      fontWeight: 'semibold',
+    },
+    {
+      src: `/font/NotoSansKR-Thin.ttf`,
+      fontWeight: 'thin',
+    },
+  ],
+});
+
+// XEIcon 폰트 등록 (public/xeicon 폴더 안의 폰트 파일 사용)
+// public/xeicon/fonts/xeicon.ttf 파일이 존재함
+// Font.register({
+//   family: 'xeicon',
+//   src: `/xeicon/fonts/xeicon.ttf`,
+// });
 
 // 클래식 스타일 정의
 const classicStyles = StyleSheet.create({
@@ -414,11 +454,11 @@ const ResumePDFDocument = ({
               marginBottom: 1,
             }}
           >
-            <Text
+            {/* <Text
               style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
             >
               {'\uEA07'}
-            </Text>
+            </Text> */}
             <Text style={styles.contactInfo}>{resumeData.email}</Text>
           </View>
 
@@ -430,19 +470,19 @@ const ResumePDFDocument = ({
               marginBottom: 1,
             }}
           >
-            <Text
+            {/* <Text
               style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
             >
               {'\uE9D3'}
-            </Text>
+            </Text> */}
             <Text style={{ ...styles.contactInfo, marginRight: 10 }}>
               {resumeData.phone}
             </Text>
-            <Text
+            {/* <Text
               style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
             >
               {'\uE9A0'}
-            </Text>
+            </Text> */}
             <Text style={styles.contactInfo}>{resumeData.birthYear}년생</Text>
           </View>
           <View
@@ -693,30 +733,6 @@ export function ResumePreviewModal({
   DataForm,
   MetaData,
 }: ResumePreviewModalProps) {
-  // Register fonts on the client only to avoid server-side import/runtime errors
-  useEffect(() => {
-    try {
-      // 한글 폰트 등록 (Noto Sans KR - 로컬 파일 사용)
-      Font.register({
-        family: 'NotoSansKR',
-        fonts: [
-          { src: `/font/NotoSansKR-Bold.ttf`, fontWeight: 'bold' },
-          { src: `/font/NotoSansKR-Light.ttf`, fontWeight: 'light' },
-          { src: `/font/NotoSansKR-Medium.ttf`, fontWeight: 'medium' },
-          { src: `/font/NotoSansKR-Regular.ttf`, fontWeight: 'normal' },
-          { src: `/font/NotoSansKR-SemiBold.ttf`, fontWeight: 'semibold' },
-          { src: `/font/NotoSansKR-Thin.ttf`, fontWeight: 'thin' },
-        ],
-      });
-
-      // XEIcon 폰트 등록 (public/xeicon 폴더 안의 폰트 파일 사용)
-      Font.register({ family: 'xeicon', src: `/xeicon/fonts/xeicon.ttf` });
-    } catch (e) {
-      // If registration fails (e.g., SSR or unsupported env), ignore silently
-      // console.warn('Font registration failed', e);
-    }
-  }, []);
-
   // 파일명: 제목(title) 또는 이름(name)을 사용
   const fileName = `${(DataForm?.title || DataForm?.name || 'resume')
     .toString()
