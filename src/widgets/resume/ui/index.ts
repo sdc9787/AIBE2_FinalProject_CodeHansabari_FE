@@ -5,3 +5,4 @@ export { ResumeList } from './resumeList';
 // export { ResumeDocument } from './resumeDocument';
 // export { ResumeSidebar } from './resumeSidebar';
 export * from './resumeDocument';
+export { ResumePreviewModal } from './ResumePreviewModal';

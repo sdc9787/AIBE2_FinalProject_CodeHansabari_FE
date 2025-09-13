@@ -9,6 +9,7 @@ import { SearchableDropdown, TechStackTags, useModalStore } from '@/shared';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { ResumeTemplateModal } from './ResumeTemplateModal';
+import { ResumePreviewModal } from './ResumePreviewModal';
 
 type ItemType = {
   name: string;
@@ -812,6 +813,10 @@ function RightSection({
   // 템플릿 선택만 하는 함수 (저장 없음)
   const handleSelectTemplate = () => {
     showTemplateSelectionModal();
+  };
+
+  const handlePreview = () => {
+    open(<ResumePreviewModal onClose={close} DataForm={DataForm} />);
   };
 
   // 현재 선택된 템플릿으로 이력서 저장하는 함수
@@ -2272,8 +2277,17 @@ function RightSection({
         </div>
       )}
 
-      {/* 저장 버튼 */}
       <div className="mt-12 flex justify-center gap-4">
+        {/*미리보기 버튼 */}
+        <motion.button
+          onClick={handlePreview}
+          disabled={mutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          미리보기
+        </motion.button>
         {/* 템플릿 선택 버튼 */}
         <motion.button
           onClick={handleSelectTemplate}
