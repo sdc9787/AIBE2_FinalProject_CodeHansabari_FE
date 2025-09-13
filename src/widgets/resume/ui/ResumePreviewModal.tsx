@@ -18,19 +18,34 @@ import { motion, AnimatePresence } from 'framer-motion';
 // 한글 폰트 등록 (Noto Sans KR - 로컬 파일 사용)
 // 주의: public/fonts 폴더에 한글을 지원하는 폰트 파일을 넣어야 합니다.
 // 예: public/fonts/NotoSansKR-Regular.otf, public/fonts/NotoSansKR-Bold.otf
-const _baseOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+// NEXT_PUBLIC_APP_URL 환경변수를 사용하여 기본 URL을 가져옵니다.
 Font.register({
   family: 'NotoSansKR',
   fonts: [
-    { src: `${_baseOrigin}/font/NotoSansKR-Bold.ttf`, fontWeight: 'bold' },
-    { src: `${_baseOrigin}/font/NotoSansKR-Light.ttf`, fontWeight: 'light' },
-    { src: `${_baseOrigin}/font/NotoSansKR-Medium.ttf`, fontWeight: 'medium' },
-    { src: `${_baseOrigin}/font/NotoSansKR-Regular.ttf`, fontWeight: 'normal' },
     {
-      src: `${_baseOrigin}/font/NotoSansKR-SemiBold.ttf`,
+      src: `${process.env.NEXT_PUBLIC_APP_URL}/font/NotoSansKR-Bold.ttf`,
+      fontWeight: 'bold',
+    },
+    {
+      src: `${process.env.NEXT_PUBLIC_APP_URL}/font/NotoSansKR-Light.ttf`,
+      fontWeight: 'light',
+    },
+    {
+      src: `${process.env.NEXT_PUBLIC_APP_URL}/font/NotoSansKR-Medium.ttf`,
+      fontWeight: 'medium',
+    },
+    {
+      src: `${process.env.NEXT_PUBLIC_APP_URL}/font/NotoSansKR-Regular.ttf`,
+      fontWeight: 'normal',
+    },
+    {
+      src: `${process.env.NEXT_PUBLIC_APP_URL}/font/NotoSansKR-SemiBold.ttf`,
       fontWeight: 'semibold',
     },
-    { src: `${_baseOrigin}/font/NotoSansKR-Thin.ttf`, fontWeight: 'thin' },
+    {
+      src: `${process.env.NEXT_PUBLIC_APP_URL}/font/NotoSansKR-Thin.ttf`,
+      fontWeight: 'thin',
+    },
   ],
 });
 
@@ -38,7 +53,7 @@ Font.register({
 // public/xeicon/fonts/xeicon.ttf 파일이 존재함
 Font.register({
   family: 'xeicon',
-  src: `${_baseOrigin}/xeicon/fonts/xeicon.ttf`,
+  src: `${process.env.NEXT_PUBLIC_APP_URL}/xeicon/fonts/xeicon.ttf`,
 });
 
 // 클래식 스타일 정의
