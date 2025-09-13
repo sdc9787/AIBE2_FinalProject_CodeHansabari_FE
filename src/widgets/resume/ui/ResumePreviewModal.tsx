@@ -8,6 +8,7 @@ import {
   Font,
   PDFViewer,
   PDFDownloadLink,
+  Image,
 } from '@react-pdf/renderer';
 import { CreateResumeRequest, ResumeMetadata } from '@/entities';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -454,11 +455,10 @@ const ResumePDFDocument = ({
               marginBottom: 1,
             }}
           >
-            {/* <Text
-              style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
-            >
-              {'\uEA07'}
-            </Text> */}
+            <Image
+              src="/image/mail.png"
+              style={{ width: 12, height: 12, marginRight: 6 }}
+            />
             <Text style={styles.contactInfo}>{resumeData.email}</Text>
           </View>
 
@@ -470,19 +470,18 @@ const ResumePDFDocument = ({
               marginBottom: 1,
             }}
           >
-            {/* <Text
-              style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
-            >
-              {'\uE9D3'}
-            </Text> */}
+            <Image
+              src="/image/phone.png"
+              style={{ width: 12, height: 12, marginRight: 6 }}
+            />
             <Text style={{ ...styles.contactInfo, marginRight: 10 }}>
               {resumeData.phone}
             </Text>
-            {/* <Text
-              style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
-            >
-              {'\uE9A0'}
-            </Text> */}
+
+            <Image
+              src="/image/calendar.png"
+              style={{ width: 12, height: 12, marginRight: 6 }}
+            />
             <Text style={styles.contactInfo}>{resumeData.birthYear}년생</Text>
           </View>
           <View
