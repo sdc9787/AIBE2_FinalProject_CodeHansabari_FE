@@ -7,11 +7,12 @@ import {
   Text,
   View,
   StyleSheet,
-  PDFDownloadLink,
   Font,
   PDFViewer,
+  PDFDownloadLink,
+  Image,
 } from '@react-pdf/renderer';
-import { CreateResumeRequest } from '@/entities';
+import { CreateResumeRequest, ResumeMetadata } from '@/entities';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // 한글 폰트 등록 (Noto Sans KR - 로컬 파일 사용)
@@ -29,6 +30,13 @@ Font.register({
   ],
 });
 
+// XEIcon 폰트 등록 (public/xeicon 폴더 안의 폰트 파일 사용)
+// public/xeicon/fonts/xeicon.ttf 파일이 존재함
+Font.register({
+  family: 'xeicon',
+  src: '/xeicon/fonts/xeicon.ttf',
+});
+
 // 클래식 스타일 정의
 const classicStyles = StyleSheet.create({
   page: {
@@ -38,215 +46,462 @@ const classicStyles = StyleSheet.create({
     fontFamily: 'NotoSansKR',
   },
   section: {
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 25,
-    textAlign: 'center',
-    color: '#1a202c',
-    borderBottomWidth: 2,
-    borderBottomColor: '#2d3748',
-    paddingBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    color: '#2d3748',
-    borderBottomWidth: 1,
-    borderBottomColor: '#4a5568',
-    paddingBottom: 6,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  text: {
-    fontSize: 12,
-    lineHeight: 1.6,
-    marginBottom: 6,
-    color: '#2d3748',
-  },
-  boldText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#1a202c',
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 10,
-  },
-  leftColumn: {
-    width: '25%',
-  },
-  rightColumn: {
-    width: '75%',
-  },
-  itemContainer: {
     marginBottom: 15,
-    paddingBottom: 10,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#a0aec0',
   },
-  techStack: {
-    fontSize: 10,
-    backgroundColor: '#edf2f7',
-    color: '#2d3748',
-    padding: 4,
-    margin: 2,
-    borderRadius: 2,
-  },
-  techStackContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 8,
-  },
-});
-
-// 모던 스타일 정의
-const modernStyles = StyleSheet.create({
-  page: {
-    flexDirection: 'column',
-    backgroundColor: '#FFFFFF',
-    padding: 30,
-    fontFamily: 'NotoSansKR',
-  },
-  section: {
-    marginBottom: 16,
-  },
+  // 이름 타이틀
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 8,
     textAlign: 'left',
-    color: '#1e40af',
-    borderLeftWidth: 4,
-    borderLeftColor: '#3b82f6',
-    paddingLeft: 15,
+    color: '#374151',
   },
+  // 연락처 정보
+  contactInfo: {
+    fontSize: 11,
+    lineHeight: 1.3,
+    marginBottom: 2,
+    color: '#374151',
+  },
+  // 섹션 제목 (개발 직무, 기술 스택 등)
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#1e40af',
-    backgroundColor: '#eff6ff',
-    padding: 8,
-    borderRadius: 4,
+    marginBottom: 8,
+    marginTop: 15,
+    color: '#374151',
+    backgroundColor: '#f3f4f6',
+    padding: 6,
+    borderRadius: 3,
   },
+  // 일반 텍스트
   text: {
+    fontSize: 11,
+    lineHeight: 1.4,
+    marginBottom: 3,
+    color: '#000000',
+  },
+  // 볼드 텍스트
+  boldText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 3,
+  },
+  // 소개 텍스트 (여러 줄)
+  introductionText: {
     fontSize: 11,
     lineHeight: 1.5,
-    marginBottom: 5,
-    color: '#4b5563',
+    marginBottom: 4,
+    color: '#000000',
   },
-  boldText: {
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: '#1f2937',
-  },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  leftColumn: {
-    width: '30%',
-  },
-  rightColumn: {
-    width: '70%',
-  },
-  itemContainer: {
-    marginBottom: 12,
-    paddingBottom: 8,
-    paddingLeft: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: '#e5e7eb',
-  },
-  techStack: {
-    fontSize: 10,
-    backgroundColor: '#dbeafe',
-    color: '#1d4ed8',
-    padding: 3,
-    margin: 2,
-    borderRadius: 12,
-  },
+  // 기술 스택 컨테이너
   techStackContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: 5,
+    marginBottom: 10,
+  },
+  // 개별 기술 스택
+  techStack: {
+    fontSize: 10,
+    backgroundColor: '#f3f4f6',
+    color: '#374151',
+    paddingTop: 6,
+    paddingBottom: 6,
+    paddingLeft: 10,
+    paddingRight: 10,
+    marginRight: 8,
+    marginBottom: 4,
+    borderColor: '#e4e4e4',
+    borderRadius: 100,
+    borderWidth: 1,
+  },
+  // 개발 직무 배지 (기술스택과 유사한 스타일)
+  jobBadge: {
+    fontSize: 10,
+    backgroundColor: '#f3f4f6',
+    color: '#374151',
+    paddingTop: 6,
+    paddingBottom: 6,
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderColor: '#e4e4e4',
+    borderRadius: 100,
+    borderWidth: 1,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  // 프로젝트/경력 아이템
+  itemContainer: {
+    marginBottom: 15,
+    paddingLeft: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#c4c4c4',
+  },
+  // 프로젝트명, 회사명 등
+  itemTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: 4,
+  },
+  // 기간, 날짜
+  dateText: {
+    fontSize: 10,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  // 설명 텍스트
+  descriptionText: {
+    fontSize: 10,
+    lineHeight: 1.4,
+    color: '#000000',
+    marginBottom: 3,
+  },
+  // 학력 정보 행
+  educationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  // 좌측 정보 (학교명, 전공)
+  educationLeft: {
+    flex: 1,
+  },
+  // 우측 정보 (GPA, 졸업일)
+  educationRight: {
+    alignItems: 'flex-end',
+  },
+  // 경력 요약
+  careerSummary: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  // 프로젝트 메타 정보
+  projectMeta: {
+    fontSize: 9,
+    color: '#6b7280',
+    marginBottom: 3,
+  },
+  // 링크 정보
+  linkText: {
+    fontSize: 10,
+    color: '#1d4ed8',
+    marginBottom: 2,
+  },
+  // 링크 행 (왼쪽 라벨 | 오른쪽 URL)
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  linkLabel: {
+    fontSize: 10,
+    color: '#374151',
+  },
+  linkUrl: {
+    fontSize: 10,
+    color: '#374151',
+    fontWeight: 'bold',
+    textDecoration: 'underline',
+  },
+  linkDivider: {
+    borderBottomWidth: 0.5,
+    borderColor: '#e5e7eb',
+    marginTop: 6,
+  },
+});
+
+// 모던 스타일 정의 (클래식 기반 + 컬러)
+const modernStyles = StyleSheet.create({
+  page: {
+    flexDirection: 'column',
+    backgroundColor: '#FFFFFF',
+    padding: 40,
+    fontFamily: 'NotoSansKR',
+  },
+  section: {
+    marginBottom: 15,
+  },
+  // 이름 타이틀 - 블루 컬러
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'left',
+    color: '#1e40af',
+  },
+  // 연락처 정보
+  contactInfo: {
+    fontSize: 11,
+    lineHeight: 1.3,
+    marginBottom: 2,
+    color: '#374151',
+  },
+  // 섹션 제목 - 블루 컬러 + 배경
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    marginTop: 15,
+    color: '#1e40af',
+    backgroundColor: '#f0f9ff',
+    padding: 6,
+    borderRadius: 3,
+  },
+  // 일반 텍스트
+  text: {
+    fontSize: 11,
+    lineHeight: 1.4,
+    marginBottom: 3,
+    color: '#374151',
+  },
+  // 볼드 텍스트
+  boldText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 3,
+  },
+  // 소개 텍스트
+  introductionText: {
+    fontSize: 11,
+    lineHeight: 1.5,
+    marginBottom: 4,
+    color: '#374151',
+  },
+  // 기술 스택 컨테이너
+  techStackContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  // 개별 기술 스택 - 블루 배경
+  techStack: {
+    fontSize: 10,
+    backgroundColor: '#dbeafe',
+    color: '#1d4ed8',
+    paddingTop: 6,
+    paddingBottom: 6,
+    paddingLeft: 10,
+    paddingRight: 10,
+    marginRight: 8,
+    marginBottom: 4,
+    borderRadius: 100,
+  },
+  // 개발 직무 배지 (모던 스타일)
+  jobBadge: {
+    fontSize: 10,
+    backgroundColor: '#dbeafe',
+    color: '#1d4ed8',
+    paddingTop: 6,
+    paddingBottom: 6,
+    paddingLeft: 10,
+    paddingRight: 10,
+    marginRight: 8,
+    marginBottom: 4,
+    borderRadius: 100,
+    alignSelf: 'flex-start',
+    marginTop: 4,
+  },
+  // 프로젝트/경력 아이템
+  itemContainer: {
+    marginBottom: 15,
+    paddingLeft: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: '#3b82f6',
+  },
+  // 프로젝트명, 회사명 등
+  itemTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: 4,
+  },
+  // 기간, 날짜
+  dateText: {
+    fontSize: 10,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  // 설명 텍스트
+  descriptionText: {
+    fontSize: 10,
+    lineHeight: 1.4,
+    color: '#374151',
+    marginBottom: 3,
+  },
+  // 학력 정보 행
+  educationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    backgroundColor: '#f9fafb',
+    padding: 8,
+    borderRadius: 4,
+  },
+  // 좌측 정보
+  educationLeft: {
+    flex: 1,
+  },
+  // 우측 정보
+  educationRight: {
+    alignItems: 'flex-end',
+  },
+  // 경력 요약
+  careerSummary: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    backgroundColor: '#f0f9ff',
+    padding: 8,
+    borderRadius: 4,
+  },
+  // 프로젝트 메타 정보
+  projectMeta: {
+    fontSize: 9,
+    color: '#6b7280',
+    marginBottom: 3,
+  },
+  // 링크 정보
+  linkText: {
+    fontSize: 10,
+    color: '#1d4ed8',
+    marginBottom: 2,
+  },
+  // 링크 행 (모던 스타일)
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  linkLabel: {
+    fontSize: 10,
+    color: '#374151',
+  },
+  linkUrl: {
+    fontSize: 10,
+    color: '#1d4ed8',
+    fontWeight: 'bold',
+    textDecoration: 'underline',
+  },
+  linkDivider: {
+    borderBottomWidth: 0.5,
+    borderColor: '#e6f0ff',
+    marginTop: 6,
   },
 });
 
 interface ResumePreviewModalProps {
   onClose: () => void;
   DataForm: CreateResumeRequest;
+  MetaData: ResumeMetadata['data'];
 }
 
 // PDF 문서 컴포넌트
-const ResumePDFDocument = ({ resumeData }: { resumeData: any }) => {
+const ResumePDFDocument = ({
+  resumeData,
+  metaData,
+}: {
+  resumeData: CreateResumeRequest;
+  metaData: ResumeMetadata['data'];
+}) => {
   if (!resumeData) return null;
 
-  // 타입에 따라 스타일 선택
   const styles = resumeData.type === 'MODERN' ? modernStyles : classicStyles;
+
+  // metaData에서 techStacks를 가져옵니다.
+  const techMeta = metaData?.techStacks || [];
+
+  // metaData에서 degreeLevels를 가져옵니다.
+  const degreeLevels = metaData?.degreeLevels || [];
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* 제목 */}
-        <Text style={styles.title}>{resumeData.title || '이력서'}</Text>
+        {/* 기본 정보 - 헤더 형태 */}
+        <View style={styles.section} wrap={false}>
+          <Text style={styles.title}>{resumeData.name}</Text>
 
-        {/* 기본 정보 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>기본 정보</Text>
-          <View style={styles.row}>
-            <View style={styles.leftColumn}>
-              <Text style={styles.boldText}>이름:</Text>
-            </View>
-            <View style={styles.rightColumn}>
-              <Text style={styles.text}>{resumeData.name}</Text>
-            </View>
+          {/* 이메일 (xeicon 폰트의 mail 아이콘) */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 1,
+            }}
+          >
+            <Text
+              style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
+            >
+              {'\uEA07'}
+            </Text>
+            <Text style={styles.contactInfo}>{resumeData.email}</Text>
           </View>
-          <View style={styles.row}>
-            <View style={styles.leftColumn}>
-              <Text style={styles.boldText}>생년:</Text>
-            </View>
-            <View style={styles.rightColumn}>
-              <Text style={styles.text}>{resumeData.birthYear}년</Text>
-            </View>
+
+          {/* 전화번호 (xeicon 폰트의 phone 아이콘) */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 1,
+            }}
+          >
+            <Text
+              style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
+            >
+              {'\uE9D3'}
+            </Text>
+            <Text style={{ ...styles.contactInfo, marginRight: 10 }}>
+              {resumeData.phone}
+            </Text>
+            <Text
+              style={{ fontFamily: 'xeicon', fontSize: 12, marginRight: 6 }}
+            >
+              {'\uE9A0'}
+            </Text>
+            <Text style={styles.contactInfo}>{resumeData.birthYear}년생</Text>
           </View>
-          <View style={styles.row}>
-            <View style={styles.leftColumn}>
-              <Text style={styles.boldText}>이메일:</Text>
-            </View>
-            <View style={styles.rightColumn}>
-              <Text style={styles.text}>{resumeData.email}</Text>
-            </View>
-          </View>
-          <View style={styles.row}>
-            <View style={styles.leftColumn}>
-              <Text style={styles.boldText}>전화번호:</Text>
-            </View>
-            <View style={styles.rightColumn}>
-              <Text style={styles.text}>{resumeData.phone}</Text>
-            </View>
-          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 1,
+            }}
+          ></View>
         </View>
 
         {/* 간단 소개 */}
         {resumeData.introduction && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>간단 소개</Text>
-            <Text style={styles.text}>{resumeData.introduction}</Text>
+          <View style={styles.section} wrap={false}>
+            <Text style={styles.introductionText}>
+              {resumeData.introduction}
+            </Text>
           </View>
         )}
 
+        {/* 개발 직무 */}
+        <View style={styles.section} wrap={false}>
+          <Text style={styles.sectionTitle}>개발 직무</Text>
+          <Text style={styles.jobBadge}>{resumeData.fieldName}</Text>
+        </View>
+
         {/* 기술 스택 */}
         {resumeData.techStacks && resumeData.techStacks.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>기술 스택</Text>
             <View style={styles.techStackContainer}>
-              {resumeData.techStacks.map((tech: any, index: number) => (
+              {resumeData.techStacks.map((tech, index: number) => (
                 <Text key={index} style={styles.techStack}>
-                  {tech.name || `기술스택 ${index + 1}`}
+                  {techMeta.find((t) => t.id === tech.techStackId)?.name ||
+                    `기술스택 ${index + 1}`}
                 </Text>
               ))}
             </View>
@@ -255,37 +510,57 @@ const ResumePDFDocument = ({ resumeData }: { resumeData: any }) => {
 
         {/* 학력 */}
         {resumeData.educations && resumeData.educations.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>학력</Text>
-            {resumeData.educations.map((edu: any, index: number) => (
-              <View key={index} style={styles.itemContainer}>
-                <Text style={styles.boldText}>{edu.schoolName}</Text>
-                <Text style={styles.text}>
-                  {edu.major} / {edu.degreeLevel}
-                </Text>
-                <Text style={styles.text}>졸업일: {edu.graduationDate}</Text>
-              </View>
-            ))}
+            {resumeData.educations.map((edu, index: number) => {
+              const degreeDesc =
+                degreeLevels.find((d) => d.value === edu.degreeLevel)
+                  ?.description || `학위 ${edu.degreeLevel}`;
+              const gpaDisplay =
+                edu.personalGpa != null
+                  ? `${edu.personalGpa}${edu.totalGpa ? `/${edu.totalGpa}` : ''}`
+                  : '';
+
+              return (
+                <View key={index} style={styles.itemContainer} wrap={false}>
+                  <View key={index} style={{ marginBottom: 10 }}>
+                    <Text style={styles.boldText}>
+                      {edu.schoolName} {' | '} {degreeDesc}
+                    </Text>
+
+                    <Text style={styles.text}>
+                      {edu.major || ''}
+                      {edu.major && gpaDisplay ? ' | ' : ''}
+                      {gpaDisplay}
+                    </Text>
+
+                    <Text style={styles.dateText}>{edu.graduationDate}</Text>
+                  </View>
+                </View>
+              );
+            })}
           </View>
         )}
 
         {/* 경력 */}
         {resumeData.careers && resumeData.careers.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>경력</Text>
-            {resumeData.careers.map((career: any, index: number) => (
-              <View key={index} style={styles.itemContainer}>
-                <Text style={styles.boldText}>{career.companyName}</Text>
+            {resumeData.careers.map((career, index: number) => (
+              <View key={index} style={styles.itemContainer} wrap={false}>
+                <Text style={styles.itemTitle}>{career.companyName}</Text>
                 <Text style={styles.text}>{career.departmentPosition}</Text>
-                <Text style={styles.text}>
+                <Text style={styles.dateText}>
                   {career.startDate} ~ {career.endDate}
                 </Text>
-                <Text style={styles.text}>{career.mainTasks}</Text>
+                <Text style={styles.descriptionText}>{career.mainTasks}</Text>
+                {/* 경력의 기술 스택 */}
                 {career.techStacks && career.techStacks.length > 0 && (
                   <View style={styles.techStackContainer}>
-                    {career.techStacks.map((tech: any, techIndex: number) => (
+                    {career.techStacks.map((tech, techIndex: number) => (
                       <Text key={techIndex} style={styles.techStack}>
-                        {tech.name || `기술 ${techIndex + 1}`}
+                        {techMeta.find((t) => t.id === tech.techStackId)
+                          ?.name || `기술 ${techIndex + 1}`}
                       </Text>
                     ))}
                   </View>
@@ -297,20 +572,38 @@ const ResumePDFDocument = ({ resumeData }: { resumeData: any }) => {
 
         {/* 프로젝트 */}
         {resumeData.projects && resumeData.projects.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>프로젝트</Text>
-            {resumeData.projects.map((project: any, index: number) => (
-              <View key={index} style={styles.itemContainer}>
-                <Text style={styles.boldText}>{project.name}</Text>
-                <Text style={styles.text}>
+            {resumeData.projects.map((project, index: number) => (
+              <View key={index} style={styles.itemContainer} wrap={false}>
+                <Text style={styles.itemTitle}>{project.name}</Text>
+                <Text style={styles.descriptionText}>
+                  {project.description}
+                </Text>
+                <Text style={styles.dateText}>
                   {project.startDate} ~ {project.endDate}
                 </Text>
-                <Text style={styles.text}>{project.description}</Text>
+
+                {/* 기술 스택 */}
+                {project.techStacks && project.techStacks.length > 0 && (
+                  <View style={styles.techStackContainer}>
+                    {project.techStacks.map((tech, techIndex: number) => (
+                      <Text key={techIndex} style={styles.techStack}>
+                        {techMeta.find((t) => t.id === tech.techStackId)
+                          ?.name || `기술 ${techIndex + 1}`}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+
+                {/* 링크 정보 */}
                 {project.deployUrl && (
-                  <Text style={styles.text}>배포 URL: {project.deployUrl}</Text>
+                  <Text style={styles.linkText}>
+                    배포 URL: {project.deployUrl}
+                  </Text>
                 )}
                 {project.repositoryUrl && (
-                  <Text style={styles.text}>
+                  <Text style={styles.linkText}>
                     저장소: {project.repositoryUrl}
                   </Text>
                 )}
@@ -321,16 +614,29 @@ const ResumePDFDocument = ({ resumeData }: { resumeData: any }) => {
 
         {/* 교육 이력 */}
         {resumeData.trainings && resumeData.trainings.length > 0 && (
-          <View style={styles.section}>
+          <View style={styles.section} wrap={false}>
             <Text style={styles.sectionTitle}>교육 이력</Text>
-            {resumeData.trainings.map((training: any, index: number) => (
-              <View key={index} style={styles.itemContainer}>
-                <Text style={styles.boldText}>{training.courseName}</Text>
+            {resumeData.trainings.map((training, index: number) => (
+              <View key={index} style={styles.itemContainer} wrap={false}>
+                <Text style={styles.itemTitle}>{training.courseName}</Text>
                 <Text style={styles.text}>{training.institutionName}</Text>
-                <Text style={styles.text}>
+                <Text style={styles.dateText}>
                   {training.startDate} ~ {training.endDate}
                 </Text>
-                <Text style={styles.text}>{training.detailedContent}</Text>
+                <Text style={styles.descriptionText}>
+                  {training.detailedContent}
+                </Text>
+                {/* 교육의 기술 스택 */}
+                {training.techStacks && training.techStacks.length > 0 && (
+                  <View style={styles.techStackContainer}>
+                    {training.techStacks.map((tech, techIndex: number) => (
+                      <Text key={techIndex} style={styles.techStack}>
+                        {techMeta.find((t) => t.id === tech.techStackId)
+                          ?.name || `기술 ${techIndex + 1}`}
+                      </Text>
+                    ))}
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -339,38 +645,66 @@ const ResumePDFDocument = ({ resumeData }: { resumeData: any }) => {
         {/* 기타 사항 */}
         {resumeData.additionalInfos &&
           resumeData.additionalInfos.length > 0 && (
-            <View style={styles.section}>
+            <View style={styles.section} wrap={false}>
               <Text style={styles.sectionTitle}>기타 사항</Text>
-              {resumeData.additionalInfos.map((info: any, index: number) => (
-                <View key={index} style={styles.itemContainer}>
-                  <Text style={styles.boldText}>{info.activityName}</Text>
+              {resumeData.additionalInfos.map((info, index: number) => (
+                <View key={index} style={styles.itemContainer} wrap={false}>
+                  <Text style={styles.itemTitle}>{info.activityName}</Text>
                   <Text style={styles.text}>{info.relatedOrganization}</Text>
-                  <Text style={styles.text}>
+                  <Text style={styles.dateText}>
                     {info.startDate} ~ {info.endDate}
                   </Text>
-                  <Text style={styles.text}>{info.detailedContent}</Text>
+                  <Text style={styles.descriptionText}>
+                    {info.detailedContent}
+                  </Text>
                 </View>
               ))}
             </View>
           )}
 
         {/* 링크 */}
-        <View style={styles.section}>
+        <View style={styles.section} wrap={false}>
           <Text style={styles.sectionTitle}>링크</Text>
+
           {resumeData.githubUrl && (
-            <Text style={styles.text}>GitHub: {resumeData.githubUrl}</Text>
+            <View>
+              <View style={styles.linkRow}>
+                <Text style={styles.linkLabel}>Github</Text>
+                <Text style={styles.linkUrl}>{resumeData.githubUrl}</Text>
+              </View>
+              <View style={styles.linkDivider} />
+            </View>
           )}
+
           {resumeData.blogUrl && (
-            <Text style={styles.text}>Blog: {resumeData.blogUrl}</Text>
+            <View>
+              <View style={styles.linkRow}>
+                <Text style={styles.linkLabel}>Portfolio</Text>
+                <Text style={styles.linkUrl}>{resumeData.blogUrl}</Text>
+              </View>
+              <View style={styles.linkDivider} />
+            </View>
           )}
+
           {resumeData.notionUrl && (
-            <Text style={styles.text}>Notion: {resumeData.notionUrl}</Text>
+            <View>
+              <View style={styles.linkRow}>
+                <Text style={styles.linkLabel}>Portfolio</Text>
+                <Text style={styles.linkUrl}>{resumeData.notionUrl}</Text>
+              </View>
+              <View style={styles.linkDivider} />
+            </View>
           )}
+
           {resumeData.customLinks &&
-            resumeData.customLinks.map((link: any, index: number) => (
-              <Text key={index} style={styles.text}>
-                {link.name}: {link.url}
-              </Text>
+            resumeData.customLinks.map((link, index: number) => (
+              <View key={index}>
+                <View style={styles.linkRow}>
+                  <Text style={styles.linkLabel}>{link.name}</Text>
+                  <Text style={styles.linkUrl}>{link.url}</Text>
+                </View>
+                <View style={styles.linkDivider} />
+              </View>
             ))}
         </View>
       </Page>
@@ -381,8 +715,12 @@ const ResumePDFDocument = ({ resumeData }: { resumeData: any }) => {
 export function ResumePreviewModal({
   onClose,
   DataForm,
+  MetaData,
 }: ResumePreviewModalProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
+  // 파일명: 제목(title) 또는 이름(name)을 사용
+  const fileName = `${(DataForm?.title || DataForm?.name || 'resume')
+    .toString()
+    .replace(/\s+/g, '_')}.pdf`;
 
   return (
     <AnimatePresence>
@@ -405,12 +743,34 @@ export function ResumePreviewModal({
             <h2 className="text-xl font-semibold text-gray-800">
               이력서 미리보기 및 다운로드
             </h2>
-            <button
-              onClick={onClose}
-              className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-            >
-              <i className="xi-close xi-x"></i>
-            </button>
+            <div className="flex items-center gap-3">
+              <PDFDownloadLink
+                document={
+                  <ResumePDFDocument
+                    resumeData={DataForm}
+                    metaData={MetaData}
+                  />
+                }
+                fileName={fileName}
+                style={{ textDecoration: 'none' }}
+              >
+                {({ loading }) => (
+                  <button
+                    className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+                    type="button"
+                  >
+                    {loading ? '다운로드 준비중...' : 'PDF 저장'}
+                  </button>
+                )}
+              </PDFDownloadLink>
+
+              <button
+                onClick={onClose}
+                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+              >
+                <i className="xi-close xi-x"></i>
+              </button>
+            </div>
           </div>
 
           {/* 컨텐츠 */}
@@ -419,7 +779,10 @@ export function ResumePreviewModal({
               <div className="max-h-[80vh] overflow-hidden rounded-lg border border-gray-200">
                 {/* PDFViewer로 실제 PDF와 동일한 렌더링을 표시합니다. */}
                 <PDFViewer style={{ width: '100%', height: '80vh' }}>
-                  <ResumePDFDocument resumeData={DataForm} />
+                  <ResumePDFDocument
+                    resumeData={DataForm}
+                    metaData={MetaData}
+                  />
                 </PDFViewer>
               </div>
             )}

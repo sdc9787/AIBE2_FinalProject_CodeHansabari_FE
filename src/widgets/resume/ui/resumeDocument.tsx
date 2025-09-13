@@ -1,6 +1,11 @@
 'use client';
 
-import { CreateResumeRequest, useResumeMetadata, ResumeType } from '@/entities';
+import {
+  CreateResumeRequest,
+  useResumeMetadata,
+  ResumeType,
+  ResumeMetadata,
+} from '@/entities';
 import { useCreateResumeMutation } from '@/features';
 import { useState, Dispatch, SetStateAction } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -293,6 +298,7 @@ export function ResumeDocument() {
               DataForm={DataForm}
               setDataForm={setDataForm}
               hasContent={hasContent}
+              MetaData={metaData}
             />
           </div>
         </div>
@@ -383,6 +389,7 @@ function LeftSection({ items, setItems, hasContent }: LeftSectionProps) {
 type RightSectionProps = {
   items: ItemType[];
   DataForm: CreateResumeRequest;
+  MetaData: ResumeMetadata['data'];
   setDataForm: Dispatch<SetStateAction<CreateResumeRequest>>;
   hasContent: (name: string) => boolean;
 };
@@ -816,7 +823,13 @@ function RightSection({
   };
 
   const handlePreview = () => {
-    open(<ResumePreviewModal onClose={close} DataForm={DataForm} />);
+    open(
+      <ResumePreviewModal
+        onClose={close}
+        DataForm={DataForm}
+        MetaData={metaData}
+      />,
+    );
   };
 
   // 현재 선택된 템플릿으로 이력서 저장하는 함수

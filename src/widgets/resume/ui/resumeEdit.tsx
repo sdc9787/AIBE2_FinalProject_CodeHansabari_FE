@@ -5,6 +5,7 @@ import {
   useResumeMetadata,
   ResumeType,
   useResumeDetail,
+  ResumeMetadata,
 } from '@/entities';
 import { useCreateResumeMutation, useUpdateResumeMutation } from '@/features';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
@@ -14,6 +15,7 @@ import { SearchableDropdown, TechStackTags, useModalStore } from '@/shared';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { ResumeTemplateModal } from './ResumeTemplateModal';
+import { ResumePreviewModal } from './ResumePreviewModal';
 
 type ItemType = {
   name: string;
@@ -824,6 +826,16 @@ function RightSection({
           i === index ? { ...link, [field]: value } : link,
         ) || [],
     }));
+  };
+
+  const handlePreview = () => {
+    open(
+      <ResumePreviewModal
+        onClose={close}
+        DataForm={DataForm}
+        MetaData={metaData}
+      />,
+    );
   };
 
   // 이력서 저장 핸들러 (템플릿 선택 후 저장)
@@ -2386,8 +2398,17 @@ function RightSection({
         </div>
       )}
 
-      {/* 저장 버튼 */}
       <div className="mt-12 flex justify-center gap-4">
+        {/*미리보기 버튼 */}
+        <motion.button
+          onClick={handlePreview}
+          disabled={updateMutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          미리보기
+        </motion.button>
         {/* 템플릿 선택 버튼 */}
         <motion.button
           onClick={handleSelectTemplate}
