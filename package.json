@@ -11,6 +11,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.0",
     "@tanstack/react-query": "^5.85.5",
     "@tanstack/react-query-devtools": "^5.85.5",
     "clsx": "^2.1.1",
@@ -19,6 +20,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",
+    "react-pdf": "^10.1.0",
     "tailwind-merge": "^3.3.1",
     "zustand": "^5.0.8"
   },

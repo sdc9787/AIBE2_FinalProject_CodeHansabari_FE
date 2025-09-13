@@ -20,30 +20,25 @@ export const resumeDetailMock: ResponseResumeDetail = {
     blogUrl: 'https://kimnewbie.tistory.com',
     notionUrl: 'https://notion.so/kimnewbie/portfolio',
 
+    // 학력 정보 추가
     educations: [
       {
         schoolName: '서울대학교',
-        major: '컴퓨터공학과',
         degreeLevel: 'BACHELOR',
+        graduationDate: '2023-02-28',
+        major: '컴퓨터공학부',
         personalGpa: 3.8,
         totalGpa: 4.5,
-        graduationDate: '2024-02-15',
-      },
-      {
-        schoolName: '서울고등학교',
-        major: '이과',
-        degreeLevel: 'HIGH_SCHOOL',
-        personalGpa: null,
-        totalGpa: null,
-        graduationDate: '2017-02-10',
       },
     ],
 
+    // 기술 스택: resumeMetadataMock에 맞춘 ID 사용
+    // Java -> id: 3, Spring Boot -> id: 64, Redis -> id: 86, AWS -> id: 104
     techStacks: [
-      { techStackId: 1, proficiencyLevel: 'INTERMEDIATE' },
-      { techStackId: 2, proficiencyLevel: 'INTERMEDIATE' },
-      { techStackId: 3, proficiencyLevel: 'BEGINNER' },
-      { techStackId: 4, proficiencyLevel: 'ADVANCED' },
+      { techStackId: 3, proficiencyLevel: 'INTERMEDIATE' }, // Java
+      { techStackId: 64, proficiencyLevel: 'INTERMEDIATE' }, // Spring Boot
+      { techStackId: 86, proficiencyLevel: 'BEGINNER' }, // Redis
+      { techStackId: 104, proficiencyLevel: 'ADVANCED' }, // AWS
     ],
 
     customLinks: [
@@ -61,7 +56,8 @@ export const resumeDetailMock: ResponseResumeDetail = {
         departmentPosition: '개발팀/인턴 개발자',
         mainTasks:
           '사용자 인증 API 개발, 데이터베이스 설계 및 최적화, 단위 테스트 작성',
-        techStacks: [{ techStackId: 1 }, { techStackId: 2 }],
+        // Spring Boot, PostgreSQL
+        techStacks: [{ techStackId: 64 }, { techStackId: 84 }],
       },
     ],
 
@@ -77,9 +73,9 @@ export const resumeDetailMock: ResponseResumeDetail = {
         deployUrl: 'https://bookstore.kimnewbie.com',
         projectType: 'PERSONAL',
         techStacks: [
-          { techStackId: 1, usageType: '백엔드 프레임워크' },
-          { techStackId: 2, usageType: '데이터베이스' },
-          { techStackId: 5, usageType: '프론트엔드' },
+          { techStackId: 64, usageType: '백엔드 프레임워크' }, // Spring Boot
+          { techStackId: 84, usageType: '데이터베이스' }, // PostgreSQL
+          { techStackId: 35, usageType: '프론트엔드' }, // React
         ],
       },
       {
@@ -93,8 +89,8 @@ export const resumeDetailMock: ResponseResumeDetail = {
         deployUrl: null,
         projectType: 'TEAM',
         techStacks: [
-          { techStackId: 1, usageType: '백엔드' },
-          { techStackId: 2, usageType: '데이터베이스' },
+          { techStackId: 64, usageType: '백엔드' }, // Spring Boot
+          { techStackId: 84, usageType: '데이터베이스' }, // PostgreSQL
         ],
       },
     ],
@@ -107,7 +103,7 @@ export const resumeDetailMock: ResponseResumeDetail = {
         institutionName: '패스트캠퍼스',
         detailedContent:
           'Spring Boot, Spring Data JPA, Spring Security를 활용한 실무 프로젝트 개발 과정을 수료했습니다. RESTful API 설계, 데이터베이스 연동, 보안 구현 등을 학습했습니다.',
-        techStacks: [{ techStackId: 1 }, { techStackId: 2 }],
+        techStacks: [{ techStackId: 64 }, { techStackId: 84 }],
       },
       {
         startDate: '2022-07-01',
@@ -116,7 +112,7 @@ export const resumeDetailMock: ResponseResumeDetail = {
         institutionName: 'AWS 교육센터',
         detailedContent:
           'AWS EC2, S3, RDS 등 클라우드 서비스 기초를 학습하고 실습을 통해 웹 애플리케이션을 배포하는 방법을 익혔습니다.',
-        techStacks: [{ techStackId: 6 }],
+        techStacks: [{ techStackId: 104 }], // AWS
       },
     ],
 

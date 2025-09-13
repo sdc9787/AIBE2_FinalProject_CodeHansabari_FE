@@ -5,6 +5,7 @@ import {
   useResumeMetadata,
   ResumeType,
   useResumeDetail,
+  ResumeMetadata,
 } from '@/entities';
 import { useCreateResumeMutation, useUpdateResumeMutation } from '@/features';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
@@ -14,6 +15,7 @@ import { SearchableDropdown, TechStackTags, useModalStore } from '@/shared';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { ResumeTemplateModal } from './ResumeTemplateModal';
+import { ResumePreviewModal } from './ResumePreviewModal';
 
 type ItemType = {
   name: string;
@@ -36,7 +38,7 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
     name: '',
     email: '',
     phone: '',
-    birthYear: 2000,
+    birthYear: 0,
     careerType: 'FRESHMAN',
     fieldName: '',
     introduction: '',
@@ -826,6 +828,16 @@ function RightSection({
     }));
   };
 
+  const handlePreview = () => {
+    open(
+      <ResumePreviewModal
+        onClose={close}
+        DataForm={DataForm}
+        MetaData={metaData}
+      />,
+    );
+  };
+
   // 이력서 저장 핸들러 (템플릿 선택 후 저장)
   const handleSaveResumeWithTemplate = () => {
     // 필수 필드 검증
@@ -1342,7 +1354,7 @@ function RightSection({
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                생년월일(연도)
+                나이(연도)
               </label>
               <input
                 type="number"
@@ -1509,7 +1521,7 @@ function RightSection({
                           e.target.value,
                         )
                       }
-                      placeholder="졸업일 (예: 2022.02)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     {/* 졸업 상태 선택 */}
@@ -1797,21 +1809,21 @@ function RightSection({
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={career.startDate || ''}
                       onChange={(e) =>
                         handleCareerChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023.03)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={career.endDate || ''}
                       onChange={(e) =>
                         handleCareerChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2024.02 또는 현재)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -1925,21 +1937,21 @@ function RightSection({
                   />
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={project.startDate || ''}
                       onChange={(e) =>
                         handleProjectChange(index, 'startDate', e.target.value)
                       }
-                      placeholder="시작일 (예: 2023.03)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     <input
-                      type="text"
+                      type="date"
                       value={project.endDate || ''}
                       onChange={(e) =>
                         handleProjectChange(index, 'endDate', e.target.value)
                       }
-                      placeholder="종료일 (예: 2024.02 또는 진행중)"
+                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                   </div>
@@ -2386,8 +2398,17 @@ function RightSection({
         </div>
       )}
 
-      {/* 저장 버튼 */}
       <div className="mt-12 flex justify-center gap-4">
+        {/*미리보기 버튼 */}
+        <motion.button
+          onClick={handlePreview}
+          disabled={updateMutation.isPending}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          미리보기
+        </motion.button>
         {/* 템플릿 선택 버튼 */}
         <motion.button
           onClick={handleSelectTemplate}
