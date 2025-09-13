@@ -18,15 +18,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 // 한글 폰트 등록 (Noto Sans KR - 로컬 파일 사용)
 // 주의: public/fonts 폴더에 한글을 지원하는 폰트 파일을 넣어야 합니다.
 // 예: public/fonts/NotoSansKR-Regular.otf, public/fonts/NotoSansKR-Bold.otf
+const _baseOrigin = typeof window !== 'undefined' ? window.location.origin : '';
 Font.register({
   family: 'NotoSansKR',
   fonts: [
-    { src: '/font/NotoSansKR-Bold.ttf', fontWeight: 'bold' },
-    { src: '/font/NotoSansKR-Light.ttf', fontWeight: 'light' },
-    { src: '/font/NotoSansKR-Medium.ttf', fontWeight: 'medium' },
-    { src: '/font/NotoSansKR-Regular.ttf', fontWeight: 'normal' },
-    { src: '/font/NotoSansKR-SemiBold.ttf', fontWeight: 'semibold' },
-    { src: '/font/NotoSansKR-Thin.ttf', fontWeight: 'thin' },
+    { src: `${_baseOrigin}/font/NotoSansKR-Bold.ttf`, fontWeight: 'bold' },
+    { src: `${_baseOrigin}/font/NotoSansKR-Light.ttf`, fontWeight: 'light' },
+    { src: `${_baseOrigin}/font/NotoSansKR-Medium.ttf`, fontWeight: 'medium' },
+    { src: `${_baseOrigin}/font/NotoSansKR-Regular.ttf`, fontWeight: 'normal' },
+    {
+      src: `${_baseOrigin}/font/NotoSansKR-SemiBold.ttf`,
+      fontWeight: 'semibold',
+    },
+    { src: `${_baseOrigin}/font/NotoSansKR-Thin.ttf`, fontWeight: 'thin' },
   ],
 });
 
@@ -34,7 +38,7 @@ Font.register({
 // public/xeicon/fonts/xeicon.ttf 파일이 존재함
 Font.register({
   family: 'xeicon',
-  src: '/xeicon/fonts/xeicon.ttf',
+  src: `${_baseOrigin}/xeicon/fonts/xeicon.ttf`,
 });
 
 // 클래식 스타일 정의
