@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useResumeList, useResumeMetadata } from '@/entities';
-import { Button } from '@/shared';
+import { useResumeList, useResumeMetadata, useResumeDetail } from '@/entities';
+import { Button, useModalStore } from '@/shared';
+import { ResumePreviewModal } from './ResumePreviewModal';
 import { useDeleteResumeMutation } from '@/features';
 
 export function ResumeList() {
@@ -45,8 +46,15 @@ export function ResumeList() {
 
   const handleDownload = (resumeId: number, event: React.MouseEvent) => {
     event.stopPropagation();
-    // TODO: 다운로드 로직 구현
-    console.log('다운로드:', resumeId);
+    // 모달로 이력서 미리보기 표시 (다운로드 전 미리보기)
+    useModalStore
+      .getState()
+      .open(
+        <PreviewWrapper resumeId={resumeId} />,
+        undefined,
+        undefined,
+        'center',
+      );
     setOpenMenuId(null);
   };
 
@@ -67,6 +75,30 @@ export function ResumeList() {
         setOpenMenuId(null);
       },
     });
+  };
+
+  // Preview wrapper component: fetches resume detail & metadata, then renders ResumePreviewModal
+  const PreviewWrapper = ({ resumeId }: { resumeId: number }) => {
+    const { data: DataForm, isLoading: detailLoading } =
+      useResumeDetail(resumeId);
+    const { data: MetaData } = useResumeMetadata();
+    const close = useModalStore.getState().close;
+
+    if (detailLoading || !DataForm || !MetaData) {
+      return (
+        <div className="p-8 text-center text-gray-600">
+          이력서 정보를 불러오는 중...
+        </div>
+      );
+    }
+
+    return (
+      <ResumePreviewModal
+        onClose={close}
+        DataForm={DataForm}
+        MetaData={MetaData}
+      />
+    );
   };
 
   // 외부 클릭 이벤트 리스너
