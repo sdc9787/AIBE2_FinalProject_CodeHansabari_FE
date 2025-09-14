@@ -7,7 +7,7 @@ export const userInfoMock: UserResponse = {
     memberId: 789,
     email: 'user@gmail.com',
     name: '박민수',
-    picture: '/images/profile.png',
+    picture: '/image/profile.png',
     role: 'USER',
     isActive: true,
     createdAt: '2024-01-05T11:20:00',

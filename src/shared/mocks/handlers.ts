@@ -1,9 +1,15 @@
-import { coverLetterHandlers } from '@/entities';
-import { resumeHandlers } from '@/entities/resume';
-import { interviewQuestionsHandlers } from '@/entities/interviewQuestions';
-import { loginGoogleHandler } from '@/features';
-import { improveCoverLetterHandlers } from '@/features/improve-cover-letter';
-import { saveCoverLetterHandler } from '@/features/save-cover-letter';
+import {
+  coverLetterHandlers,
+  interviewQuestionsHandlers,
+  resumeHandlers,
+  userHandlers,
+} from '@/entities';
+
+import {
+  improveCoverLetterHandlers,
+  loginGoogleHandler,
+  saveCoverLetterHandler,
+} from '@/features';
 
 export const handlers = [
   ...coverLetterHandlers,
@@ -12,4 +18,5 @@ export const handlers = [
   ...improveCoverLetterHandlers,
   ...saveCoverLetterHandler,
   ...loginGoogleHandler,
+  ...userHandlers,
 ];
