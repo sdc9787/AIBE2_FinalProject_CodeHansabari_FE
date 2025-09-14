@@ -86,7 +86,7 @@ export function Header() {
           </div>
           <div className="flex items-center justify-center">
             {/*토큰 사용량 및 다음 리필 시간 표시 */}
-            <div className="mr-4 hidden flex-col items-center rounded-full bg-indigo-100/50 px-6 py-1 text-sm font-medium text-indigo-700 sm:flex">
+            <div className="mr-4 hidden flex-col items-center rounded-md bg-indigo-100/50 px-6 py-2 text-sm font-medium text-indigo-700 sm:flex">
               <div>
                 토큰 사용량: {tokenUsage?.remainingTokens ?? 0} /{' '}
                 {tokenUsage?.maxTokens ?? 0}

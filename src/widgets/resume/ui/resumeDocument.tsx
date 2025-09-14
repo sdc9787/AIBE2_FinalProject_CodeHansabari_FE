@@ -2280,48 +2280,61 @@ function RightSection({
         </div>
       )}
 
-      {/*현재 템플릿 타입 표시 */}
-      {DataForm.type && (
-        <div className="mb-4 rounded-lg border border-gray-200 p-4 text-center text-sm text-gray-600">
-          현재 선택된 템플릿 :&nbsp;
-          <span className="font-medium">
-            {DataForm.type === 'DEFAULT' ? '클래식' : '모던'}
-          </span>
+      {/* 버튼 영역은 편집 창의 하단 고정(모바일/데스크탑 모두 지원)으로 이동 */}
+      <div className="mt-6" />
+
+      <div className="sticky bottom-0 z-40 border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-4xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between">
+          {/* 왼쪽: 선택된 템플릿 표시 (데스크탑에서만 보임) */}
+          <div className="hidden items-center gap-2 text-sm text-gray-600 sm:flex">
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+              템플릿: {DataForm.type === 'DEFAULT' ? '클래식' : '모던'}
+            </span>
+            <span className="text-xs text-gray-500">(현재 선택된 템플릿)</span>
+          </div>
+
+          {/* 중앙 / 우측: 버튼 그룹 */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <motion.button
+              onClick={handlePreview}
+              disabled={mutation.isPending}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="transform rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              미리보기
+            </motion.button>
+
+            <motion.button
+              onClick={handleSelectTemplate}
+              disabled={mutation.isPending}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="transform rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white shadow-md transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              템플릿 선택
+            </motion.button>
+
+            <motion.button
+              onClick={handleSaveResume}
+              disabled={mutation.isPending}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="transform rounded-lg border-2 border-blue-600 bg-white px-6 py-3 text-base font-semibold text-blue-600 shadow-md transition-all duration-200 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {mutation.isPending ? '저장 중...' : '이력서 저장'}
+            </motion.button>
+          </div>
+
+          {/* 모바일: 템플릿 정보는 버튼 그룹 아래에 작게 표시 */}
+          <div className="mt-1 flex w-full justify-center sm:hidden">
+            {DataForm.type && (
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-800">
+                템플릿: {DataForm.type === 'DEFAULT' ? '클래식' : '모던'}
+              </span>
+            )}
+          </div>
         </div>
-      )}
-
-      <div className="mt-12 flex justify-center gap-4">
-        {/*미리보기 버튼 */}
-        <motion.button
-          onClick={handlePreview}
-          disabled={mutation.isPending}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          미리보기
-        </motion.button>
-        {/* 템플릿 선택 버튼 */}
-        <motion.button
-          onClick={handleSelectTemplate}
-          disabled={mutation.isPending}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="transform rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          템플릿 선택
-        </motion.button>
-
-        {/* 이력서 저장 버튼 */}
-        <motion.button
-          onClick={handleSaveResume}
-          disabled={mutation.isPending}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="transform rounded-xl border-2 border-blue-600 bg-white px-8 py-4 text-lg font-semibold text-blue-600 shadow-lg transition-all duration-200 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {mutation.isPending ? '저장 중...' : '이력서 저장'}
-        </motion.button>
       </div>
     </div>
   );
