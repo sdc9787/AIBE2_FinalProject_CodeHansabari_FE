@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useLoadingStore } from '@/shared';
+import { fetchUsageToken } from '@/entities/user/api';
 
 // 범용 레코드 타입 (any 사용 금지 대응)
 type UnknownRecord = Record<string, unknown>;
@@ -27,6 +28,9 @@ interface UseCustomMutationArgs<TVariables, TResult, TError> {
   mutationOptions?: UseMutationOptions<TResult, TError, TVariables>;
   successMessage?: string;
   loadingType?: 'toast' | 'global' | 'none'; // 로딩 표시 방식 선택
+  requireTokenCheck?: boolean; // if true, perform a preflight token check before mutation
+  tokenPreflightStrategy?: 'cache' | 'fresh'; // 'cache' uses cached usageTokens, 'fresh' fetches latest
+  usageToken?: number;
 }
 
 interface MutationContext {
@@ -44,10 +48,53 @@ export const useCustomMutation = <TVariables, TResult, TError = ApiError>(
     mutationOptions,
     successMessage,
     loadingType = 'toast', // 기본값은 toast
+    requireTokenCheck = false,
+    tokenPreflightStrategy = 'cache',
+    usageToken = 1,
   } = args;
 
+  // wrap the provided mutationFn to run an optional preflight token check
+  const wrappedMutationFn = async (variables: TVariables) => {
+    if (requireTokenCheck && loadingType === 'global') {
+      try {
+        const cached = queryClient.getQueryData<any>(['usageTokens']);
+        let remaining: number | null = null;
+        if (tokenPreflightStrategy === 'cache') {
+          if (
+            cached &&
+            cached.data &&
+            typeof cached.data.remainingTokens === 'number'
+          ) {
+            remaining = cached.data.remainingTokens;
+          } else if (cached && typeof cached.remainingTokens === 'number') {
+            // support earlier select behavior where select returns inner data
+            remaining = cached.remainingTokens;
+          }
+          // if cache miss, fallback to fresh check
+          if (remaining == null) {
+            const fresh = await fetchUsageToken();
+            remaining = fresh?.data?.remainingTokens ?? 0;
+          }
+        } else {
+          // fresh fetch
+          const fresh = await fetchUsageToken();
+          remaining = fresh?.data?.remainingTokens ?? 0;
+        }
+
+        if (typeof remaining !== 'number' || remaining < usageToken) {
+          throw new Error('토큰이 부족합니다.');
+        }
+      } catch (e) {
+        // rethrow to allow useMutation onError handling to show toast
+        throw e;
+      }
+    }
+
+    return mutationFn(variables);
+  };
+
   return useMutation<TResult, TError, TVariables, MutationContext>({
-    mutationFn,
+    mutationFn: wrappedMutationFn,
     ...mutationOptions,
     onMutate: (variables) => {
       // 기존 onMutate가 있다면 실행

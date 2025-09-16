@@ -185,6 +185,16 @@ export function CoverLetter({ id }: CoverLetterProps) {
       return;
     }
 
+    // 자기소개서 내용은 100~2000자 사이여야 함
+    if (text.length < 100) {
+      toast.error('최소 100자 이상 이어야 합니다.');
+      return;
+    }
+    if (text.length > MAX_LENGTH) {
+      toast.error(`최대 ${MAX_LENGTH}자 까지 작성할 수 있습니다.`);
+      return;
+    }
+
     // Step 1에서는 기본 프롬프트, Step 2에서는 커스텀 프롬프트 사용
     const promptToUse =
       currentStep === 1

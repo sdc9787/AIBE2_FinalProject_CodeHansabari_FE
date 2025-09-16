@@ -80,15 +80,16 @@ export function Header() {
             >
               CV Mento
             </Link>
-            <nav className="flex gap-6">
+            <nav className="flex items-end justify-center gap-6">
               {menuList.map((menu) => (
                 <Link
                   key={menu.path}
                   href={menu.path}
+                  // Always reserve 2px bottom border to prevent layout jump when toggling
                   className={`border-b-2 pb-1 font-medium transition-all duration-200 ${
                     isActivePath(menu.path)
                       ? 'border-indigo-600 font-semibold text-indigo-600'
-                      : 'border-white text-gray-700 hover:font-semibold hover:text-indigo-600'
+                      : 'border-transparent text-gray-700 hover:font-semibold hover:text-indigo-600'
                   }`}
                 >
                   {menu.name}
