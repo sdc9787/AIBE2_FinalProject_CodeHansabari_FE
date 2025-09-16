@@ -557,29 +557,27 @@ export function CoverLetter({ id }: CoverLetterProps) {
                       />
 
                       <div className="flex gap-4">
-                        <div className="group relative">
+                        <div className="group">
                           <Button
                             onClick={analyzeResume}
                             disabled={improveMutation.isPending || !text.trim()}
                             variant="primary"
                             size="md"
                             loading={improveMutation.isPending}
-                            className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-blue-700"
+                            className="relative transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-blue-700"
                           >
                             {improveMutation.isPending
                               ? '분석 중...'
                               : 'AI 첨삭 시작'}
-                          </Button>
-
-                          {/* Hover tooltip: 예상 사용 토큰 */}
-                          <div className="pointer-events-none absolute top-full right-0 mt-2 w-40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                            <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
-                              예상 사용 토큰:{' '}
-                              <span className="font-medium">5</span>개
+                            <div className="pointer-events-none absolute top-full right-0 mt-2 w-40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                              <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                                예상 사용 토큰:{' '}
+                                <span className="font-medium">5</span>개
+                              </div>
+                              {/* 화살표 */}
+                              <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
                             </div>
-                            {/* 화살표 */}
-                            <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
-                          </div>
+                          </Button>
                         </div>
                       </div>
                     </div>
