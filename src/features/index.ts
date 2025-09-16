@@ -7,3 +7,5 @@ export * from './create-interview-questions';
 export * from './create-interview-questions-custom';
 export * from './delete-resume';
 export * from './update-resume';
+export * from './delete-crawl';
+export * from './update-crawl';
