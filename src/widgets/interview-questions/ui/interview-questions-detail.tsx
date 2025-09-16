@@ -213,12 +213,13 @@ export function InterviewQuestionsDetail({
                     {createQuestions.isPending
                       ? '생성 중...'
                       : generationInfo.canGenerate
-                        ? `면접 질문 생성하기 (${generationInfo.remainingGenerations}회 남음)`
+                        ? `면접 질문 생성하기 (소모 토큰 : 3개)`
                         : '생성 완료 (15개 모두 생성됨)'}
                   </Button>
                   {generationInfo.canGenerate && (
                     <p className="mt-2 text-center text-sm text-gray-500">
-                      생성된 질문: {generationInfo.generatedCount}/
+                      {generationInfo.remainingGenerations}회 남음 | 생성된
+                      질문: {generationInfo.generatedCount}/
                       {generationInfo.maxGeneratedCount}개
                     </p>
                   )}
@@ -439,17 +440,26 @@ export function InterviewQuestionsDetail({
                   rows={3}
                   className="w-full"
                 />
-                <Button
-                  onClick={handleCustomQuestionSubmit}
-                  disabled={
-                    createCustomAnswer.isPending || !customQuestion.trim()
-                  }
-                  className="bg-purple-600 py-3 text-lg font-semibold text-white shadow-lg hover:bg-purple-700 disabled:opacity-50"
-                >
-                  {createCustomAnswer.isPending
-                    ? 'AI 답변 생성 중...'
-                    : 'AI 답변 생성'}
-                </Button>
+                <div className="group">
+                  <Button
+                    onClick={handleCustomQuestionSubmit}
+                    disabled={
+                      createCustomAnswer.isPending || !customQuestion.trim()
+                    }
+                    className="relative bg-purple-600 py-3 text-lg font-semibold text-white shadow-lg hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {createCustomAnswer.isPending
+                      ? 'AI 답변 생성 중...'
+                      : 'AI 답변 생성'}
+                    <div className="pointer-events-none absolute top-full right-0 mt-2 w-40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                        예상 사용 토큰: <span className="font-medium">1</span>개
+                      </div>
+                      {/* 화살표 */}
+                      <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
+                    </div>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
