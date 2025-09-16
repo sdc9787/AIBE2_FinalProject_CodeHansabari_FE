@@ -1,4 +1,5 @@
 import {
+  adminHandlers,
   coverLetterHandlers,
   interviewQuestionsHandlers,
   resumeHandlers,
@@ -19,4 +20,5 @@ export const handlers = [
   ...saveCoverLetterHandler,
   ...loginGoogleHandler,
   ...userHandlers,
+  ...adminHandlers,
 ];

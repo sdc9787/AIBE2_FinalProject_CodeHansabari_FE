@@ -1,5 +1,5 @@
 import { useCustomMutation } from '@/shared';
-import { startCrawl } from '../api';
+import { startCrawl } from '@/features';
 
 export const useStartCrawl = () => {
   return useCustomMutation({
