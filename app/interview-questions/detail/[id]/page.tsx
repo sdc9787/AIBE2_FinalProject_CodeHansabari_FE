@@ -1,16 +1,11 @@
-import { InterviewQuestionsDetail } from '@/widgets';
+import { InterviewQuestionsDetailPage } from '@/pages';
 
-interface InterviewQuestionsDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+export default async function InterviewQuestions({ params }: { params: any }) {
+  // Next.js requires awaiting `params` before accessing its properties.
+  // Await here, then forward a Promise to the shared page component which
+  // itself expects `params: Promise<{ id: string }>`.
+  const resolved = await params;
+  const id = resolved?.id;
 
-export default async function InterviewQuestionsDetailPage({
-  params,
-}: InterviewQuestionsDetailPageProps) {
-  const { id } = await params;
-  const coverLetterId = parseInt(id, 10);
-
-  return <InterviewQuestionsDetail coverLetterId={coverLetterId} />;
+  return <InterviewQuestionsDetailPage params={Promise.resolve({ id })} />;
 }

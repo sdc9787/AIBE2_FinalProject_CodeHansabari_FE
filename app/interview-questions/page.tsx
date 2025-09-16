@@ -1,5 +1,5 @@
-import InterviewQuestionsList from '@/widgets/interview-questions/ui/interview-questions-list';
+import { InterviewQuestionsListPage } from '@/pages';
 
 export default function InterviewQuestions() {
-  return <InterviewQuestionsList />;
+  return <InterviewQuestionsListPage />;
 }

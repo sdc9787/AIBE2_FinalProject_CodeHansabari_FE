@@ -248,7 +248,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
     id && coverLetterDetail ? coverLetterDetail.title : 'AI 자기소개서 첨삭';
 
   return (
-    <div className="">
+    <div className="mt-10">
       <div className="mx-auto mb-20 flex max-w-7xl gap-8">
         {/* 좌측 스텝 인디케이터 */}
         <div className="w-64 flex-shrink-0">

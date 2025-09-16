@@ -10,7 +10,7 @@ import {
 } from '@/entities';
 import { Button } from '@/shared';
 
-export default function InterviewQuestionsList() {
+export function InterviewQuestionsList() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
@@ -143,7 +143,7 @@ export default function InterviewQuestionsList() {
   // 로딩 상태
   if (isCoverLettersLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="mt-10 flex min-h-screen items-center justify-center bg-gray-50">
         <div className="mx-auto max-w-4xl px-4">
           <div className="text-center">
             <div className="mx-auto h-32 w-32 animate-spin rounded-full border-b-2 border-blue-600"></div>
@@ -157,7 +157,7 @@ export default function InterviewQuestionsList() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="mt-10 bg-gray-50">
       {/* 헤더 섹션 */}
       <div
         className="mx-auto max-w-7xl rounded-2xl border-b border-purple-300 text-white"
