@@ -18,5 +18,7 @@ interface SaveCoverLetterResponse {
 export const useSaveCoverLetter = () => {
   return useCustomMutation<SaveCoverLetterRequest, SaveCoverLetterResponse>({
     mutationFn: (requestData) => saveCoverLetter(requestData),
+    invalidateQueryKeys: [['coverLetters', 'list']],
+    loadingType: 'none',
   });
 };

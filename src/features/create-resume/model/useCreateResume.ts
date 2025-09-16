@@ -1,9 +1,5 @@
 import { useCustomMutation } from '@/shared/lib';
-import {
-  createResume,
-  CreateResumeRequest,
-  FetchResumeListParams,
-} from '@/entities';
+import { createResume, CreateResumeRequest } from '@/entities';
 
 interface CreateResumeResponse {
   success: boolean;
@@ -11,10 +7,10 @@ interface CreateResumeResponse {
   data: null;
 }
 
-export const useCreateResumeMutation = (params: FetchResumeListParams) => {
+export const useCreateResumeMutation = () => {
   return useCustomMutation<CreateResumeRequest, CreateResumeResponse>({
     mutationFn: (data: CreateResumeRequest) => createResume(data),
     successMessage: '이력서가 성공적으로 생성되었습니다.',
-    invalidateQueryKeys: [['resumeList', params]],
+    invalidateQueryKeys: [['resumeList']],
   });
 };

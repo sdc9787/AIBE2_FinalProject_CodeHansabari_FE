@@ -16,7 +16,7 @@ export function ResumeList() {
     isLoading,
     error,
   } = useResumeList({ page, size });
-  const deleteMutation = useDeleteResumeMutation({ page, size });
+  const deleteMutation = useDeleteResumeMutation();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const completedSectionsList = {

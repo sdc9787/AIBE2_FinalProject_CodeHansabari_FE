@@ -22,6 +22,9 @@ export const useCreateCustomQuestionAnswer = ({
         [...interviewQuestionsQueryKeys.list(coverLetterId)],
       ],
       loadingType: 'global',
+      requireTokenCheck: true,
+      tokenPreflightStrategy: 'fresh',
+      usageToken: 1, // 이 작업이 2 토큰을 소모한다고 가정
     },
   );
 };

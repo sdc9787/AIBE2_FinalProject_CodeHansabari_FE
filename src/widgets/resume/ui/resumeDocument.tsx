@@ -409,7 +409,7 @@ function RightSection({
   const router = useRouter();
   const { open, close } = useModalStore();
   // 이력서 생성 mutation
-  const mutation = useCreateResumeMutation({ page: 0, size: 10 });
+  const mutation = useCreateResumeMutation();
 
   // 상태 관리
   const [isTechStackOpen, setIsTechStackOpen] = useState(false);
