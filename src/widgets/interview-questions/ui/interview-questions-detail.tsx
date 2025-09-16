@@ -213,12 +213,13 @@ export function InterviewQuestionsDetail({
                     {createQuestions.isPending
                       ? '생성 중...'
                       : generationInfo.canGenerate
-                        ? `면접 질문 생성하기 (${generationInfo.remainingGenerations}회 남음)`
+                        ? `면접 질문 생성하기 (소모 토큰 : 3개)`
                         : '생성 완료 (15개 모두 생성됨)'}
                   </Button>
                   {generationInfo.canGenerate && (
                     <p className="mt-2 text-center text-sm text-gray-500">
-                      생성된 질문: {generationInfo.generatedCount}/
+                      {generationInfo.remainingGenerations}회 남음 | 생성된
+                      질문: {generationInfo.generatedCount}/
                       {generationInfo.maxGeneratedCount}개
                     </p>
                   )}

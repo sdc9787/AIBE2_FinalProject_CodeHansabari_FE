@@ -557,18 +557,30 @@ export function CoverLetter({ id }: CoverLetterProps) {
                       />
 
                       <div className="flex gap-4">
-                        <Button
-                          onClick={analyzeResume}
-                          disabled={improveMutation.isPending || !text.trim()}
-                          variant="primary"
-                          size="md"
-                          loading={improveMutation.isPending}
-                          className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-blue-700"
-                        >
-                          {improveMutation.isPending
-                            ? '분석 중...'
-                            : 'AI 첨삭 시작'}
-                        </Button>
+                        <div className="group relative">
+                          <Button
+                            onClick={analyzeResume}
+                            disabled={improveMutation.isPending || !text.trim()}
+                            variant="primary"
+                            size="md"
+                            loading={improveMutation.isPending}
+                            className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-blue-700"
+                          >
+                            {improveMutation.isPending
+                              ? '분석 중...'
+                              : 'AI 첨삭 시작'}
+                          </Button>
+
+                          {/* Hover tooltip: 예상 사용 토큰 */}
+                          <div className="pointer-events-none absolute top-full right-0 mt-2 w-40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                            <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                              예상 사용 토큰:{' '}
+                              <span className="font-medium">5</span>개
+                            </div>
+                            {/* 화살표 */}
+                            <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -652,17 +664,30 @@ export function CoverLetter({ id }: CoverLetterProps) {
                           className="rounded-xl border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                         />
                         <div className="flex gap-3">
-                          <Button
-                            onClick={analyzeResume}
-                            disabled={improveMutation.isPending || !text.trim()}
-                            variant="primary"
-                            loading={improveMutation.isPending}
-                            className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
-                          >
-                            {improveMutation.isPending
-                              ? '재분석 중...'
-                              : '추가 개선하기'}
-                          </Button>
+                          <div className="group relative">
+                            <Button
+                              onClick={analyzeResume}
+                              disabled={
+                                improveMutation.isPending || !text.trim()
+                              }
+                              variant="primary"
+                              loading={improveMutation.isPending}
+                              className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
+                            >
+                              {improveMutation.isPending
+                                ? '재분석 중...'
+                                : '추가 개선하기'}
+                            </Button>
+
+                            <div className="pointer-events-none absolute top-full right-0 mt-2 w-40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                              <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                                예상 사용 토큰:{' '}
+                                <span className="font-medium">5</span>개
+                              </div>
+                              {/* 화살표 */}
+                              <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
+                            </div>
+                          </div>
                           <Button
                             onClick={() => setCustomPrompt('')}
                             variant="secondary"
