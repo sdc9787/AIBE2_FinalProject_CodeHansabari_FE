@@ -7,7 +7,7 @@ import {
   useResumeDetail,
   ResumeMetadata,
 } from '@/entities';
-import { useCreateResumeMutation, useUpdateResumeMutation } from '@/features';
+import { useUpdateResumeMutation } from '@/features';
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -510,7 +510,6 @@ function RightSection({
   const { open, close } = useModalStore();
 
   const updateMutation = useUpdateResumeMutation({
-    params: { page: 0, size: 10 },
     resumeId: resumeId || 0,
   });
 
