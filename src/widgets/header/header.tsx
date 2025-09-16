@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserInfo } from './ui';
 import { useUsageTokens } from '@/entities/user/model/query/useUsageTokens';
+import Image from 'next/image';
 
 interface MenuItem {
   name: string;
@@ -31,10 +32,6 @@ export function Header() {
     return pathname.startsWith(path);
   };
 
-  if (isLoading) {
-    return <></>;
-  }
-
   // 포맷된 리필 시간 (없으면 '-')
   const formattedNextRefill = (() => {
     const iso = tokenUsage?.nextRefillTime;
@@ -50,6 +47,21 @@ export function Header() {
     } catch (e) {
       return '-';
     }
+  })();
+
+  // 계산된 실제 리필량: 최대 토큰을 넘지 않도록 remaining + refillAmount 로 계산
+  const computedRefillDisplay = (() => {
+    const remaining = tokenUsage?.remainingTokens ?? 0;
+    const max = tokenUsage?.maxTokens ?? 0;
+    const refill = tokenUsage?.refillAmount ?? 0;
+
+    if (max <= 0) return null; // 최대 토큰 정보 없으면 표시 안함
+
+    if (remaining >= max) return { atMax: true, amount: 0 };
+
+    const possibleAdd = max - remaining;
+    const actualAdd = Math.min(refill, possibleAdd);
+    return { atMax: false, amount: actualAdd };
   })();
 
   return (
@@ -85,16 +97,55 @@ export function Header() {
             </nav>
           </div>
           <div className="flex items-center justify-center">
-            {/*토큰 사용량 및 다음 리필 시간 표시 */}
-            <div className="mr-4 hidden flex-col items-center rounded-md bg-indigo-100/50 px-6 py-2 text-sm font-medium text-indigo-700 sm:flex">
-              <div>
-                토큰 사용량: {tokenUsage?.remainingTokens ?? 0} /{' '}
-                {tokenUsage?.maxTokens ?? 0}
+            {/*토큰 사용량 표시 - hover 시 리필 정보 표시 */}
+            <div className="group relative mr-4 hidden sm:block">
+              <div className="flex cursor-pointer items-center gap-2 rounded-md bg-indigo-100/50 px-4 py-2 text-sm font-medium text-indigo-700 transition-all duration-200 hover:bg-indigo-100">
+                {isLoading ? (
+                  <i className="xi-spinner-3 xi-spin"></i>
+                ) : (
+                  <>
+                    <Image
+                      src="/image/coin.png"
+                      width={16}
+                      height={16}
+                      alt="Coin"
+                      className="flex-shrink-0"
+                    />
+                    <span>{tokenUsage?.remainingTokens ?? 0}</span>
+                  </>
+                )}
               </div>
-              <div className="text-xs text-indigo-700/80">
-                리필: {formattedNextRefill} / {tokenUsage?.refillAmount ?? 0}{' '}
-                토큰
-              </div>
+
+              {/* Hover 시 나타나는 리필 정보 툴팁 */}
+              {!isLoading && (
+                <div className="pointer-events-none absolute top-full right-0 mt-2 w-48 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
+                  <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                    <div className="mb-1 font-medium">토큰 리필 정보</div>
+                    <div className="text-gray-300">
+                      리필 시간: {formattedNextRefill}
+                    </div>
+                    <div className="text-gray-300">
+                      {computedRefillDisplay == null ? (
+                        '리필 토큰: -'
+                      ) : computedRefillDisplay.atMax ? (
+                        <span className="text-green-300">
+                          최대 토큰에 도달했습니다.
+                        </span>
+                      ) : (
+                        <>
+                          리필 토큰:{' '}
+                          <span className="font-medium">
+                            {computedRefillDisplay.amount}
+                          </span>
+                          개
+                        </>
+                      )}
+                    </div>
+                    {/* 화살표 */}
+                    <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
+                  </div>
+                </div>
+              )}
             </div>
             <UserInfo />
           </div>
