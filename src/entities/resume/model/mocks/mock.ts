@@ -256,6 +256,103 @@ export const resumeDeleteMock = {
   data: null,
 };
 
+// 이력서 변환 mock 데이터
+export const resumeConvertMock = {
+  success: true,
+  message: '이력서가 성공적으로 변환되었습니다.',
+  data: {
+    title: '백엔드 개발자 김철수',
+    type: 'DEFAULT',
+    name: '김철수',
+    email: 'kim@example.com',
+    birthYear: 1995,
+    phone: '010-1234-5678',
+    careerType: 'EXPERIENCED',
+    fieldName: '백엔드 개발자',
+    introduction: '3년차 백엔드 개발자입니다.',
+    githubUrl: 'https://github.com/kimcs',
+    blogUrl: null,
+    notionUrl: null,
+    educations: [
+      {
+        schoolName: '서울대학교',
+        major: '컴퓨터공학과',
+        degreeLevel: 'BACHELOR',
+        personalGpa: 3.8,
+        totalGpa: 4.5,
+        graduationDate: '2024-02-15',
+      },
+    ],
+    techStacks: [
+      {
+        techStackId: 1,
+        techStackName: 'Java',
+        proficiencyLevel: 'ADVANCED',
+      },
+      {
+        techStackId: 3,
+        techStackName: 'Spring Boot',
+        proficiencyLevel: 'INTERMEDIATE',
+      },
+    ],
+    customLinks: [],
+    careers: [
+      {
+        startDate: '2021-03-01',
+        endDate: '2024-12-31',
+        companyName: '네이버',
+        companyDescription: '대한민국 대표 IT 기업',
+        departmentPosition: '플랫폼개발팀/주임연구원',
+        mainTasks:
+          'Spring Boot 기반 REST API 개발, MySQL 데이터베이스 설계 및 최적화',
+        techStacks: [
+          {
+            techStackId: 1,
+            techStackName: 'Java',
+          },
+        ],
+      },
+    ],
+    projects: [
+      {
+        startDate: '2023-01-01',
+        endDate: '2023-06-30',
+        name: '전자상거래 플랫폼',
+        description: 'Spring Boot + React 기반 쇼핑몰 개발',
+        detailedDescription: '결제 시스템 연동 및 주문 관리 기능 구현',
+        repositoryUrl: 'https://github.com/kimdev/ecommerce',
+        deployUrl: null,
+        projectType: 'PERSONAL',
+        techStacks: [
+          {
+            techStackId: 1,
+            techStackName: 'Java',
+            usageType: '백엔드 API',
+          },
+        ],
+      },
+    ],
+    trainings: [
+      {
+        startDate: '2023-03-01',
+        endDate: '2023-09-30',
+        courseName: '클라우드 아키텍처 과정',
+        institutionName: '테크 아카데미',
+        detailedContent:
+          'AWS 클라우드 서비스 활용, Docker, Kubernetes 컨테이너 기술',
+        techStacks: [
+          {
+            techStackId: 15,
+            techStackName: 'AWS',
+          },
+        ],
+      },
+    ],
+    additionalInfos: [],
+  },
+  timestamp: '2025-09-11T16:24:27',
+};
+
 // 이력서 메타데이터 조회 mock 데이터
 export const resumeMetadataMock = {
   success: true,

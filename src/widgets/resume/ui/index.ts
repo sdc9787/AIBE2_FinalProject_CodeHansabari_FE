@@ -6,3 +6,4 @@ export { ResumeList } from './resumeList';
 // export { ResumeSidebar } from './resumeSidebar';
 export * from './resumeDocument';
 export { ResumePreviewModal } from './ResumePreviewModal';
+export { ConvertResumeModal } from './ConvertResumeModal';

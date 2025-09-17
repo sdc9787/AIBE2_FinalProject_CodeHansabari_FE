@@ -6,6 +6,7 @@ import {
   resumeCreateMock,
   resumeUpdateMock,
   resumeDeleteMock,
+  resumeConvertMock,
 } from './mock';
 
 const resumeDetail = resumeDetailMock; //이력서 상세 mock 데이터
@@ -41,5 +42,15 @@ export const resumeHandlers = [
   // 이력서 삭제 핸들러
   http.delete('/api/v1/resumes/:id', () => {
     return HttpResponse.json(resumeDeleteMock);
+  }),
+
+  // 이력서 변환 핸들러
+  http.post('/api/v1/resume-import', () => {
+    // 2초 지연을 추가하여 실제 변환 과정을 시뮬레이션
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(HttpResponse.json(resumeConvertMock));
+      }, 2000);
+    });
   }),
 ];

@@ -14,6 +14,7 @@ export * from './create-interview-questions-custom';
 export * from './create-resume';
 export * from './delete-resume';
 export * from './update-resume';
+export * from './convert-resume';
 
 //크롤링
 export * from './delete-crawl';
