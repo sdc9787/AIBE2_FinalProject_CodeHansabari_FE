@@ -5,12 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useResumeList, useResumeMetadata, useResumeDetail } from '@/entities';
 import { Button, useModalStore } from '@/shared';
 import { ResumePreviewModal } from './ResumePreviewModal';
+import { ConvertResumeModal } from './ConvertResumeModal';
 import { useDeleteResumeMutation } from '@/features';
 
 export function ResumeList() {
   const router = useRouter();
   const [page, setPage] = useState<number>(0);
   const size = 6; // 한 페이지에 보여줄 항목 수
+  const [showConvertModal, setShowConvertModal] = useState(false);
   const {
     data: resumeListData,
     isLoading,
@@ -37,6 +39,14 @@ export function ResumeList() {
 
   const handleCreateNew = () => {
     router.push('/resume/document');
+  };
+
+  const handleConvertResume = () => {
+    setShowConvertModal(true);
+  };
+
+  const handleConvertSuccess = () => {
+    // 변환 성공 후 처리 (목록이 자동으로 새로고침됨)
   };
 
   const handleMenuToggle = (resumeId: number, event: React.MouseEvent) => {
@@ -164,13 +174,22 @@ export function ResumeList() {
           className="mb-8 flex items-center justify-between"
         >
           <h2 className="text-3xl font-bold text-gray-800">이력서 관리</h2>
-          <Button
-            onClick={handleCreateNew}
-            variant="primary"
-            className="transform rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
-          >
-            새 이력서 작성
-          </Button>
+          <div className="flex space-x-3">
+            <Button
+              onClick={handleConvertResume}
+              variant="secondary"
+              className="transform rounded-xl border border-blue-600 bg-white px-6 py-3 font-semibold text-blue-600 shadow-lg transition-all duration-200 hover:bg-blue-50"
+            >
+              이력서 변환
+            </Button>
+            <Button
+              onClick={handleCreateNew}
+              variant="primary"
+              className="transform rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
+            >
+              새 이력서 작성
+            </Button>
+          </div>
         </motion.div>
 
         {/* 이력서 목록 */}
@@ -358,6 +377,13 @@ export function ResumeList() {
           </motion.div>
         )}
       </div>
+
+      {/* 이력서 변환 모달 */}
+      <ConvertResumeModal
+        isOpen={showConvertModal}
+        onClose={() => setShowConvertModal(false)}
+        onSuccess={handleConvertSuccess}
+      />
     </div>
   );
 }
