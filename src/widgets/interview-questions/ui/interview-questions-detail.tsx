@@ -134,7 +134,7 @@ export function InterviewQuestionsDetail({
   }
 
   return (
-    <div className="bg-gray-50">
+    <div className="mt-10 bg-gray-50">
       <div className="relative mx-auto flex max-w-7xl gap-10">
         {/* 왼쪽: 자기소개서 상세 - sticky 고정 */}
         <div className="sticky top-30 h-[80vh] w-1/2 flex-shrink-0">

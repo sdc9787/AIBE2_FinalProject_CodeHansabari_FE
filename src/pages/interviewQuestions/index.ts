@@ -1,1 +1,2 @@
-export * from './interviewQuestionsPage';
+export * from './interviewQuestionsDetailPage';
+export * from './interviewQuestionsListPage';

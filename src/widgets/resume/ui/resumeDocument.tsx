@@ -271,7 +271,7 @@ export function ResumeDocument() {
         </div>
 
         {/* 우측 - 이력서 입력 폼 */}
-        <div className="lg:col-span-3">
+        <div className="mt-10 lg:col-span-3">
           <div className="rounded-2xl border border-white/20 bg-white/95 p-8 shadow-xl backdrop-blur-sm">
             <h1 className="mb-8 text-3xl font-bold text-gray-800">
               이력서 작성

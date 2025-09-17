@@ -154,7 +154,7 @@ export function ResumeList() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
+    <div className="mx-auto mt-10 max-w-7xl">
       <div className="rounded-2xl border border-white/20 bg-white/95 p-8 shadow-xl backdrop-blur-sm">
         {/* 헤더 */}
         <motion.div

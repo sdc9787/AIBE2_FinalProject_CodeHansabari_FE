@@ -152,7 +152,7 @@ export function Header() {
           </div>
         </div>
       </header>
-      <div className="h-30"></div>
+      <div className="h-20"></div>
     </>
   );
 }
