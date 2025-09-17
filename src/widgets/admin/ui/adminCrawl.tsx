@@ -1,17 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import toast from 'react-hot-toast';
 import { Button } from '@/shared/ui';
 import { useCrawlList, type CrawlItem } from '@/entities/admin';
-import { clientFetch } from '@/shared/api';
 import { useStartCrawl } from '@/features/start-crawl';
 import { useDeleteCrawl } from '@/features/delete-crawl';
 
 export const AdminCrawl = () => {
   const [selectedCrawls, setSelectedCrawls] = useState<number[]>([]);
 
-  // 커스텀 훅 사용
+  // 데이터 훅
   const {
     data: crawlList,
     isLoading: isListLoading,
@@ -21,69 +19,55 @@ export const AdminCrawl = () => {
   const startCrawlMutation = useStartCrawl();
   const deleteAllCrawlMutation = useDeleteCrawl();
 
-  // 크롤링 시작 핸들러
-  const handleStartCrawl = () => {
-    startCrawlMutation.mutate({});
-  };
+  const handleStartCrawl = () => startCrawlMutation.mutate({});
 
-  // 삭제 핸들러 id값이 있으면 개별 삭제
   const handleDeleteAllCrawl = (crawlId?: number) => {
-    if (crawlId) {
-      if (window.confirm('선택한 크롤링 데이터를 삭제하시겠습니까?')) {
-        deleteAllCrawlMutation.mutate({ id: crawlId });
-        setSelectedCrawls([]);
-      }
-    } else {
-      if (window.confirm('모든 크롤링 데이터를 삭제하시겠습니까?')) {
-        deleteAllCrawlMutation.mutate({});
-        setSelectedCrawls([]);
-      }
-    }
+    const confirmMessage = crawlId
+      ? '선택한 크롤링 데이터를 삭제하시겠습니까?'
+      : '모든 크롤링 데이터를 삭제하시겠습니까?';
+    if (!window.confirm(confirmMessage)) return;
+    if (crawlId) deleteAllCrawlMutation.mutate({ id: crawlId });
+    else deleteAllCrawlMutation.mutate({});
+    setSelectedCrawls([]);
   };
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="mb-2 text-2xl font-bold text-gray-900">
-          크롤링 및 특정 관리
-        </h2>
-        <p className="text-gray-600">
-          자기소개서 크롤링 데이터를 관리하고 새로운 크롤링을 실행할 수
-          있습니다.
-        </p>
-      </div>
-
-      {/* 크롤링 제어 버튼 영역 */}
-      <div className="mb-6 flex gap-3">
-        <Button
-          onClick={handleStartCrawl}
-          disabled={startCrawlMutation.isPending}
-          className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700"
-        >
-          {startCrawlMutation.isPending ? '크롤링 중...' : '크롤링 시작'}
-        </Button>
-
-        <Button
-          onClick={() => handleDeleteAllCrawl()}
-          disabled={
-            !crawlList ||
-            crawlList.length === 0 ||
-            deleteAllCrawlMutation.isPending
-          }
-          className="rounded-lg bg-red-600 px-6 py-2 font-medium text-white hover:bg-red-700"
-        >
-          전체 삭제
-        </Button>
-      </div>
-
-      {/* 크롤링 목록 테이블 */}
-      <div className="overflow-hidden rounded-lg bg-gray-50">
-        <div className="border-b bg-gray-100 p-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            크롤링 대상 목록
-          </h3>
+    <div className="space-y-6">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between rounded-lg border border-[#e2e8f0] bg-[#fafbfc] p-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">크롤링 관리</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            자기소개서 크롤링 결과를 조회하고, 새로운 크롤링을 시작하거나
+            데이터를 관리할 수 있습니다.
+          </p>
         </div>
 
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={handleStartCrawl}
+            disabled={startCrawlMutation.isPending}
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            {startCrawlMutation.isPending ? '크롤링 중...' : '크롤링 시작'}
+          </Button>
+
+          <Button
+            onClick={() => handleDeleteAllCrawl()}
+            disabled={
+              !crawlList ||
+              crawlList.length === 0 ||
+              deleteAllCrawlMutation.isPending
+            }
+            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+          >
+            전체 삭제
+          </Button>
+        </div>
+      </div>
+
+      {/* 목록 영역 */}
+      <div className="rounded-lg border border-[#e2e8f0] bg-white">
         {isListLoading ? (
           <div className="p-8 text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
@@ -96,7 +80,7 @@ export const AdminCrawl = () => {
             </p>
             <Button
               onClick={() => refetchCrawlList()}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
             >
               다시 시도
             </Button>
@@ -106,109 +90,71 @@ export const AdminCrawl = () => {
             <p className="text-gray-500">크롤링된 데이터가 없습니다.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="p-3 text-left" />
-                  <th className="p-3 text-left font-semibold text-gray-700">
-                    ID
-                  </th>
-                  <th className="p-3 text-left font-semibold text-gray-700">
-                    내용 미리보기
-                  </th>
-                  <th className="p-3 text-left font-semibold text-gray-700">
-                    생성일
-                  </th>
-                  <th className="p-3 text-left font-semibold text-gray-700">
-                    수정일
-                  </th>
-                  <th className="p-3 text-left font-semibold text-gray-700">
-                    상태 / 작업
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {crawlList &&
-                  crawlList.map((crawl: CrawlItem, index: number) => (
-                    <tr
-                      key={crawl.coverLetterId}
-                      className={`border-b hover:bg-gray-50 ${
-                        selectedCrawls.includes(crawl.coverLetterId)
-                          ? 'bg-blue-50'
-                          : ''
-                      }`}
-                    >
-                      <td className="p-3" />
-                      <td className="p-3 font-mono text-sm">
-                        {crawl.coverLetterId}
-                      </td>
-                      <td className="max-w-md p-3">
-                        <div className="truncate" title={crawl.text}>
-                          {crawl.text.length > 100
-                            ? `${crawl.text.substring(0, 100)}...`
-                            : crawl.text}
-                        </div>
-                      </td>
-                      <td className="p-3 text-sm text-gray-600">
-                        {new Date(crawl.createdAt).toLocaleDateString('ko-KR', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </td>
-                      <td className="p-3 text-sm text-gray-600">
-                        {new Date(crawl.updatedAt).toLocaleDateString('ko-KR', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </td>
-                      <td className="flex items-center gap-2 p-3">
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                          완료
-                        </span>
-                        <Button
-                          onClick={() =>
-                            handleDeleteAllCrawl(crawl.coverLetterId)
-                          }
-                          className="ml-2 rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
-                        >
-                          삭제
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+          <div className="overflow-hidden">
+            {/* 헤더(데스크톱) */}
+            <div className="hidden grid-cols-12 bg-[#fafbfc] p-3 text-sm font-medium text-gray-700 md:grid">
+              <div className="col-span-1">ID</div>
+              <div className="col-span-5">내용 미리보기</div>
+              <div className="col-span-2">생성일</div>
+              <div className="col-span-2">수정일</div>
+              <div className="col-span-1 text-center">상태</div>
+              <div className="col-span-1 text-center">삭제</div>
+            </div>
+
+            {/* 항목 리스트: 모바일은 카드형, 데스크톱은 그리드 행 */}
+            <div>
+              {crawlList?.map((crawl: CrawlItem) => (
+                <div
+                  key={crawl.coverLetterId}
+                  className="flex flex-col border-b px-3 py-3 hover:bg-gray-50 md:grid md:grid-cols-12 md:items-center"
+                >
+                  <div className="font-mono text-sm text-gray-800 md:col-span-1">
+                    {crawl.coverLetterId}
+                  </div>
+
+                  <div className="text-sm text-gray-700 md:col-span-5">
+                    <div className="truncate" title={crawl.text}>
+                      {crawl.text.length > 120
+                        ? `${crawl.text.substring(0, 120)}...`
+                        : crawl.text}
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-gray-600 md:col-span-2">
+                    {new Date(crawl.createdAt).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </div>
+
+                  <div className="text-sm text-gray-600 md:col-span-2">
+                    {new Date(crawl.updatedAt).toLocaleDateString('ko-KR', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </div>
+
+                  <span className="mx-auto flex w-14 items-center justify-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 md:col-span-1">
+                    완료
+                  </span>
+
+                  <Button
+                    onClick={() => handleDeleteAllCrawl(crawl.coverLetterId)}
+                    className="mx-auto w-14 rounded-md bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 md:col-span-1"
+                  >
+                    삭제
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
         )}
-      </div>
-
-      {/* 통계 정보 */}
-      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-lg bg-blue-50 p-4">
-          <h4 className="font-semibold text-blue-900">전체 크롤링 수</h4>
-          <p className="text-2xl font-bold text-blue-700">
-            {crawlList?.length || 0}
-          </p>
-        </div>
-        <div className="rounded-lg bg-green-50 p-4">
-          <h4 className="font-semibold text-green-900">선택된 항목</h4>
-          <p className="text-2xl font-bold text-green-700">
-            {selectedCrawls.length}
-          </p>
-        </div>
-        <div className="rounded-lg bg-purple-50 p-4">
-          <h4 className="font-semibold text-purple-900">크롤링 상태</h4>
-          <p className="text-2xl font-bold text-purple-700">
-            {startCrawlMutation.isPending ? '진행중' : '대기'}
-          </p>
-        </div>
       </div>
     </div>
   );

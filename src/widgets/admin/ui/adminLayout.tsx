@@ -9,7 +9,8 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
 
   const routerMenu = [
     { name: '크롤링 관리', path: '/admin/crawl' },
-    { name: '데이터 관리', path: '/admin/data' },
+    { name: '이력서 복구', path: '/admin/restore/resumes' },
+    { name: '자소서 복구', path: '/admin/restore/cover-letters' },
     { name: '로그 관리', path: '/admin/log' },
     { name: '회원 관리', path: '/admin/users' },
   ];
