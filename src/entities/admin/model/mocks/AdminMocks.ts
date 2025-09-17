@@ -119,3 +119,47 @@ export const mockCrawlDetail: CrawlDetailResponse = {
   },
   timestamp: Date.now(),
 };
+
+export const mockCrawlStartResponse = {
+  success: true,
+  message: '요청이 성공적으로 처리되었습니다.',
+  data: {
+    success: true,
+    message: '자소서 크롤링이 완료되었습니다.',
+    crawledCount: 150,
+  },
+  timestamp: '2024-01-15T14:30:00',
+};
+
+export const mockCrawlDeleteResponse = {
+  success: true,
+  message: '크롤링 데이터가 삭제되었습니다.',
+  data: null,
+  timestamp: '2024-01-15T14:30:00',
+};
+
+export const mockCrawlUpdateResponse = {
+  success: true,
+  message: '요청이 성공적으로 처리되었습니다.',
+  data: {
+    coverLetterId: 1,
+    text: '저는 소프트웨어 개발 분야에서 지속적인 성장을 추구하는 개발자입니다...',
+    createdAt: '2024-01-15T10:00:00',
+    updatedAt: '2024-01-15T14:30:00',
+  },
+  timestamp: '2024-01-15T14:30:00',
+};
+
+export const mockAdminResumePatchResponse = {
+  success: true,
+  message: '이력서가 복구되었습니다.',
+  data: null,
+  timestamp: '2024-01-15T14:30:00',
+};
+
+export const mockAdminCoverLetterPatchResponse = {
+  success: true,
+  message: '자기소개서가 복구되었습니다.',
+  data: null,
+  timestamp: '2024-01-15T14:30:00',
+};
