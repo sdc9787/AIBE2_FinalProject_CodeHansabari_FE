@@ -517,7 +517,7 @@ const ChangeStatusModal = ({
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-96 rounded-lg bg-white p-6">
         <h3 className="mb-4 text-lg font-bold">회원 상태 변경</h3>
 
@@ -585,7 +585,7 @@ const ChangeRoleModal = ({ memberId, currentRole, onClose, mutation }: any) => {
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-96 rounded-lg bg-white p-6">
         <h3 className="mb-4 text-lg font-bold">회원 역할 변경</h3>
 
@@ -643,7 +643,7 @@ const ForceLogoutModal = ({ memberId, memberName, onClose, mutation }: any) => {
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-96 rounded-lg bg-white p-6">
         <h3 className="mb-4 text-lg font-bold">강제 로그아웃</h3>
 
