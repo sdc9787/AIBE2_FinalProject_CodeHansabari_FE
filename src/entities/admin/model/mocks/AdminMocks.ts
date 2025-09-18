@@ -88,26 +88,45 @@ export const mockAdminCoverLetterList: AdminCoverLetterListResponse = {
 export const mockCrawlList: CrawlListResponse = {
   success: true,
   message: '크롤링된 자기소개서 목록 조회 성공',
-  data: [
-    {
-      coverLetterId: 101,
-      text: '크롤링된 자기소개서 예시 텍스트 1 - 회사 지원 동기 및 경험 설명',
-      createdAt: '2025-09-10T08:00:00',
-      updatedAt: '2025-09-10T08:00:00',
+  data: {
+    content: [
+      {
+        coverLetterId: 101,
+        text: '크롤링된 자기소개서 예시 텍스트 1 - 회사 지원 동기 및 경험 설명',
+        createdAt: '2025-09-10T08:00:00',
+        updatedAt: '2025-09-10T08:00:00',
+      },
+      {
+        coverLetterId: 102,
+        text: '크롤링된 자기소개서 예시 텍스트 2 - 프로젝트 경험과 기술 스택 요약',
+        createdAt: '2025-09-09T12:30:00',
+        updatedAt: '2025-09-09T12:30:00',
+      },
+      {
+        coverLetterId: 103,
+        text: '크롤링된 자기소개서 예시 텍스트 3 - 문제 해결 사례 중심',
+        createdAt: '2025-09-08T15:45:00',
+        updatedAt: '2025-09-08T15:45:00',
+      },
+    ],
+    pageable: {
+      sort: { sorted: true, unsorted: false, empty: false },
+      offset: 0,
+      pageNumber: 0,
+      pageSize: 20,
+      paged: true,
+      unpaged: false,
     },
-    {
-      coverLetterId: 102,
-      text: '크롤링된 자기소개서 예시 텍스트 2 - 프로젝트 경험과 기술 스택 요약',
-      createdAt: '2025-09-09T12:30:00',
-      updatedAt: '2025-09-09T12:30:00',
-    },
-    {
-      coverLetterId: 103,
-      text: '크롤링된 자기소개서 예시 텍스트 3 - 문제 해결 사례 중심',
-      createdAt: '2025-09-08T15:45:00',
-      updatedAt: '2025-09-08T15:45:00',
-    },
-  ],
+    totalElements: 3,
+    totalPages: 1,
+    last: true,
+    size: 20,
+    number: 0,
+    sort: { sorted: true, unsorted: false, empty: false },
+    numberOfElements: 3,
+    first: true,
+    empty: false,
+  },
   timestamp: Date.now(),
 };
 

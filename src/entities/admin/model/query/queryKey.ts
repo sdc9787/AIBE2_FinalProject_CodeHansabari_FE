@@ -3,7 +3,8 @@ export const adminQueryKeys = {
     ['admin', 'resumes', page, size] as const,
   coverLetters: (page: number, size: number) =>
     ['admin', 'coverLetters', page, size] as const,
-  crawlList: () => ['admin', 'crawl', 'list'] as const,
+  crawlList: (page: number, size: number) =>
+    ['admin', 'crawl', 'list', page, size] as const,
   crawlDetail: (id: number) => ['admin', 'crawl', 'detail', id] as const,
   members: (params: any) => ['admin', 'members', params] as const,
   memberDetail: (memberId: number) =>

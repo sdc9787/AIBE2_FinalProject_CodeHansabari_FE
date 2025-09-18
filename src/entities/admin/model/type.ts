@@ -5,11 +5,33 @@ export interface CrawlItem {
   updatedAt: string; // ISO datetime
 }
 
+// paginated crawl list response returned from /api/crawled-cover-letters/
+export interface CrawlListPagedData {
+  content: CrawlItem[];
+  pageable: {
+    sort: { sorted: boolean; unsorted: boolean; empty: boolean };
+    offset: number;
+    pageNumber: number;
+    pageSize: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
+  size: number;
+  number: number;
+  sort: { sorted: boolean; unsorted: boolean; empty: boolean };
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
+}
+
 export interface CrawlListResponse {
   success: boolean;
   message: string;
-  data: CrawlItem[];
-  timestamp: number;
+  data: CrawlListPagedData;
+  timestamp: number | string;
 }
 
 export interface CrawlDetailResponse {
