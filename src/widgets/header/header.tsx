@@ -68,7 +68,7 @@ export function Header() {
   return (
     <>
       {/* 헤더 */}
-      <header className="fixed inset-x-0 top-0 z-50 h-20 border-b border-black/10 bg-white/95 backdrop-blur-sm">
+      <header className="fixed inset-x-0 top-0 z-50 h-[84px] border-b border-black/10 bg-white/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <div className="flex items-center gap-8">
             <Link
