@@ -17,9 +17,10 @@ export function UserInfo({ className }: UserInfoProps) {
   // 로딩 중일 때는 스켈레톤 표시
   if (isLoading) {
     return (
+      // 로그인 버튼과 동일한 높이/모양의 스켈레톤을 사용해서 레이아웃 점프를 방지합니다.
       <div className={className}>
         <div className="animate-pulse">
-          <div className="h-8 w-8 rounded-full bg-gray-200"></div>
+          <div className="h-[52px] w-32 rounded-full bg-gray-200"></div>
         </div>
       </div>
     );

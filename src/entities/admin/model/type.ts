@@ -102,3 +102,83 @@ export interface AdminCoverLetterListResponse {
   errorCode?: string | null;
   canRetry?: boolean | null;
 }
+
+// 회원 관리 관련 타입들
+export interface FetchAdminMembersParams {
+  page?: number;
+  size?: number;
+  email?: string;
+  name?: string;
+  role?: 'USER' | 'ADMIN' | 'ROOT';
+  status?: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  sortBy?: 'createdAt' | 'lastLoginAt' | 'email' | 'name';
+  sortDirection?: 'asc' | 'desc';
+}
+
+export interface AdminMemberItem {
+  memberId: number;
+  email: string;
+  name: string;
+  picture: string;
+  role: 'USER' | 'ADMIN' | 'ROOT';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  lastLoginAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminMemberListResponse {
+  success: boolean;
+  message: string;
+  data: {
+    content: AdminMemberItem[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+    first: boolean;
+    last: boolean;
+  };
+  timestamp: string;
+}
+
+export interface AdminMemberDetailItem {
+  memberId: number;
+  googleId: string;
+  email: string;
+  name: string;
+  picture: string;
+  role: 'USER' | 'ADMIN' | 'ROOT';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+  lastLoginAt: string;
+  createdAt: string;
+  updatedAt: string;
+  coverLetterCount: number;
+  resumeCount: number;
+}
+
+export interface AdminMemberDetailResponse {
+  success: boolean;
+  message: string;
+  data: AdminMemberDetailItem;
+  timestamp: string;
+}
+
+export interface AdminMemberStatistics {
+  totalMembers: number;
+  activeMembers: number;
+  inactiveMembers: number;
+  suspendedMembers: number;
+  userRoleCount: number;
+  adminRoleCount: number;
+  rootRoleCount: number;
+  todayNewMembers: number;
+  monthlyNewMembers: number;
+}
+
+export interface AdminMemberStatisticsResponse {
+  success: boolean;
+  message: string;
+  data: AdminMemberStatistics;
+  timestamp: string;
+}

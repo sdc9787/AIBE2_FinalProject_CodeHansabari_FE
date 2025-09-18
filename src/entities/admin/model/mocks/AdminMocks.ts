@@ -3,6 +3,9 @@ import {
   AdminCoverLetterListResponse,
   CrawlListResponse,
   CrawlDetailResponse,
+  AdminMemberListResponse,
+  AdminMemberDetailResponse,
+  AdminMemberStatisticsResponse,
 } from '../type';
 
 export const mockAdminResumeList: AdminResumeListResponse = {
@@ -161,5 +164,114 @@ export const mockAdminCoverLetterPatchResponse = {
   success: true,
   message: '자기소개서가 복구되었습니다.',
   data: null,
+  timestamp: '2024-01-15T14:30:00',
+};
+
+// 회원 관리 Mock 데이터
+export const mockAdminMemberList: AdminMemberListResponse = {
+  success: true,
+  message: '회원 목록 조회 성공',
+  data: {
+    content: [
+      {
+        memberId: 1,
+        email: 'user@example.com',
+        name: '홍길동',
+        picture: 'https://example.com/profile.jpg',
+        role: 'USER',
+        status: 'ACTIVE',
+        lastLoginAt: '2025-09-08T10:30:00',
+        createdAt: '2025-09-01T09:00:00',
+        updatedAt: '2025-09-08T10:30:00',
+      },
+      {
+        memberId: 2,
+        email: 'admin@example.com',
+        name: '관리자',
+        picture: 'https://example.com/admin.jpg',
+        role: 'ADMIN',
+        status: 'ACTIVE',
+        lastLoginAt: '2025-09-08T11:15:00',
+        createdAt: '2025-08-15T14:20:00',
+        updatedAt: '2025-09-08T11:15:00',
+      },
+      {
+        memberId: 3,
+        email: 'test@example.com',
+        name: '테스트유저',
+        picture: 'https://example.com/test.jpg',
+        role: 'USER',
+        status: 'INACTIVE',
+        lastLoginAt: '2025-08-20T09:30:00',
+        createdAt: '2025-08-01T10:00:00',
+        updatedAt: '2025-08-20T09:30:00',
+      },
+      {
+        memberId: 4,
+        email: 'suspended@example.com',
+        name: '정지유저',
+        picture: 'https://example.com/suspended.jpg',
+        role: 'USER',
+        status: 'SUSPENDED',
+        lastLoginAt: '2025-07-15T14:20:00',
+        createdAt: '2025-07-01T11:30:00',
+        updatedAt: '2025-07-15T14:20:00',
+      },
+      {
+        memberId: 5,
+        email: 'root@example.com',
+        name: '최고관리자',
+        picture: 'https://example.com/root.jpg',
+        role: 'ROOT',
+        status: 'ACTIVE',
+        lastLoginAt: '2025-09-08T12:00:00',
+        createdAt: '2025-01-01T00:00:00',
+        updatedAt: '2025-09-08T12:00:00',
+      },
+    ],
+    totalElements: 150,
+    totalPages: 15,
+    size: 10,
+    number: 0,
+    first: true,
+    last: false,
+  },
+  timestamp: '2024-01-15T14:30:00',
+};
+
+export const mockAdminMemberDetail: AdminMemberDetailResponse = {
+  success: true,
+  message: '회원 상세 조회 성공',
+  data: {
+    memberId: 1,
+    googleId: 'google_123456789',
+    email: 'user@example.com',
+    name: '홍길동',
+    picture: 'https://lh3.googleusercontent.com/...',
+    role: 'USER',
+    status: 'ACTIVE',
+    lastLoginAt: '2025-09-08T10:30:00',
+    createdAt: '2025-09-01T09:00:00',
+    updatedAt: '2025-09-08T10:30:00',
+    coverLetterCount: 5,
+    resumeCount: 2,
+  },
+  timestamp: '2024-01-15T14:30:00',
+};
+
+export const mockAdminMemberStatistics: AdminMemberStatisticsResponse = {
+  success: true,
+  message: '회원 통계 조회 성공',
+  data: {
+    totalMembers: 1250,
+    activeMembers: 1180,
+    inactiveMembers: 65,
+    suspendedMembers: 5,
+    userRoleCount: 1200,
+    adminRoleCount: 48,
+    rootRoleCount: 2,
+    todayNewMembers: 12,
+    monthlyNewMembers: 89,
+  },
   timestamp: '2024-01-15T14:30:00',
 };

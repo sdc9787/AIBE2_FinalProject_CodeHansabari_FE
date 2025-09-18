@@ -11,8 +11,9 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
     { name: '크롤링 관리', path: '/admin/crawl' },
     { name: '이력서 복구', path: '/admin/restore/resumes' },
     { name: '자소서 복구', path: '/admin/restore/cover-letters' },
-    { name: '로그 관리', path: '/admin/log' },
     { name: '회원 관리', path: '/admin/users' },
+    { name: '회원 통계', path: '/admin/users/statistics' },
+    { name: '로그 관리', path: '/admin/log' },
   ];
 
   function isActive(path: string) {
@@ -22,8 +23,8 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <aside className="w-64 border-r border-gray-200 bg-white">
+    <div className="flex bg-gray-50">
+      <aside className="fixed top-20 bottom-0 w-56 border-r border-gray-200 bg-white">
         <nav className="px-2 py-4">
           <ul className="space-y-1">
             {routerMenu.map((m) => {
@@ -48,7 +49,7 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
         </nav>
       </aside>
 
-      <main className="flex-1 p-6">{children}</main>
+      <main className="h-full flex-1 p-6 pl-60">{children}</main>
     </div>
   );
 }

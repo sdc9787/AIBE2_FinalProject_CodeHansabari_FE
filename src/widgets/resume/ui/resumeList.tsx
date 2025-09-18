@@ -175,13 +175,24 @@ export function ResumeList() {
         >
           <h2 className="text-3xl font-bold text-gray-800">이력서 관리</h2>
           <div className="flex space-x-3">
-            <Button
-              onClick={handleConvertResume}
-              variant="secondary"
-              className="transform rounded-xl border border-blue-600 bg-white px-6 py-3 font-semibold text-blue-600 shadow-lg transition-all duration-200 hover:bg-blue-50"
-            >
-              이력서 변환
-            </Button>
+            <div className="group relative">
+              <Button
+                onClick={handleConvertResume}
+                variant="secondary"
+                className="transform rounded-xl border border-blue-600 bg-white px-6 py-3 font-semibold text-blue-600 shadow-lg transition-all duration-200 hover:bg-blue-50"
+              >
+                이력서 변환
+              </Button>
+
+              {/* Hover tooltip showing estimated token usage */}
+              <div className="pointer-events-none absolute top-full right-0 z-10 mt-2 w-40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                  예상 사용 토큰: <span className="font-medium">5</span>개
+                </div>
+                {/* 화살표 */}
+                <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
+              </div>
+            </div>
             <Button
               onClick={handleCreateNew}
               variant="primary"
