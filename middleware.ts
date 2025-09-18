@@ -8,7 +8,11 @@ const protectedRoutes = [
   '/cover-letter',
   '/resume',
   '/interview-questions',
-  // 필요에 따라 더 추가
+  '/admin/users/statistics',
+  '/admin/users',
+  '/admin/crawl',
+  '/admin/restore/resumes',
+  '/admin/restore/cover-letters',
 ];
 
 /**
@@ -26,7 +30,9 @@ const publicRoutes = [
  */
 async function checkAuthStatus(
   request: NextRequest,
-): Promise<boolean | 'refresh_needed'> {
+): Promise<
+  boolean | 'refresh_needed' | { authenticated?: boolean; role?: string }
+> {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -68,7 +74,9 @@ async function checkAuthStatus(
 
     if (response.ok) {
       const data = await response.json();
-      return data.success && data.data.authenticated;
+      // Return the API's data object so middleware can inspect role, etc.
+      // expected shape: { authenticated: boolean, role?: string, ... }
+      return data.data || (data.success && { authenticated: true });
     }
 
     return false;
@@ -116,6 +124,33 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // 추가: /admin 경로 접근시 role 체크 (USER는 접근 불가)
+  if (pathname.startsWith('/admin')) {
+    const authResult = await checkAuthStatus(request);
+
+    if (authResult === 'refresh_needed') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/auth/refresh';
+      url.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(url);
+    }
+
+    // authResult may be an object with role
+    if (typeof authResult === 'object') {
+      const role = (authResult as any).role;
+      const authenticated = (authResult as any).authenticated;
+      if (!authenticated || role === 'USER') {
+        const url = request.nextUrl.clone();
+        url.pathname = '/';
+        return NextResponse.redirect(url);
+      }
+    } else if (!authResult) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+  }
+
   return NextResponse.next();
 }
 
@@ -124,5 +159,6 @@ export const config = {
     '/cover-letter/:path*',
     '/resume/:path*',
     '/interview-questions/:path*',
+    '/admin/:path*',
   ],
 };
