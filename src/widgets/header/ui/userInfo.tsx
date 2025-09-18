@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useUserMe } from '@/entities/user/model/query/useUserMe';
 import { useUserStore } from '@/shared';
 import { GoogleLoginButton, LogoutButton } from '@/features';
@@ -10,6 +11,7 @@ interface UserInfoProps {
 }
 
 export function UserInfo({ className }: UserInfoProps) {
+  const router = useRouter();
   const { isLoading } = useUserMe();
   const { user, isAuthenticated } = useUserStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -80,7 +82,20 @@ export function UserInfo({ className }: UserInfoProps) {
               <p className="text-sm font-medium text-gray-900">{user.name}</p>
               <p className="text-xs text-gray-500">{user.email}</p>
             </div>
-            <div className="p-2">
+            <div className="space-y-1 p-2">
+              {/* 관리자 권한이 있는 경우 관리자 페이지로 이동하는 버튼 노출 */}
+              {user.role && user.role !== 'USER' && (
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    router.push('/admin/users/statistics');
+                  }}
+                  className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  관리자 페이지
+                </button>
+              )}
+
               <LogoutButton className="w-full rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50" />
             </div>
           </div>

@@ -8,18 +8,31 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
   const pathname = usePathname();
 
   const routerMenu = [
+    { name: '회원 통계', path: '/admin/users/statistics' },
+    { name: '회원 관리', path: '/admin/users' },
     { name: '크롤링 관리', path: '/admin/crawl' },
     { name: '이력서 복구', path: '/admin/restore/resumes' },
     { name: '자소서 복구', path: '/admin/restore/cover-letters' },
-    { name: '회원 관리', path: '/admin/users' },
-    { name: '회원 통계', path: '/admin/users/statistics' },
-    { name: '로그 관리', path: '/admin/log' },
   ];
 
   function isActive(path: string) {
-    if (path === '/admin')
-      return pathname === '/admin' || pathname === '/admin/';
-    return pathname?.startsWith(path);
+    const normalize = (s?: string) => (s || '').replace(/\/$/, '');
+    const np = normalize(pathname ?? '');
+    const p = normalize(path);
+
+    if (p === '/admin') return np === '/admin' || np === '';
+
+    // Special-case: keep '/admin/users' from matching '/admin/users/statistics'
+    if (p === '/admin/users') {
+      // active when exactly on /admin/users or on subpaths that are not /admin/users/statistics
+      return (
+        np === '/admin/users' ||
+        (np.startsWith('/admin/users/') &&
+          !np.startsWith('/admin/users/statistics'))
+      );
+    }
+
+    return np === p || np.startsWith(p + '/');
   }
 
   return (
