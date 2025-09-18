@@ -1,23 +1,65 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/shared/ui';
+import React, { useState, useEffect } from 'react';
 import { useCrawlList, type CrawlItem } from '@/entities/admin';
 import { useStartCrawl } from '@/features/start-crawl';
 import { useDeleteCrawl } from '@/features/delete-crawl';
+import { useUpdateCrawl } from '@/features/update-crawl';
 
 export const AdminCrawl = () => {
-  const [selectedCrawls, setSelectedCrawls] = useState<number[]>([]);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 데이터 훅
+  const [filters, setFilters] = useState<{
+    status: 'ALL' | 'ACTIVE';
+  }>({
+    status: 'ALL',
+  });
+
+  // 페이지네이션 정보
+  const [pageInfo, setPageInfo] = useState({
+    totalElements: 0,
+    totalPages: 0,
+    currentPage: 0,
+    pageSize: 10,
+  });
+
+  // 수정 모달 상태
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    crawlId: number;
+    currentText: string;
+  }>({
+    isOpen: false,
+    crawlId: 0,
+    currentText: '',
+  });
+
   const {
-    data: crawlList,
-    isLoading: isListLoading,
-    error: listError,
-    refetch: refetchCrawlList,
-  } = useCrawlList();
+    data: crawlPage,
+    isLoading: queryLoading,
+    error,
+    refetch,
+  } = useCrawlList({ page, size });
+
+  const content = crawlPage?.content ?? [];
+
   const startCrawlMutation = useStartCrawl();
   const deleteAllCrawlMutation = useDeleteCrawl();
+  const updateCrawlMutation = useUpdateCrawl();
+
+  // 페이지네이션 정보 업데이트
+  useEffect(() => {
+    if (crawlPage) {
+      setPageInfo({
+        totalElements: crawlPage.totalElements,
+        totalPages: crawlPage.totalPages,
+        currentPage: page,
+        pageSize: size,
+      });
+    }
+  }, [crawlPage, page, size]);
 
   const handleStartCrawl = () => startCrawlMutation.mutate({});
 
@@ -28,133 +70,316 @@ export const AdminCrawl = () => {
     if (!window.confirm(confirmMessage)) return;
     if (crawlId) deleteAllCrawlMutation.mutate({ id: crawlId });
     else deleteAllCrawlMutation.mutate({});
-    setSelectedCrawls([]);
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      status: 'ALL',
+    });
+    setPage(0);
+  };
+
+  // 페이지 변경
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  // 수정 모달 열기/닫기
+  const openEditModal = (crawlId: number, currentText: string) => {
+    setEditModal({
+      isOpen: true,
+      crawlId,
+      currentText,
+    });
+  };
+
+  const closeEditModal = () => {
+    setEditModal({
+      isOpen: false,
+      crawlId: 0,
+      currentText: '',
+    });
   };
 
   return (
-    <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between rounded-lg border border-[#e2e8f0] bg-[#fafbfc] p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">크롤링 관리</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            자기소개서 크롤링 결과를 조회하고, 새로운 크롤링을 시작하거나
-            데이터를 관리할 수 있습니다.
-          </p>
+    <div className="flex h-full w-full flex-col items-start justify-start gap-4 overflow-y-scroll">
+      <h1 className="text-xl font-bold text-black">크롤링 관리</h1>
+
+      {/* 필터 섹션 */}
+      <div className="w-full rounded-sm border border-gray-300 bg-gray-50 p-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* 상태 필터 */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              상태
+            </label>
+            <select
+              className="w-full rounded-sm border border-gray-300 px-3 py-1"
+              value={filters.status}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: e.target.value as any,
+                }))
+              }
+            >
+              <option value="ALL">전체</option>
+              <option value="ACTIVE">활성</option>
+            </select>
+          </div>
+
+          {/* 페이지 크기 */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              페이지 크기
+            </label>
+            <select
+              className="w-full rounded-sm border border-gray-300 px-3 py-1"
+              value={size}
+              onChange={(e) => {
+                setSize(Number(e.target.value));
+                setPage(0);
+              }}
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
+        {/* 액션 버튼 */}
+        <div className="mt-4 flex gap-2">
+          <button
             onClick={handleStartCrawl}
             disabled={startCrawlMutation.isPending}
-            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
           >
             {startCrawlMutation.isPending ? '크롤링 중...' : '크롤링 시작'}
-          </Button>
-
-          <Button
+          </button>
+          <button
             onClick={() => handleDeleteAllCrawl()}
             disabled={
-              !crawlList ||
-              crawlList.length === 0 ||
+              !crawlPage ||
+              !crawlPage.content ||
+              crawlPage.content.length === 0 ||
               deleteAllCrawlMutation.isPending
             }
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+            className="rounded-sm bg-red-500 px-4 py-2 text-white hover:bg-red-600"
           >
             전체 삭제
-          </Button>
+          </button>
+          <button
+            onClick={() => refetch()}
+            className="rounded-sm bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+          >
+            새로고침
+          </button>
+          <button
+            onClick={resetFilters}
+            className="rounded-sm bg-gray-500 px-4 py-2 text-white hover:bg-gray-600"
+          >
+            초기화
+          </button>
         </div>
       </div>
 
-      {/* 목록 영역 */}
-      <div className="rounded-lg border border-[#e2e8f0] bg-white">
-        {isListLoading ? (
-          <div className="p-8 text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
-            <p className="mt-2 text-gray-600">크롤링 목록을 불러오는 중...</p>
+      {/* 크롤링 데이터 리스트 */}
+      <div className="w-full rounded-sm border border-gray-300 bg-white">
+        {/* 헤더 */}
+        <div className="grid grid-cols-[0.5fr_3fr_1fr_1fr_0.8fr_1fr] font-bold text-gray-700">
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            ID
           </div>
-        ) : listError ? (
-          <div className="p-8 text-center">
-            <p className="mb-4 text-red-600">
-              크롤링 목록을 불러오는데 실패했습니다.
-            </p>
-            <Button
-              onClick={() => refetchCrawlList()}
-              className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              다시 시도
-            </Button>
+          <div className="flex h-12 items-center justify-start border-b border-gray-300 bg-gray-50 px-2">
+            내용 미리보기
           </div>
-        ) : !crawlList || crawlList.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-gray-500">크롤링된 데이터가 없습니다.</p>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            생성일
           </div>
-        ) : (
-          <div className="overflow-hidden">
-            {/* 헤더(데스크톱) */}
-            <div className="hidden grid-cols-12 bg-[#fafbfc] p-3 text-sm font-medium text-gray-700 md:grid">
-              <div className="col-span-1">ID</div>
-              <div className="col-span-5">내용 미리보기</div>
-              <div className="col-span-2">생성일</div>
-              <div className="col-span-2">수정일</div>
-              <div className="col-span-1 text-center">상태</div>
-              <div className="col-span-1 text-center">삭제</div>
-            </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            수정일
+          </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            상태
+          </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            작업
+          </div>
 
-            {/* 항목 리스트: 모바일은 카드형, 데스크톱은 그리드 행 */}
-            <div>
-              {crawlList?.map((crawl: CrawlItem) => (
-                <div
-                  key={crawl.coverLetterId}
-                  className="flex flex-col border-b px-3 py-3 hover:bg-gray-50 md:grid md:grid-cols-12 md:items-center"
-                >
-                  <div className="font-mono text-sm text-gray-800 md:col-span-1">
+          {/* 데이터 */}
+          {queryLoading ? (
+            <div className="col-span-6 flex h-20 items-center justify-center">
+              <span className="text-gray-500">로딩 중...</span>
+            </div>
+          ) : content.length === 0 ? (
+            <div className="col-span-6 flex h-20 items-center justify-center">
+              <span className="text-gray-500">
+                조회된 크롤링 데이터가 없습니다.
+              </span>
+            </div>
+          ) : (
+            <>
+              {content.map((crawl: CrawlItem) => (
+                <React.Fragment key={crawl.coverLetterId}>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 transition-colors hover:bg-blue-50">
                     {crawl.coverLetterId}
                   </div>
-
-                  <div className="text-sm text-gray-700 md:col-span-5">
-                    <div className="truncate" title={crawl.text}>
-                      {crawl.text.length > 120
-                        ? `${crawl.text.substring(0, 120)}...`
+                  <div className="flex h-16 items-center justify-start border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    <span className="truncate" title={crawl.text}>
+                      {crawl.text.length > 100
+                        ? `${crawl.text.substring(0, 100)}...`
                         : crawl.text}
-                    </div>
+                    </span>
                   </div>
-
-                  <div className="text-sm text-gray-600 md:col-span-2">
-                    {new Date(crawl.createdAt).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    {new Date(crawl.createdAt).toLocaleDateString()}
                   </div>
-
-                  <div className="text-sm text-gray-600 md:col-span-2">
-                    {new Date(crawl.updatedAt).toLocaleDateString('ko-KR', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    {new Date(crawl.updatedAt).toLocaleDateString()}
                   </div>
-
-                  <span className="mx-auto flex w-14 items-center justify-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 md:col-span-1">
-                    완료
-                  </span>
-
-                  <Button
-                    onClick={() => handleDeleteAllCrawl(crawl.coverLetterId)}
-                    className="mx-auto w-14 rounded-md bg-red-600 px-3 py-1 text-xs text-white hover:bg-red-700 md:col-span-1"
-                  >
-                    삭제
-                  </Button>
-                </div>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 transition-colors hover:bg-blue-50">
+                    <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                      완료
+                    </span>
+                  </div>
+                  <div className="flex h-16 items-center justify-center gap-2 border-b border-gray-200 px-2 transition-colors hover:bg-blue-50">
+                    <button
+                      onClick={() =>
+                        openEditModal(crawl.coverLetterId, crawl.text)
+                      }
+                      disabled={updateCrawlMutation.isPending}
+                      className="rounded bg-blue-600 px-2 py-1 text-xs font-medium text-white hover:bg-blue-700"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAllCrawl(crawl.coverLetterId)}
+                      disabled={deleteAllCrawlMutation.isPending}
+                      className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </React.Fragment>
               ))}
-            </div>
-          </div>
-        )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* 페이지네이션 */}
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={() => handlePageChange(0)}
+          disabled={pageInfo.currentPage === 0}
+          className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          처음
+        </button>
+        <button
+          onClick={() => handlePageChange(pageInfo.currentPage - 1)}
+          disabled={pageInfo.currentPage === 0}
+          className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          이전
+        </button>
+
+        <span className="px-3 py-1 text-sm text-gray-700">
+          {pageInfo.currentPage + 1} / {pageInfo.totalPages}
+          <span className="ml-2 text-gray-500">
+            (총 {pageInfo.totalElements}개)
+          </span>
+        </span>
+
+        <button
+          onClick={() => handlePageChange(pageInfo.currentPage + 1)}
+          disabled={pageInfo.currentPage >= pageInfo.totalPages - 1}
+          className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          다음
+        </button>
+        <button
+          onClick={() => handlePageChange(pageInfo.totalPages - 1)}
+          disabled={pageInfo.currentPage >= pageInfo.totalPages - 1}
+          className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          마지막
+        </button>
+      </div>
+
+      {/* 수정 모달 */}
+      {editModal.isOpen && (
+        <EditCrawlModal
+          crawlId={editModal.crawlId}
+          currentText={editModal.currentText}
+          onClose={closeEditModal}
+          mutation={updateCrawlMutation}
+        />
+      )}
+    </div>
+  );
+};
+
+// 크롤링 데이터 수정 모달 컴포넌트
+const EditCrawlModal = ({
+  crawlId,
+  currentText,
+  onClose,
+  mutation,
+}: {
+  crawlId: number;
+  currentText: string;
+  onClose: () => void;
+  mutation: any;
+}) => {
+  const [text, setText] = useState(currentText);
+
+  const handleSubmit = () => {
+    if (!text.trim()) {
+      alert('내용을 입력해주세요.');
+      return;
+    }
+    mutation.mutate(
+      { crawlId, text },
+      {
+        onSuccess: () => {
+          onClose();
+        },
+      },
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-96 max-w-lg rounded-lg bg-white p-6">
+        <h3 className="mb-4 text-lg font-bold">크롤링 데이터 수정</h3>
+
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium">내용</label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="h-40 w-full rounded border border-gray-300 px-3 py-2"
+            placeholder="크롤링 데이터 내용을 입력해주세요"
+          />
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
+          >
+            취소
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={mutation.isPending}
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {mutation.isPending ? '수정 중...' : '수정'}
+          </button>
+        </div>
       </div>
     </div>
   );

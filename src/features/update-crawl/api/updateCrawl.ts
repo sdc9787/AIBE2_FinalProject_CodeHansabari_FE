@@ -1,5 +1,7 @@
 import { clientFetch } from '@/shared';
 
-export const updateCrawl = (crawlId: number) => {
-  return clientFetch.put(`/api/crawl/cover-letters/${crawlId}`);
+export const updateCrawl = (crawlId: number, text: string) => {
+  return clientFetch.put(`/api/crawled-cover-letters/${crawlId}`, {
+    text,
+  });
 };

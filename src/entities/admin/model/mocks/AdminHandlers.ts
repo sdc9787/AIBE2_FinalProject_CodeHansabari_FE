@@ -32,30 +32,62 @@ export const adminHandlers = [
     return HttpResponse.json(mockAdminCoverLetterPatchResponse);
   }),
 
-  // crawl endpoints
-  http.get('/api/crawl/cover-letters', () => {
-    return HttpResponse.json(mockCrawlList);
+  // crawl endpoints (migrated to /api/crawled-cover-letters)
+  http.get('/api/crawled-cover-letters/', async ({ request }) => {
+    // simple pagination based on query params
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page')) || 0;
+    const size = Number(url.searchParams.get('size')) || 20;
+
+    const all = mockCrawlList.data.content;
+    const start = page * size;
+    const end = start + size;
+    const content = all.slice(start, end);
+
+    return HttpResponse.json({
+      ...mockCrawlList,
+      data: {
+        content,
+        pageable: {
+          sort: { sorted: true, unsorted: false, empty: false },
+          offset: start,
+          pageNumber: page,
+          pageSize: size,
+          paged: true,
+          unpaged: false,
+        },
+        totalElements: all.length,
+        totalPages: Math.max(1, Math.ceil(all.length / size)),
+        last: page >= Math.ceil(all.length / size) - 1,
+        size,
+        number: page,
+        sort: { sorted: true, unsorted: false, empty: false },
+        numberOfElements: content.length,
+        first: page === 0,
+        empty: content.length === 0,
+      },
+    });
   }),
 
-  http.get('/api/crawl/cover-letters/:id', () => {
+  http.get('/api/crawled-cover-letters/:id', () => {
     // Return the same detail mock for now
     return HttpResponse.json(mockCrawlDetail);
   }),
 
   //feature
-  http.post('/api/crawl/cover-letters', () => {
+  http.post('/api/crawled-cover-letters', () => {
     return HttpResponse.json(mockCrawlStartResponse);
   }),
 
-  http.delete('/api/crawl/cover-letters', () => {
+  http.delete('/api/crawled-cover-letters', () => {
     return HttpResponse.json(mockCrawlDeleteResponse);
   }),
 
-  http.delete('/api/crawl/cover-letters/:id', () => {
+  http.delete('/api/crawled-cover-letters/:id', () => {
     return HttpResponse.json(mockCrawlDeleteResponse);
   }),
 
-  http.put('/api/crawl/cover-letters/:id', () => {
+  http.put('/api/crawled-cover-letters/:id', () => {
     return HttpResponse.json(mockCrawlUpdateResponse);
   }),
 

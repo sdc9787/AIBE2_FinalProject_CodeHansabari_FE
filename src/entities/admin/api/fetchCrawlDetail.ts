@@ -4,5 +4,5 @@ import { CrawlDetailResponse } from '@/entities';
 export const fetchCrawlDetail = async (
   coverLetterId: number,
 ): Promise<CrawlDetailResponse> => {
-  return clientFetch.get(`/api/crawl/cover-letters/${coverLetterId}`);
+  return clientFetch.get(`/api/crawled-cover-letters/${coverLetterId}`);
 };
