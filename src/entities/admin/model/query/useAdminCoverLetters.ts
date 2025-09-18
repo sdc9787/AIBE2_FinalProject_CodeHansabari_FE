@@ -4,7 +4,7 @@ import {
   AdminCoverLetterListResponse,
   FetchAdminCoverLettersParams,
 } from '../type';
-import { fetchAdminCoverLetters } from '@/entities/admin/api/fetchAdminCoverLetter';
+import { fetchAdminCoverLetters } from '../../api';
 
 export const useAdminCoverLetters = (params: FetchAdminCoverLettersParams) => {
   const { page, size } = params;

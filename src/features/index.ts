@@ -20,3 +20,12 @@ export * from './convert-resume';
 export * from './delete-crawl';
 export * from './update-crawl';
 export * from './start-crawl';
+
+//관리자 복구
+export * from './restore-resumes';
+export * from './restore-coverLetter';
+
+//관리자 회원 관리
+export * from './change-member-status';
+export * from './change-member-role';
+export * from './force-logout-member';

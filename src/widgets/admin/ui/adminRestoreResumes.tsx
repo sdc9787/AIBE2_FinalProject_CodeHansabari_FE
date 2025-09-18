@@ -1,13 +1,13 @@
 'use client';
 
-import { Button } from '@/shared/ui';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdminResumes } from '@/entities/admin';
 import { useRestoreResume } from '@/features/restore-resumes';
 
 export const AdminRestoreResumes = () => {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [filters, setFilters] = useState<{
     status: 'ACTIVE' | 'DELETED' | 'ALL';
@@ -15,10 +15,23 @@ export const AdminRestoreResumes = () => {
     title: string;
   }>({ status: 'DELETED', email: '', title: '' });
 
+  // 페이지네이션 정보
+  const [pageInfo, setPageInfo] = useState({
+    totalElements: 0,
+    totalPages: 0,
+    currentPage: 0,
+    pageSize: 10,
+  });
+
   const formatStatusForApi = (s: typeof filters.status) =>
     s === 'ALL' ? undefined : (s as 'ACTIVE' | 'DELETED');
 
-  const { data, isLoading, error, refetch } = useAdminResumes({
+  const {
+    data,
+    isLoading: queryLoading,
+    error,
+    refetch,
+  } = useAdminResumes({
     page,
     size,
     status: formatStatusForApi(filters.status),
@@ -27,10 +40,19 @@ export const AdminRestoreResumes = () => {
   });
 
   const content = data?.content ?? [];
-  const totalPages = data?.totalPages ?? 0;
-  const totalElements = data?.totalElements ?? 0;
-
   const restoreMutation = useRestoreResume();
+
+  // 페이지네이션 정보 업데이트
+  useEffect(() => {
+    if (data) {
+      setPageInfo({
+        totalElements: data.totalElements,
+        totalPages: data.totalPages,
+        currentPage: page,
+        pageSize: size,
+      });
+    }
+  }, [data, page, size]);
 
   const handleRestore = (id: number) => {
     if (!window.confirm('이력서를 복구하시겠습니까?')) return;
@@ -42,21 +64,21 @@ export const AdminRestoreResumes = () => {
     setPage(0);
   };
 
-  useEffect(() => {
-    // refetch whenever page or size change
-    refetch();
-  }, [page, size]);
+  // 페이지 변경
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  // 상태별 색상
+  const getStatusColor = (status: string) => {
+    if (status === 'ACTIVE') return 'bg-green-100 text-green-800';
+    if (status === 'DELETED') return 'bg-red-100 text-red-800';
+    return 'bg-gray-100 text-gray-800';
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between rounded-lg border border-[#e2e8f0] bg-[#fafbfc] p-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">이력서 복구</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            삭제된 이력서를 관리자 권한으로 복구합니다.
-          </p>
-        </div>
-      </div>
+    <div className="flex h-full w-full flex-col items-start justify-start gap-4 overflow-y-scroll">
+      <h1 className="text-xl font-bold text-black">이력서 복구</h1>
 
       {/* 필터 섹션 */}
       <div className="w-full rounded-sm border border-gray-300 bg-gray-50 p-4">
@@ -78,6 +100,7 @@ export const AdminRestoreResumes = () => {
             >
               <option value="DELETED">DELETED</option>
               <option value="ACTIVE">ACTIVE</option>
+              <option value="ALL">전체</option>
             </select>
           </div>
 
@@ -152,123 +175,136 @@ export const AdminRestoreResumes = () => {
         </div>
       </div>
 
-      <div className="rounded-lg border border-[#e2e8f0] bg-white">
-        <div className="border-b p-4">
-          <h3 className="text-lg font-semibold text-gray-900">
-            복구 가능한 이력서 목록
-          </h3>
-        </div>
-
-        {isLoading ? (
-          <div className="p-8 text-center">로딩 중...</div>
-        ) : error ? (
-          <div className="p-8 text-center">
-            <p className="text-red-600">목록을 불러오는데 실패했습니다.</p>
-            <Button onClick={() => refetch()}>다시 시도</Button>
+      {/* 이력서 리스트 */}
+      <div className="w-full rounded-sm border border-gray-300 bg-white">
+        {/* 헤더 */}
+        <div className="grid grid-cols-[0.5fr_1fr_2fr_1fr_1fr_0.8fr_0.8fr] font-bold text-gray-700">
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            ID
           </div>
-        ) : content.length === 0 ? (
-          <div className="p-8 text-center">복구 가능한 이력서가 없습니다.</div>
-        ) : (
-          <>
-            <div className="overflow-hidden">
-              <div className="hidden grid-cols-12 bg-[#fafbfc] p-3 text-sm font-medium text-gray-700 md:grid">
-                <div className="col-span-1">ID</div>
-                <div className="col-span-3">작성자</div>
-                <div className="col-span-4">제목</div>
-                <div className="col-span-2">삭제일</div>
-                <div className="col-span-1">상태</div>
-                <div className="col-span-1">작업</div>
-              </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            작성자
+          </div>
+          <div className="flex h-12 items-center justify-start border-b border-gray-300 bg-gray-50 px-2">
+            제목
+          </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            생성일
+          </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            삭제일
+          </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            상태
+          </div>
+          <div className="flex h-12 items-center justify-center border-b border-gray-300 bg-gray-50 px-2">
+            작업
+          </div>
 
-              <div>
-                {content.map((item) => (
-                  <div
-                    key={item.resumeId}
-                    className="flex flex-col gap-2 border-b px-4 py-3 hover:bg-gray-50 md:grid md:grid-cols-12 md:items-center"
-                  >
-                    <div className="font-mono text-sm text-gray-800 md:col-span-1">
-                      {item.resumeId}
-                    </div>
-                    <div className="text-sm text-gray-700 md:col-span-3">
-                      {item.authorEmail}
-                    </div>
-                    <div className="text-sm text-gray-700 md:col-span-4">
-                      {item.title}
-                    </div>
-                    <div className="text-sm text-gray-600 md:col-span-2">
-                      {item.deletedAt ?? '-'}
-                    </div>
-                    <div className="flex items-center justify-center md:col-span-1">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${item.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                    <div className="flex justify-center md:col-span-1">
-                      <Button
-                        onClick={() => handleRestore(item.resumeId)}
-                        disabled={item.status === 'ACTIVE'}
-                        aria-disabled={item.status === 'ACTIVE'}
-                        className={
-                          item.status === 'ACTIVE'
-                            ? 'cursor-not-allowed rounded-md bg-gray-300 px-3 py-1 text-sm text-white disabled:opacity-75'
-                            : 'rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700'
-                        }
-                      >
-                        복구
-                      </Button>
-                    </div>
+          {/* 데이터 */}
+          {queryLoading ? (
+            <div className="col-span-7 flex h-20 items-center justify-center">
+              <span className="text-gray-500">로딩 중...</span>
+            </div>
+          ) : content.length === 0 ? (
+            <div className="col-span-7 flex h-20 items-center justify-center">
+              <span className="text-gray-500">조회된 이력서가 없습니다.</span>
+            </div>
+          ) : (
+            <>
+              {content.map((item) => (
+                <React.Fragment key={item.resumeId}>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 transition-colors hover:bg-blue-50">
+                    {item.resumeId}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between border-t p-4">
-              <div className="text-sm text-gray-600">
-                총 페이지: {totalPages || '-'} / 총 항목: {totalElements || '-'}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPage((p) => Math.max(0, p - 1))}
-                  disabled={page <= 0}
-                  className="rounded-sm bg-gray-100 px-3 py-1 disabled:opacity-50"
-                >
-                  이전
-                </button>
-
-                {/* numeric page window (current +/- 2) */}
-                {Array.from({ length: Math.max(0, totalPages) }).map((_, i) => {
-                  const start = Math.max(0, page - 2);
-                  const end = Math.min(totalPages - 1, page + 2);
-                  if (i < start || i > end) return null;
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setPage(i)}
-                      className={`rounded-sm px-3 py-1 ${i === page ? 'bg-indigo-600 text-white' : 'bg-gray-100'}`}
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    {item.authorEmail}
+                  </div>
+                  <div className="flex h-16 items-center justify-start border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    <span className="truncate" title={item.title}>
+                      {item.title}
+                    </span>
+                  </div>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    {item.createdAt
+                      ? new Date(item.createdAt).toLocaleDateString()
+                      : '-'}
+                  </div>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 text-sm transition-colors hover:bg-blue-50">
+                    {item.deletedAt
+                      ? new Date(item.deletedAt).toLocaleDateString()
+                      : '-'}
+                  </div>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 transition-colors hover:bg-blue-50">
+                    <span
+                      className={`rounded px-2 py-1 text-xs font-medium ${getStatusColor(item.status)}`}
                     >
-                      {i + 1}
+                      {item.status === 'ACTIVE' ? '활성화' : '삭제됨'}
+                    </span>
+                  </div>
+                  <div className="flex h-16 items-center justify-center border-b border-gray-200 px-2 transition-colors hover:bg-blue-50">
+                    <button
+                      onClick={() => handleRestore(item.resumeId)}
+                      disabled={
+                        item.status === 'ACTIVE' || restoreMutation.isPending
+                      }
+                      className={`rounded px-3 py-1 text-sm font-medium ${
+                        item.status === 'ACTIVE'
+                          ? 'cursor-not-allowed bg-gray-300 text-gray-500'
+                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                      }`}
+                    >
+                      복구
                     </button>
-                  );
-                })}
-
-                <button
-                  onClick={() =>
-                    setPage((p) => Math.min(totalPages - 1, p + 1))
-                  }
-                  disabled={totalPages <= 1 || page >= totalPages - 1}
-                  className="rounded-sm bg-gray-100 px-3 py-1 disabled:opacity-50"
-                >
-                  다음
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+                  </div>
+                </React.Fragment>
+              ))}
+            </>
+          )}
+        </div>
       </div>
+
+      {/* 페이지네이션 */}
+      {
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => handlePageChange(0)}
+            disabled={pageInfo.currentPage === 0}
+            className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            처음
+          </button>
+          <button
+            onClick={() => handlePageChange(pageInfo.currentPage - 1)}
+            disabled={pageInfo.currentPage === 0}
+            className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            이전
+          </button>
+
+          <span className="px-3 py-1 text-sm text-gray-700">
+            {pageInfo.currentPage + 1} / {pageInfo.totalPages}
+            <span className="ml-2 text-gray-500">
+              (총 {pageInfo.totalElements}개)
+            </span>
+          </span>
+
+          <button
+            onClick={() => handlePageChange(pageInfo.currentPage + 1)}
+            disabled={pageInfo.currentPage >= pageInfo.totalPages - 1}
+            className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            다음
+          </button>
+          <button
+            onClick={() => handlePageChange(pageInfo.totalPages - 1)}
+            disabled={pageInfo.currentPage >= pageInfo.totalPages - 1}
+            className="rounded border border-gray-300 px-3 py-1 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            마지막
+          </button>
+        </div>
+      }
     </div>
   );
 };
