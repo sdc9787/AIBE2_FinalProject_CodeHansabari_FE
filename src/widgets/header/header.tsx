@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserInfo } from './ui';
 import { useUsageTokens } from '@/entities/user/model/query/useUsageTokens';
+import { useUserStore } from '@/shared';
 import Image from 'next/image';
 
 interface MenuItem {
@@ -98,56 +99,58 @@ export function Header() {
             </nav>
           </div>
           <div className="flex items-center justify-center">
-            {/*토큰 사용량 표시 - hover 시 리필 정보 표시 */}
-            <div className="group relative mr-4 hidden sm:block">
-              <div className="flex cursor-pointer items-center gap-2 rounded-md bg-indigo-100/50 px-4 py-2 text-sm font-medium text-indigo-700 transition-all duration-200 hover:bg-indigo-100">
-                {isLoading ? (
-                  <i className="xi-spinner-3 xi-spin"></i>
-                ) : (
-                  <>
-                    <Image
-                      src="/image/coin.png"
-                      width={16}
-                      height={16}
-                      alt="Coin"
-                      className="flex-shrink-0"
-                    />
-                    <span>{tokenUsage?.remainingTokens ?? 0}</span>
-                  </>
+            {/*토큰 사용량 표시 - hover 시 리필 정보 표시 (로그인되어 있을 때만 표시) */}
+            {useUserStore().isAuthenticated && (
+              <div className="group relative mr-4 hidden sm:block">
+                <div className="flex cursor-pointer items-center gap-2 rounded-md bg-indigo-100/50 px-4 py-2 text-sm font-medium text-indigo-700 transition-all duration-200 hover:bg-indigo-100">
+                  {isLoading ? (
+                    <i className="xi-spinner-3 xi-spin"></i>
+                  ) : (
+                    <>
+                      <Image
+                        src="/image/coin.png"
+                        width={16}
+                        height={16}
+                        alt="Coin"
+                        className="flex-shrink-0"
+                      />
+                      <span>{tokenUsage?.remainingTokens ?? 0}</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Hover 시 나타나는 리필 정보 툴팁 */}
+                {!isLoading && (
+                  <div className="pointer-events-none absolute top-full right-0 mt-2 w-48 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
+                    <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
+                      <div className="mb-1 font-medium">토큰 리필 정보</div>
+                      <div className="text-gray-300">
+                        리필 시간: {formattedNextRefill}
+                      </div>
+                      <div className="text-gray-300">
+                        {computedRefillDisplay == null ? (
+                          '리필 토큰: -'
+                        ) : computedRefillDisplay.atMax ? (
+                          <span className="text-green-300">
+                            최대 토큰에 도달했습니다.
+                          </span>
+                        ) : (
+                          <>
+                            리필 토큰:{' '}
+                            <span className="font-medium">
+                              {computedRefillDisplay.amount}
+                            </span>
+                            개
+                          </>
+                        )}
+                      </div>
+                      {/* 화살표 */}
+                      <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
+                    </div>
+                  </div>
                 )}
               </div>
-
-              {/* Hover 시 나타나는 리필 정보 툴팁 */}
-              {!isLoading && (
-                <div className="pointer-events-none absolute top-full right-0 mt-2 w-48 opacity-0 transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
-                  <div className="rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg">
-                    <div className="mb-1 font-medium">토큰 리필 정보</div>
-                    <div className="text-gray-300">
-                      리필 시간: {formattedNextRefill}
-                    </div>
-                    <div className="text-gray-300">
-                      {computedRefillDisplay == null ? (
-                        '리필 토큰: -'
-                      ) : computedRefillDisplay.atMax ? (
-                        <span className="text-green-300">
-                          최대 토큰에 도달했습니다.
-                        </span>
-                      ) : (
-                        <>
-                          리필 토큰:{' '}
-                          <span className="font-medium">
-                            {computedRefillDisplay.amount}
-                          </span>
-                          개
-                        </>
-                      )}
-                    </div>
-                    {/* 화살표 */}
-                    <div className="absolute -top-1 right-4 h-2 w-2 rotate-45 bg-gray-800"></div>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
             <UserInfo />
           </div>
         </div>

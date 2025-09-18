@@ -12,6 +12,7 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
     { name: '이력서 복구', path: '/admin/restore/resumes' },
     { name: '자소서 복구', path: '/admin/restore/cover-letters' },
     { name: '회원 관리', path: '/admin/users' },
+    { name: '회원 통계', path: '/admin/users/statistics' },
     { name: '로그 관리', path: '/admin/log' },
   ];
 

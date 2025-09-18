@@ -118,10 +118,18 @@ export const adminHandlers = [
     });
   }),
 
+  // 통계 API는 더 구체적인 경로를 먼저 매칭하도록 순서 변경
+  http.get('/api/v1/admin/statistics', async () => {
+    await new Promise((resolve) => setTimeout(resolve, 800)); // 0.8초 지연
+    console.log('MSW: Statistics API called');
+    return HttpResponse.json(mockAdminMemberStatistics);
+  }),
+
   http.get('/api/v1/admin/:memberId', async ({ params }) => {
     await new Promise((resolve) => setTimeout(resolve, 500)); // 0.5초 지연
 
     const memberId = Number(params.memberId);
+    console.log('MSW: Member detail API called for memberId:', memberId);
 
     // memberId에 따라 다른 데이터 반환 (예시)
     const memberDetail = {
@@ -135,11 +143,6 @@ export const adminHandlers = [
       ...mockAdminMemberDetail,
       data: memberDetail,
     });
-  }),
-
-  http.get('/api/v1/admin/statistics', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 800)); // 0.8초 지연
-    return HttpResponse.json(mockAdminMemberStatistics);
   }),
 
   // 회원 상태 변경
