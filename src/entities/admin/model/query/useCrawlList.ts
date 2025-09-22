@@ -10,7 +10,11 @@ export const useCrawlList = (
   params: FetchCrawlListParams = { page: 0, size: 20 },
 ) => {
   return useQuery<CrawlListResponse, Error, CrawlListResponse['data']>({
-    queryKey: adminQueryKeys.crawlList(params.page ?? 0, params.size ?? 20),
+    queryKey: adminQueryKeys.crawlList(
+      params.page ?? 0,
+      params.size ?? 20,
+      params.sort,
+    ),
     queryFn: () => fetchCrawlList(params),
     staleTime: 1000 * 60,
     refetchOnWindowFocus: false,

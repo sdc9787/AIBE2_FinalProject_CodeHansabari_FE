@@ -8,21 +8,26 @@ import { useUpdateCrawl } from '@/features/update-crawl';
 
 export const AdminCrawl = () => {
   const [page, setPage] = useState(0);
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState(20);
   const [isLoading, setIsLoading] = useState(false);
+  const [sortField, setSortField] = useState<'createdAt' | 'updatedAt' | ''>(
+    '',
+  );
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const [filters, setFilters] = useState<{
-    status: 'ALL' | 'ACTIVE';
-  }>({
-    status: 'ALL',
-  });
+  // applied filters: only these are used for the actual API query
+  const [appliedPage, setAppliedPage] = useState(0);
+  const [appliedSize, setAppliedSize] = useState(20);
+  const [appliedSort, setAppliedSort] = useState<string | undefined>(undefined);
+
+  // (status filter removed)
 
   // 페이지네이션 정보
   const [pageInfo, setPageInfo] = useState({
     totalElements: 0,
     totalPages: 0,
     currentPage: 0,
-    pageSize: 10,
+    pageSize: 20,
   });
 
   // 수정 모달 상태
@@ -36,12 +41,14 @@ export const AdminCrawl = () => {
     currentText: '',
   });
 
+  const sortParam = sortField ? `${sortField},${sortDirection}` : undefined;
+
   const {
     data: crawlPage,
     isLoading: queryLoading,
     error,
     refetch,
-  } = useCrawlList({ page, size });
+  } = useCrawlList({ page: appliedPage, size: appliedSize, sort: appliedSort });
 
   const content = crawlPage?.content ?? [];
 
@@ -61,6 +68,14 @@ export const AdminCrawl = () => {
     }
   }, [crawlPage, page, size]);
 
+  // listen for crawl list updates (dispatched by modal on successful update)
+  useEffect(() => {
+    const handler = () => refetch();
+    window.addEventListener('crawlListUpdated', handler as EventListener);
+    return () =>
+      window.removeEventListener('crawlListUpdated', handler as EventListener);
+  }, [refetch]);
+
   const handleStartCrawl = () => startCrawlMutation.mutate({});
 
   const handleDeleteAllCrawl = (crawlId?: number) => {
@@ -73,15 +88,26 @@ export const AdminCrawl = () => {
   };
 
   const resetFilters = () => {
-    setFilters({
-      status: 'ALL',
-    });
+    // Reset pagination and page size to defaults
     setPage(0);
+    setSize(20);
+    setSortField('');
+    setSortDirection('desc');
+    // also reset applied filters and refetch default list
+    setAppliedPage(0);
+    setAppliedSize(20);
+    setAppliedSort(undefined);
+    // let the query refetch with default applied filters
+    setTimeout(() => refetch(), 0);
   };
 
   // 페이지 변경
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
+    // when user navigates pages, apply the change immediately
+    setAppliedPage(newPage);
+    // trigger refetch for the new page
+    setTimeout(() => refetch(), 0);
   };
 
   // 수정 모달 열기/닫기
@@ -103,29 +129,55 @@ export const AdminCrawl = () => {
 
   return (
     <div className="flex h-full w-full flex-col items-start justify-start gap-4 overflow-y-scroll">
-      <h1 className="text-xl font-bold text-black">크롤링 관리</h1>
+      {/* Header with action button */}
+      <div className="flex w-full items-center justify-between">
+        <h1 className="text-xl font-bold text-black">크롤링 관리</h1>
+        <div>
+          <button
+            onClick={handleStartCrawl}
+            disabled={startCrawlMutation.isPending}
+            className="rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          >
+            {startCrawlMutation.isPending ? '크롤링 중...' : '크롤링 시작'}
+          </button>
+        </div>
+      </div>
 
       {/* 필터 섹션 */}
       <div className="w-full rounded-sm border border-gray-300 bg-gray-50 p-4">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* 상태 필터 */}
+          {/* (상태 필터 제거됨) */}
+
+          {/* 정렬 */}
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              상태
+              정렬
             </label>
-            <select
-              className="w-full rounded-sm border border-gray-300 px-3 py-1"
-              value={filters.status}
-              onChange={(e) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  status: e.target.value as any,
-                }))
-              }
-            >
-              <option value="ALL">전체</option>
-              <option value="ACTIVE">활성</option>
-            </select>
+            <div className="flex gap-2">
+              <select
+                className="w-1/2 rounded-sm border border-gray-300 px-3 py-1"
+                value={sortField}
+                onChange={(e) => {
+                  setSortField(e.target.value as any);
+                  setPage(0);
+                }}
+              >
+                <option value="">정렬 없음</option>
+                <option value="createdAt">생성일</option>
+                <option value="updatedAt">수정일</option>
+              </select>
+              <select
+                className="w-1/2 rounded-sm border border-gray-300 px-3 py-1"
+                value={sortDirection}
+                onChange={(e) => {
+                  setSortDirection(e.target.value as any);
+                  setPage(0);
+                }}
+              >
+                <option value="desc">내림차순</option>
+                <option value="asc">오름차순</option>
+              </select>
+            </div>
           </div>
 
           {/* 페이지 크기 */}
@@ -134,7 +186,7 @@ export const AdminCrawl = () => {
               페이지 크기
             </label>
             <select
-              className="w-full rounded-sm border border-gray-300 px-3 py-1"
+              className="w-1/2 rounded-sm border border-gray-300 px-3 py-1"
               value={size}
               onChange={(e) => {
                 setSize(Number(e.target.value));
@@ -151,11 +203,16 @@ export const AdminCrawl = () => {
         {/* 액션 버튼 */}
         <div className="mt-4 flex gap-2">
           <button
-            onClick={handleStartCrawl}
-            disabled={startCrawlMutation.isPending}
-            className="rounded-sm bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+            onClick={() => {
+              // apply current selections and refetch
+              setAppliedPage(page);
+              setAppliedSize(size);
+              setAppliedSort(sortParam);
+              setTimeout(() => refetch(), 0);
+            }}
+            className="rounded-sm bg-indigo-500 px-4 py-2 text-white hover:bg-indigo-600"
           >
-            {startCrawlMutation.isPending ? '크롤링 중...' : '크롤링 시작'}
+            검색
           </button>
           <button
             onClick={() => handleDeleteAllCrawl()}
@@ -345,6 +402,10 @@ const EditCrawlModal = ({
       {
         onSuccess: () => {
           onClose();
+          // refresh list after successful update
+          // refetch is provided by the parent via closure? use window event or call a passed callback
+          // We'll dispatch a custom event so parent can listen and refetch.
+          window.dispatchEvent(new CustomEvent('crawlListUpdated'));
         },
       },
     );

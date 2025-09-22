@@ -87,8 +87,51 @@ export const adminHandlers = [
     return HttpResponse.json(mockCrawlDeleteResponse);
   }),
 
-  http.put('/api/crawled-cover-letters/:id', () => {
-    return HttpResponse.json(mockCrawlUpdateResponse);
+  http.put('/api/crawled-cover-letters/:id', async ({ params, request }) => {
+    const id = Number(params.id);
+    const body = (await request.json()) as { text?: string };
+
+    // find and update the item in the in-memory mock list
+    const all = mockCrawlList.data.content;
+    const idx = all.findIndex((it) => it.coverLetterId === id);
+    if (idx === -1) {
+      return HttpResponse.json({
+        success: false,
+        message: '해당 크롤링 데이터를 찾을 수 없습니다.',
+        data: null,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    const now = new Date().toISOString();
+    const existing = all[idx];
+    const updated = {
+      ...existing,
+      text: body.text ?? existing.text,
+      updatedAt: now,
+    };
+    all[idx] = updated;
+
+    // also update detail mock if it matches
+    if (mockCrawlDetail && mockCrawlDetail.data?.coverLetterId === id) {
+      mockCrawlDetail.data = {
+        ...mockCrawlDetail.data,
+        text: updated.text,
+        updatedAt: now,
+      };
+    }
+
+    return HttpResponse.json({
+      success: true,
+      message: '요청이 성공적으로 처리되었습니다.',
+      data: {
+        coverLetterId: id,
+        text: updated.text,
+        createdAt: updated.createdAt,
+        updatedAt: updated.updatedAt,
+      },
+      timestamp: now,
+    });
   }),
 
   // 회원 관리 API
