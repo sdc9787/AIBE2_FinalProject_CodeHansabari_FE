@@ -88,7 +88,7 @@ export function UserInfo({ className }: UserInfoProps) {
                 <button
                   onClick={() => {
                     setIsDropdownOpen(false);
-                    router.push('/admin/users/statistics');
+                    router.push('/admin/users');
                   }}
                   className="w-full rounded-md px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                 >
