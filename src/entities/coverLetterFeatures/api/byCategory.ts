@@ -1,4 +1,5 @@
 import { clientFetch } from '@/shared';
+import type { ApiFeaturePageResponse } from '../model/type';
 
 export const fetchCoverLetterFeaturesByCategory = (
   category: string,
@@ -6,6 +7,9 @@ export const fetchCoverLetterFeaturesByCategory = (
   size = 20,
   sort?: string,
 ) =>
-  clientFetch.get(`/api/cover-letter-features/category/${category}`, {
-    params: { page, size, sort },
-  });
+  clientFetch.get<ApiFeaturePageResponse>(
+    `/api/cover-letter-features/category/${category}`,
+    {
+      params: { page, size, sort },
+    },
+  );

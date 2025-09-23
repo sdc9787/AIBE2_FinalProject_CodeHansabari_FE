@@ -1,5 +1,6 @@
 import {
   adminHandlers,
+  coverLetterEntitiesHandlers,
   coverLetterHandlers,
   interviewQuestionsHandlers,
   resumeHandlers,
@@ -16,6 +17,7 @@ import { coverLetterFeaturesHandlers } from '@/features';
 export const handlers = [
   ...coverLetterHandlers,
   ...coverLetterFeaturesHandlers,
+  ...coverLetterEntitiesHandlers,
   ...resumeHandlers,
   ...interviewQuestionsHandlers,
   ...improveCoverLetterHandlers,

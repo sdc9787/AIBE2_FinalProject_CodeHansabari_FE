@@ -3,9 +3,11 @@ import {
   mockCoverLetterFeaturesStatistics,
   mockRawCoverLetterFeature,
   mockCoverLetterFeature,
+  TOTAL_RAW,
+  CATEGORY_DISTRIBUTION,
 } from './mock';
 
-export const coverLetterFeaturesHandlers = [
+export const coverLetterEntitiesHandlers = [
   // 통계
   http.get('/api/cover-letter-features/statistics', () => {
     return HttpResponse.json(mockCoverLetterFeaturesStatistics);
@@ -16,9 +18,12 @@ export const coverLetterFeaturesHandlers = [
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || '0');
     const size = Number(url.searchParams.get('size') || '20');
-    const start = page * size + 1;
-    const content = Array.from({ length: Math.min(size, 5) }).map((_, i) =>
-      mockRawCoverLetterFeature(start + i),
+    const totalElements = TOTAL_RAW;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const startIdx = page * size + 1;
+    const maxItems = Math.min(size, Math.max(0, totalElements - page * size));
+    const content = Array.from({ length: maxItems }).map((_, i) =>
+      mockRawCoverLetterFeature(startIdx + i),
     );
 
     return HttpResponse.json({
@@ -27,13 +32,13 @@ export const coverLetterFeaturesHandlers = [
       data: {
         content,
         pageable: { pageNumber: page, pageSize: size },
-        totalElements: 5,
-        totalPages: 1,
+        totalElements,
+        totalPages,
         numberOfElements: content.length,
         size,
         number: page,
-        first: true,
-        last: true,
+        first: page === 0,
+        last: page >= totalPages - 1,
         empty: content.length === 0,
       },
     });
@@ -47,10 +52,14 @@ export const coverLetterFeaturesHandlers = [
       const page = Number(url.searchParams.get('page') || '0');
       const size = Number(url.searchParams.get('size') || '20');
       const category = params.category as string;
-      const content = Array.from({ length: Math.min(size, 5) }).map((_, i) => ({
-        ...mockRawCoverLetterFeature(i + 1),
-        featuresCategory: category,
-      }));
+      const categoryTotal = CATEGORY_DISTRIBUTION[category] ?? 0;
+      const totalElements = categoryTotal;
+      const totalPages = Math.max(1, Math.ceil(totalElements / size));
+      const startIdx = page * size + 1;
+      const maxItems = Math.min(size, Math.max(0, totalElements - page * size));
+      const content = Array.from({ length: maxItems }).map((_, i) =>
+        mockRawCoverLetterFeature(startIdx + i, category),
+      );
 
       return HttpResponse.json({
         success: true,
@@ -58,13 +67,13 @@ export const coverLetterFeaturesHandlers = [
         data: {
           content,
           pageable: { pageNumber: page, pageSize: size },
-          totalElements: 5,
-          totalPages: 1,
+          totalElements,
+          totalPages,
           numberOfElements: content.length,
           size,
           number: page,
-          first: true,
-          last: true,
+          first: page === 0,
+          last: page >= totalPages - 1,
           empty: content.length === 0,
         },
       });
@@ -76,8 +85,13 @@ export const coverLetterFeaturesHandlers = [
     const url = new URL(request.url);
     const page = Number(url.searchParams.get('page') || '0');
     const size = Number(url.searchParams.get('size') || '20');
-    const content = Array.from({ length: Math.min(size, 5) }).map((_, i) =>
-      mockCoverLetterFeature(page * size + i + 1),
+    // final features assume same TOTAL_RAW -> pagination based on TOTAL_RAW
+    const totalElements = TOTAL_RAW;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const startIdx = page * size + 1;
+    const maxItems = Math.min(size, Math.max(0, totalElements - page * size));
+    const content = Array.from({ length: maxItems }).map((_, i) =>
+      mockCoverLetterFeature(startIdx + i),
     );
 
     return HttpResponse.json({
@@ -86,13 +100,13 @@ export const coverLetterFeaturesHandlers = [
       data: {
         content,
         pageable: { pageNumber: page, pageSize: size },
-        totalElements: 5,
-        totalPages: 1,
+        totalElements,
+        totalPages,
         numberOfElements: content.length,
         size,
         number: page,
-        first: true,
-        last: true,
+        first: page === 0,
+        last: page >= totalPages - 1,
         empty: content.length === 0,
       },
     });
@@ -106,10 +120,14 @@ export const coverLetterFeaturesHandlers = [
       const page = Number(url.searchParams.get('page') || '0');
       const size = Number(url.searchParams.get('size') || '20');
       const category = params.category as string;
-      const content = Array.from({ length: Math.min(size, 5) }).map((_, i) => ({
-        ...mockCoverLetterFeature(i + 1),
-        featuresCategory: category,
-      }));
+      const categoryTotal = CATEGORY_DISTRIBUTION[category] ?? 0;
+      const totalElements = categoryTotal;
+      const totalPages = Math.max(1, Math.ceil(totalElements / size));
+      const startIdx = page * size + 1;
+      const maxItems = Math.min(size, Math.max(0, totalElements - page * size));
+      const content = Array.from({ length: maxItems }).map((_, i) =>
+        mockCoverLetterFeature(startIdx + i, category),
+      );
 
       return HttpResponse.json({
         success: true,
@@ -117,13 +135,13 @@ export const coverLetterFeaturesHandlers = [
         data: {
           content,
           pageable: { pageNumber: page, pageSize: size },
-          totalElements: 5,
-          totalPages: 1,
+          totalElements,
+          totalPages,
           numberOfElements: content.length,
           size,
           number: page,
-          first: true,
-          last: true,
+          first: page === 0,
+          last: page >= totalPages - 1,
           empty: content.length === 0,
         },
       });

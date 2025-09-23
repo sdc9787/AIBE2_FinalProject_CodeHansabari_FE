@@ -1,4 +1,5 @@
 import { clientFetch } from '@/shared';
+import type { ApiRawByCategoryResponse } from '../model/type';
 
 export const fetchRawCoverLetterFeaturesByCategory = (
   category: string,
@@ -6,6 +7,9 @@ export const fetchRawCoverLetterFeaturesByCategory = (
   size = 20,
   sort?: string,
 ) =>
-  clientFetch.get(`/api/cover-letter-features/raw/category/${category}`, {
-    params: { page, size, sort },
-  });
+  clientFetch.get<ApiRawByCategoryResponse>(
+    `/api/cover-letter-features/raw/category/${category}`,
+    {
+      params: { page, size, sort },
+    },
+  );

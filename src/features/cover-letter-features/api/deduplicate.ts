@@ -1,14 +1,9 @@
 import { clientFetch } from '@/shared';
-
-interface DeduplicateResponse {
-  success: boolean;
-  message: string;
-  data?: any;
-}
+import type { ApiDeduplicateResponse } from '@/entities/coverLetterFeatures/model/type';
 
 export const deduplicateCoverLetterFeatures =
-  async (): Promise<DeduplicateResponse> => {
-    const response = await clientFetch.post(
+  async (): Promise<ApiDeduplicateResponse> => {
+    const response = await clientFetch.post<ApiDeduplicateResponse>(
       '/api/cover-letter-features/deduplicate',
     );
     return response;
