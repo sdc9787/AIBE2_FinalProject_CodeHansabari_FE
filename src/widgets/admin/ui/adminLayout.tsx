@@ -8,9 +8,14 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
   const pathname = usePathname();
 
   const routerMenu = [
-    { name: '회원 통계 및 관리', path: '/admin/users' },
-    { name: '크롤링 관리', path: '/admin/crawl' },
-    { name: '데이터 복구', path: '/admin/restore' },
+    { name: '회원 통계 및 관리', path: '/admin/users', type: 'internal' },
+    { name: '크롤링 관리', path: '/admin/crawl', type: 'internal' },
+    { name: '데이터 복구', path: '/admin/restore', type: 'internal' },
+    {
+      name: '모니터링',
+      path: 'https://codehansabari.grafana.net/d/co5jwnz/cvmento?orgId=1&from=now-6h&to=now&timezone=browser',
+      type: 'external',
+    },
   ];
 
   function isActive(path: string) {
@@ -39,20 +44,37 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
         <nav className="px-2 py-4">
           <ul className="space-y-1">
             {routerMenu.map((m) => {
-              const active = isActive(m.path);
+              // only treat internal routes as active candidates
+              const active = m.type === 'internal' && isActive(m.path);
               return (
                 <li key={m.path}>
-                  <Link
-                    href={m.path}
-                    className={
-                      `flex w-full items-center gap-3 rounded-md px-4 py-3 text-sm transition-colors hover:bg-indigo-50 focus:outline-none ` +
-                      (active
-                        ? 'bg-indigo-100 font-medium text-indigo-700'
-                        : 'text-gray-600')
-                    }
-                  >
-                    <span className="truncate">{m.name}</span>
-                  </Link>
+                  {m.type === 'external' ? (
+                    <a
+                      href={m.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={
+                        `flex w-full items-center gap-3 rounded-md px-4 py-3 text-sm transition-colors hover:bg-indigo-50 focus:outline-none ` +
+                        (active
+                          ? 'bg-indigo-100 font-medium text-indigo-700'
+                          : 'text-gray-600')
+                      }
+                    >
+                      <span className="truncate">{m.name}</span>
+                    </a>
+                  ) : (
+                    <Link
+                      href={m.path}
+                      className={
+                        `flex w-full items-center gap-3 rounded-md px-4 py-3 text-sm transition-colors hover:bg-indigo-50 focus:outline-none ` +
+                        (active
+                          ? 'bg-indigo-100 font-medium text-indigo-700'
+                          : 'text-gray-600')
+                      }
+                    >
+                      <span className="truncate">{m.name}</span>
+                    </Link>
+                  )}
                 </li>
               );
             })}
