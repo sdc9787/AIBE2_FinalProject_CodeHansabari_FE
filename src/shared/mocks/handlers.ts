@@ -11,9 +11,11 @@ import {
   loginGoogleHandler,
   saveCoverLetterHandler,
 } from '@/features';
+import { coverLetterFeaturesHandlers } from '@/features';
 
 export const handlers = [
   ...coverLetterHandlers,
+  ...coverLetterFeaturesHandlers,
   ...resumeHandlers,
   ...interviewQuestionsHandlers,
   ...improveCoverLetterHandlers,

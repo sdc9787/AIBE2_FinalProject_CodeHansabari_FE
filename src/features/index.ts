@@ -21,6 +21,9 @@ export * from './delete-crawl';
 export * from './update-crawl';
 export * from './start-crawl';
 
+// 자소서 특징 처리
+export * from './cover-letter-features';
+
 //관리자 복구
 export * from './restore-resumes';
 export * from './restore-coverLetter';

@@ -1,0 +1,17 @@
+import { useQuery } from '@tanstack/react-query';
+import { coverLetterFeaturesQueryKeys } from './queryKey';
+import { fetchRawCoverLetterFeatures } from '@/entities/coverLetterFeatures/api';
+
+export const useRawCoverLetterFeatures = (
+  page = 0,
+  size = 20,
+  sort?: string,
+) => {
+  return useQuery({
+    queryKey: coverLetterFeaturesQueryKeys.rawList(page, size, sort),
+    queryFn: () => fetchRawCoverLetterFeatures(page, size, sort),
+    staleTime: 1000 * 30,
+    refetchOnWindowFocus: false,
+    select: (res: any) => res.data,
+  });
+};
