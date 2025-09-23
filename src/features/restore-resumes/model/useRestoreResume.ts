@@ -1,9 +1,9 @@
 import { useCustomMutation } from '@/shared';
 import { restoreResume } from '@/features/restore-resumes/api';
 
-export const useRestoreResume = (resumeId?: number) => {
+export const useRestoreResume = () => {
   return useCustomMutation({
-    mutationFn: () => restoreResume(resumeId as number),
+    mutationFn: (resumeId: number) => restoreResume(resumeId),
     successMessage: '이력서가 복구되었습니다.',
     invalidateQueryKeys: [['admin', 'resumes', 'list']],
   });

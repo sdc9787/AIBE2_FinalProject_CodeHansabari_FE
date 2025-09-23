@@ -1,5 +1,6 @@
 import {
   adminHandlers,
+  coverLetterEntitiesHandlers,
   coverLetterHandlers,
   interviewQuestionsHandlers,
   resumeHandlers,
@@ -11,9 +12,12 @@ import {
   loginGoogleHandler,
   saveCoverLetterHandler,
 } from '@/features';
+import { coverLetterFeaturesHandlers } from '@/features';
 
 export const handlers = [
   ...coverLetterHandlers,
+  ...coverLetterFeaturesHandlers,
+  ...coverLetterEntitiesHandlers,
   ...resumeHandlers,
   ...interviewQuestionsHandlers,
   ...improveCoverLetterHandlers,
