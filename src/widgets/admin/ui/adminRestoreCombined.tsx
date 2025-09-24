@@ -422,7 +422,7 @@ export const AdminRestoreCombined = ({
             </table>
 
             {/* pagination */}
-            <div className="mt-4 flex items-center justify-between">
+            <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
               <div className="text-sm text-gray-700">
                 전체 {resumePageInfo.totalElements.toLocaleString()}개
               </div>
@@ -572,7 +572,7 @@ export const AdminRestoreCombined = ({
             </table>
 
             {/* pagination */}
-            <div className="mt-4 flex items-center justify-between">
+            <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
               <div className="text-sm text-gray-700">
                 전체 {coverPageInfo.totalElements.toLocaleString()}개
               </div>

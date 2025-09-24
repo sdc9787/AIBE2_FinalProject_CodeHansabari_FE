@@ -243,20 +243,15 @@ export const AdminMemberStatistics = () => {
   // 상태별 회원 수 도넛 차트 데이터
   const statusChartData = stats
     ? {
-        labels: ['활성', '비활성', '정지'],
+        labels: ['활성', '비활성'],
         datasets: [
           {
             data: [stats.activeMembers || 0, stats.inactiveMembers || 0],
             backgroundColor: [
               'rgba(34, 197, 94, 0.8)',
               'rgba(251, 191, 36, 0.8)',
-              'rgba(239, 68, 68, 0.8)',
             ],
-            borderColor: [
-              'rgba(34, 197, 94, 1)',
-              'rgba(251, 191, 36, 1)',
-              'rgba(239, 68, 68, 1)',
-            ],
+            borderColor: ['rgba(34, 197, 94, 1)', 'rgba(251, 191, 36, 1)'],
             borderWidth: 2,
           },
         ],
@@ -312,7 +307,7 @@ export const AdminMemberStatistics = () => {
   }
 
   return (
-    <div className="flex h-full w-full flex-col items-start justify-start gap-4 overflow-y-scroll p-4">
+    <div className="flex h-full w-full flex-col items-start justify-start gap-4 p-4">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-black">회원 통계 및 관리</h1>
@@ -720,7 +715,7 @@ export const AdminMemberStatistics = () => {
 
         {/* 페이지네이션 */}
         {content.length > 0 && (
-          <div className="mt-4 flex items-center justify-between">
+          <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
             <div className="text-sm text-gray-700">
               전체 {pageInfo.totalElements.toLocaleString()}개 중{' '}
               {pageInfo.currentPage * pageInfo.pageSize + 1}-

@@ -252,7 +252,7 @@ export const AdminCrawl = () => {
   }, [activeTab]);
 
   return (
-    <div className="flex h-full w-full flex-col items-start justify-start gap-4 overflow-y-scroll p-4">
+    <div className="flex h-full w-full flex-col items-start justify-start gap-4 p-4">
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-black">크롤링 관리</h1>
@@ -264,13 +264,6 @@ export const AdminCrawl = () => {
             className="rounded bg-blue-500 px-3 py-1.5 text-sm text-white hover:bg-blue-600"
           >
             새로고침
-          </button>
-          <button
-            onClick={handleStartCrawl}
-            disabled={startCrawlMutation.isPending}
-            className="rounded bg-indigo-500 px-3 py-1.5 text-sm text-white hover:bg-indigo-600"
-          >
-            {startCrawlMutation.isPending ? '크롤링 중...' : '크롤링 시작'}
           </button>
         </div>
       </div>
@@ -357,6 +350,15 @@ export const AdminCrawl = () => {
                   className="rounded bg-blue-500 px-4 py-2 text-sm text-white hover:bg-blue-600"
                 >
                   검색
+                </button>
+                <button
+                  onClick={handleStartCrawl}
+                  disabled={startCrawlMutation.isPending}
+                  className="rounded bg-indigo-500 px-3 py-1.5 text-sm text-white hover:bg-indigo-600"
+                >
+                  {startCrawlMutation.isPending
+                    ? '크롤링 중...'
+                    : '크롤링 시작'}
                 </button>
               </div>
             </div>
@@ -461,7 +463,7 @@ export const AdminCrawl = () => {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 flex items-center justify-between">
+          <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
             <div className="text-sm text-gray-700">
               전체 {crawlPage?.totalElements.toLocaleString() || 0}개 중{' '}
               {page * size + 1}-
@@ -695,7 +697,7 @@ export const AdminCrawl = () => {
           {/* pagination */}
           {currentExtractQuery.data &&
             currentExtractQuery.data.totalPages > 1 && (
-              <div className="mt-4 flex items-center justify-between">
+              <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
                 <div className="text-sm text-gray-700">
                   전체 {currentExtractQuery.data.totalElements.toLocaleString()}
                   개
@@ -939,7 +941,7 @@ export const AdminCrawl = () => {
 
           {/* pagination */}
           {currentFinalQuery.data && currentFinalQuery.data.totalPages > 1 && (
-            <div className="mt-4 flex items-center justify-between">
+            <div className="sticky bottom-0 z-40 flex items-center justify-between border-t border-gray-200 bg-white/90 py-4 backdrop-blur-sm">
               <div className="text-sm text-gray-700">
                 전체 {currentFinalQuery.data.totalElements.toLocaleString()}개
                 {category && (
