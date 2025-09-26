@@ -16,6 +16,7 @@ export const useCrawlList = (
       params.sort,
     ),
     queryFn: () => fetchCrawlList(params),
+    retry: 0,
     staleTime: 1000 * 60,
     refetchOnWindowFocus: false,
     select: (res) => res.data,

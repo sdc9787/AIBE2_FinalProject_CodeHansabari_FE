@@ -18,5 +18,6 @@ export const useCoverLetterFeaturesByCategory = (
     staleTime: 1000 * 30,
     refetchOnWindowFocus: false,
     select: (res: ApiFeaturePageResponse) => res.data,
+    retry: 0,
   });
 };

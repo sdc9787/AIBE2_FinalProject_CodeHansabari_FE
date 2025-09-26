@@ -10,5 +10,6 @@ export const useCoverLetterFeatures = (page = 0, size = 20, sort?: string) => {
     staleTime: 1000 * 30,
     refetchOnWindowFocus: false,
     select: (res: ApiFeaturePageResponse) => res.data,
+    retry: 0,
   });
 };

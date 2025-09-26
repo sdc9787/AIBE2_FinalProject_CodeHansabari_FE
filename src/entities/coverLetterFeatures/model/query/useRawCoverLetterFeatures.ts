@@ -14,5 +14,6 @@ export const useRawCoverLetterFeatures = (
     staleTime: 1000 * 30,
     refetchOnWindowFocus: false,
     select: (res: ApiRawPageResponse) => res.data,
+    retry: 0,
   });
 };
