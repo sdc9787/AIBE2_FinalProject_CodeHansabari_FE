@@ -11,8 +11,7 @@ const protectedRoutes = [
   '/admin/users/statistics',
   '/admin/users',
   '/admin/crawl',
-  '/admin/restore/resumes',
-  '/admin/restore/cover-letters',
+  '/admin/restore',
 ];
 
 /**
