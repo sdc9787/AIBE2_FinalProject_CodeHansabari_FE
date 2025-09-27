@@ -6,5 +6,9 @@ export const useDeduplicateCoverLetterFeatures = () => {
   return useCustomMutation<void, ApiDeduplicateResponse>({
     mutationFn: () => deduplicateCoverLetterFeatures(),
     successMessage: '중복 제거가 완료되었습니다.',
+    invalidateQueryKeys: [
+      ['coverLetterFeatures', 'list'],
+      ['coverLetterFeatures', 'category'],
+    ],
   });
 };

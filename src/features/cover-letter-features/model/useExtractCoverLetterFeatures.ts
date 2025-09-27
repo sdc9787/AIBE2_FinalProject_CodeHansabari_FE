@@ -6,5 +6,9 @@ export const useExtractCoverLetterFeatures = () => {
   return useCustomMutation<void, ApiExtractResponse>({
     mutationFn: () => extractCoverLetterFeatures(),
     successMessage: '특징 추출을 시작하였습니다.',
+    invalidateQueryKeys: [
+      ['coverLetterFeatures', 'rawList'],
+      ['coverLetterFeatures', 'rawCategory'],
+    ],
   });
 };
