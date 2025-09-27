@@ -6,7 +6,5 @@ export const useProcessCoverLetterFeatures = () => {
   return useCustomMutation<void, ApiProcessResponse>({
     mutationFn: () => processCoverLetterFeatures(),
     successMessage: '전체 특징 처리가 시작/완료되었습니다.',
-    loadingType: 'global',
-    // Invalidate relevant queries if any (none added here)
   });
 };

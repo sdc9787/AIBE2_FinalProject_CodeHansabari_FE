@@ -5,7 +5,6 @@ import type { ApiExtractResponse } from '@/entities/coverLetterFeatures/model/ty
 export const useExtractCoverLetterFeatures = () => {
   return useCustomMutation<void, ApiExtractResponse>({
     mutationFn: () => extractCoverLetterFeatures(),
-    successMessage: '특징 추출이 완료되었습니다.',
-    loadingType: 'global',
+    successMessage: '특징 추출을 시작하였습니다.',
   });
 };

@@ -5,6 +5,6 @@ export const useStartCrawl = () => {
   return useCustomMutation({
     mutationFn: () => startCrawl(),
     invalidateQueryKeys: [['crawlList', 'list']],
-    loadingType: 'global',
+    successMessage: '크롤링이 완료되었습니다.',
   });
 };
