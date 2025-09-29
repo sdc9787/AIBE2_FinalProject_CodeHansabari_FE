@@ -13,7 +13,7 @@ export function AdminLayout({ children }: { children?: React.ReactNode }) {
     { name: '데이터 복구', path: '/admin/restore', type: 'internal' },
     {
       name: '모니터링',
-      path: 'https://codehansabari.grafana.net/d/co5jwnz/cvmento?orgId=1&from=now-6h&to=now&timezone=browser',
+      path: 'https://codehansabari.grafana.net/d/dLsDQIUnzb/cv-mento?orgId=1&from=now-5m&to=now&timezone=browser&var-app_name=cvmento&var-log_keyword=&refresh=5s&var-environment=production',
       type: 'external',
     },
   ];
