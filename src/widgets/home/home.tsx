@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useUserStore } from '@/shared';
+import { GoogleLoginButton } from '@/features';
 
 const features = [
   {
@@ -88,12 +89,7 @@ export function Home() {
               </p>
 
               <div className="flex flex-col justify-center gap-5 md:flex-row">
-                <Link
-                  href="/auth"
-                  className="rounded-full bg-white px-8 py-4 text-lg font-semibold text-indigo-600 transition-transform hover:scale-105"
-                >
-                  Google로 시작하기
-                </Link>
+                <GoogleLoginButton className="rounded-full bg-white px-8 py-4 text-lg font-semibold text-indigo-600 transition-transform hover:scale-105" />
                 <Link
                   href="#features"
                   className="rounded-full border-2 border-white bg-transparent px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white hover:text-indigo-600"
@@ -189,13 +185,7 @@ export function Home() {
                 AI의 도움으로 더 나은 자기소개서를 완성해보세요
               </p>
 
-              <Link
-                href="/auth"
-                className="inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-lg font-semibold text-gray-800 transition-transform hover:scale-105"
-              >
-                <span className="text-blue-500">🔵</span>
-                Google로 시작하기
-              </Link>
+              <GoogleLoginButton className="inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-lg font-semibold text-gray-800 transition-transform hover:scale-105" />
             </>
           )}
         </div>
