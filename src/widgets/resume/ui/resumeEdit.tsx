@@ -299,6 +299,8 @@ export function ResumeDocumentEdit({ resumeId }: { resumeId: number }) {
         // additionalInfos: activityName 존재 여부로 판단
         return allHaveProps((DataForm.additionalInfos as any) || [], [
           'activityName',
+          'relatedOrganization',
+          'startDate',
         ]);
 
       case '링크':

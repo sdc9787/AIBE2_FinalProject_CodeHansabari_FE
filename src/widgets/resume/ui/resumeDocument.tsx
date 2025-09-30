@@ -117,7 +117,7 @@ export function ResumeDocument() {
       { name: '교육이력', required: false, state: false, meta: 'training' },
       {
         name: '기타사항',
-        required: false,
+        required: true,
         state: false,
         meta: 'additionalInfo',
       },
@@ -197,9 +197,11 @@ export function ResumeDocument() {
         ]);
 
       case '기타사항':
-        // additionalInfos: activityName 존재 여부로 판단
+        // additionalInfos: activityName 및 relatedOrganization(관련 기관/수여처)를 필수로 판단
         return allHaveProps((DataForm.additionalInfos as any) || [], [
           'activityName',
+          'relatedOrganization',
+          'startDate',
         ]);
 
       case '링크':
@@ -2139,7 +2141,9 @@ function RightSection({
                         e.target.value,
                       )
                     }
-                    placeholder="관련 기관/수여처"
+                    placeholder="관련 기관/수여처 (필수)"
+                    required
+                    aria-required="true"
                     className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                   />
 
