@@ -909,6 +909,8 @@ export function ResumePreviewModal({
     .toString()
     .replace(/\s+/g, '_')}.pdf`;
 
+  console.log(DataForm);
+
   return (
     <AnimatePresence>
       <motion.div
