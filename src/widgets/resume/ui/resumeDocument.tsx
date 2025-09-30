@@ -672,14 +672,24 @@ function RightSection({
   const handleEducationChange = (
     index: number,
     field: string,
-    value: string,
+    value: string | number | null,
   ) => {
     setDataForm((prev) => ({
       ...prev,
       educations:
-        prev.educations?.map((edu, i) =>
-          i === index ? { ...edu, [field]: value } : edu,
-        ) || [],
+        prev.educations?.map((edu, i) => {
+          if (i !== index) return edu;
+          let newVal: any = value;
+          // For GPA fields, convert empty string -> null and otherwise to number
+          if (field === 'personalGpa' || field === 'totalGpa') {
+            if (value === '' || value === null) newVal = null;
+            else {
+              newVal = Number(value);
+              if (Number.isNaN(newVal)) newVal = null;
+            }
+          }
+          return { ...edu, [field]: newVal };
+        }) || [],
     }));
   };
 
@@ -724,6 +734,39 @@ function RightSection({
 
   // 이력서 저장 핸들러 (템플릿 선택 후 저장)
   const handleSaveResumeWithTemplate = () => {
+    // GPA validation helper
+    const validateGpas = (form: CreateResumeRequest) => {
+      const educations = form.educations || [];
+      for (let i = 0; i < educations.length; i++) {
+        const edu = educations[i] as any;
+        const personal = edu.personalGpa;
+        const total = edu.totalGpa;
+        if (personal != null) {
+          if (total == null || total === '') {
+            toast.error(
+              '학점을 입력하셨으면 학점 체계(최대학점)를 선택해주세요.',
+            );
+            return false;
+          }
+          const max = Number(total);
+          if (Number.isNaN(max)) {
+            toast.error('유효한 학점 체계를 선택해주세요.');
+            return false;
+          }
+          const val = Number(personal);
+          if (Number.isNaN(val)) {
+            toast.error('학점은 숫자로 입력하세요.');
+            return false;
+          }
+          if (val < 0 || val > max) {
+            toast.error(`학점은 0부터 ${max} 사이여야 합니다.`);
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
     // 필수 필드 검증
     if (!DataForm.title.trim()) {
       toast.error('이력서 제목을 입력해주세요.');
@@ -798,6 +841,9 @@ function RightSection({
       return;
     }
 
+    // GPA validation
+    if (!validateGpas(filteredDataForm)) return;
+
     // 검증 완료 후 템플릿 선택 모달 열기
     const handleTemplateSelect = (type: ResumeType) => {
       const finalDataForm = { ...filteredDataForm, type };
@@ -834,6 +880,39 @@ function RightSection({
 
   // 현재 선택된 템플릿으로 이력서 저장하는 함수
   const handleSaveResume = () => {
+    // GPA validation helper (reuse same logic)
+    const validateGpas = (form: CreateResumeRequest) => {
+      const educations = form.educations || [];
+      for (let i = 0; i < educations.length; i++) {
+        const edu = educations[i] as any;
+        const personal = edu.personalGpa;
+        const total = edu.totalGpa;
+        if (personal != null) {
+          if (total == null || total === '') {
+            toast.error(
+              '학점을 입력하셨으면 학점 체계(최대학점)를 선택해주세요.',
+            );
+            return false;
+          }
+          const max = Number(total);
+          if (Number.isNaN(max)) {
+            toast.error('유효한 학점 체계를 선택해주세요.');
+            return false;
+          }
+          const val = Number(personal);
+          if (Number.isNaN(val)) {
+            toast.error('학점은 숫자로 입력하세요.');
+            return false;
+          }
+          if (val < 0 || val > max) {
+            toast.error(`학점은 0부터 ${max} 사이여야 합니다.`);
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
     // 필수 필드 검증
     if (!DataForm.title.trim()) {
       toast.error('이력서 제목을 입력해주세요.');
@@ -905,6 +984,9 @@ function RightSection({
       toast.error((error as Error).message);
       return;
     }
+
+    // GPA validation
+    if (!validateGpas(filteredDataForm)) return;
 
     // 현재 FormData의 type을 사용해서 저장
     saveResumeWithCurrentTemplate(filteredDataForm);
@@ -1455,6 +1537,36 @@ function RightSection({
                         )}
                       </AnimatePresence>
                     </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={education.personalGpa ?? ''}
+                      onChange={(e) =>
+                        handleEducationChange(
+                          index,
+                          'personalGpa',
+                          e.target.value,
+                        )
+                      }
+                      placeholder="학점 (예: 3.8)"
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    />
+                    <select
+                      value={education.totalGpa ?? ''}
+                      onChange={(e) =>
+                        handleEducationChange(index, 'totalGpa', e.target.value)
+                      }
+                      className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+                    >
+                      <option value="">기준 학점(선택)</option>
+                      <option value="4.5">4.5</option>
+                      <option value="4.3">4.3</option>
+                      <option value="4.0">4.0</option>
+                      <option value="100">100</option>
+                    </select>
                   </div>
                 </div>
               </div>
