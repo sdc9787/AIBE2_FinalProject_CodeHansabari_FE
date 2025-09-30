@@ -525,7 +525,7 @@ const ResumePDFDocument = ({
 
         {/* 학력 */}
         {resumeData.educations && resumeData.educations.length > 0 && (
-          <View style={styles.section} wrap={false}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>학력</Text>
             {resumeData.educations.map((edu, index: number) => {
               const degreeDesc =
@@ -559,7 +559,7 @@ const ResumePDFDocument = ({
 
         {/* 경력 */}
         {resumeData.careers && resumeData.careers.length > 0 && (
-          <View style={styles.section} wrap={false}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>경력</Text>
             {resumeData.careers.map((career, index: number) => (
               <View key={index} style={styles.itemContainer} wrap={false}>
@@ -569,6 +569,12 @@ const ResumePDFDocument = ({
                   {career.startDate} ~ {career.endDate}
                 </Text>
                 <Text style={styles.descriptionText}>{career.mainTasks}</Text>
+                {/* 회사 설명 (선택) */}
+                {career.companyDescription && (
+                  <Text style={styles.descriptionText}>
+                    {career.companyDescription}
+                  </Text>
+                )}
                 {/* 경력의 기술 스택 */}
                 {career.techStacks && career.techStacks.length > 0 && (
                   <View style={styles.techStackContainer}>
@@ -587,7 +593,7 @@ const ResumePDFDocument = ({
 
         {/* 프로젝트 */}
         {resumeData.projects && resumeData.projects.length > 0 && (
-          <View style={styles.section} wrap={false}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>프로젝트</Text>
             {resumeData.projects.map((project, index: number) => (
               <View key={index} style={styles.itemContainer} wrap={false}>
@@ -595,6 +601,12 @@ const ResumePDFDocument = ({
                 <Text style={styles.descriptionText}>
                   {project.description}
                 </Text>
+                {/* 상세 설명 (선택) */}
+                {project.detailedDescription && (
+                  <Text style={styles.descriptionText}>
+                    {project.detailedDescription}
+                  </Text>
+                )}
                 <Text style={styles.dateText}>
                   {project.startDate} ~ {project.endDate}
                 </Text>
@@ -629,7 +641,7 @@ const ResumePDFDocument = ({
 
         {/* 교육 이력 */}
         {resumeData.trainings && resumeData.trainings.length > 0 && (
-          <View style={styles.section} wrap={false}>
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>교육 이력</Text>
             {resumeData.trainings.map((training, index: number) => (
               <View key={index} style={styles.itemContainer} wrap={false}>
@@ -660,7 +672,7 @@ const ResumePDFDocument = ({
         {/* 기타 사항 */}
         {resumeData.additionalInfos &&
           resumeData.additionalInfos.length > 0 && (
-            <View style={styles.section} wrap={false}>
+            <View style={styles.section}>
               <Text style={styles.sectionTitle}>기타 사항</Text>
               {resumeData.additionalInfos.map((info, index: number) => (
                 <View key={index} style={styles.itemContainer} wrap={false}>
