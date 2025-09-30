@@ -1459,7 +1459,7 @@ function RightSection({
                   </div>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <input
-                      type="text"
+                      type="date"
                       value={education.graduationDate}
                       onChange={(e) =>
                         handleEducationChange(
@@ -1468,7 +1468,6 @@ function RightSection({
                           e.target.value,
                         )
                       }
-                      placeholder="YYYY-MM-DD"
                       className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                     />
                     {/* 졸업 상태 선택 */}
