@@ -18,7 +18,8 @@ export function Header() {
   const menuList: MenuItem[] = [
     { name: '자기소개서', path: '/cover-letter' },
     { name: 'AI 모의면접', path: '/interview-questions' },
-    { name: '이력서', path: '/resume' },
+    { name: '이력서', path: '/resume/document' },
+    { name: '내 문서', path: '/document' },
   ];
 
   //토큰 사용량 표시

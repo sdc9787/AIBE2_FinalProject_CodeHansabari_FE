@@ -980,6 +980,7 @@ function RightSection({
 
     open(
       <ResumeTemplateModal
+        template={DataForm.type}
         onSelect={handleTemplateSelect}
         onCancel={handleCancel}
       />,

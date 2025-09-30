@@ -732,137 +732,6 @@ function RightSection({
     }));
   };
 
-  // 이력서 저장 핸들러 (템플릿 선택 후 저장)
-  const handleSaveResumeWithTemplate = () => {
-    // GPA validation helper
-    const validateGpas = (form: CreateResumeRequest) => {
-      const educations = form.educations || [];
-      for (let i = 0; i < educations.length; i++) {
-        const edu = educations[i] as any;
-        const personal = edu.personalGpa;
-        const total = edu.totalGpa;
-        if (personal != null) {
-          if (total == null || total === '') {
-            toast.error(
-              '학점을 입력하셨으면 학점 체계(최대학점)를 선택해주세요.',
-            );
-            return false;
-          }
-          const max = Number(total);
-          if (Number.isNaN(max)) {
-            toast.error('유효한 학점 체계를 선택해주세요.');
-            return false;
-          }
-          const val = Number(personal);
-          if (Number.isNaN(val)) {
-            toast.error('학점은 숫자로 입력하세요.');
-            return false;
-          }
-          if (val < 0 || val > max) {
-            toast.error(`학점은 0부터 ${max} 사이여야 합니다.`);
-            return false;
-          }
-        }
-      }
-      return true;
-    };
-
-    // 필수 필드 검증
-    if (!DataForm.title.trim()) {
-      toast.error('이력서 제목을 입력해주세요.');
-      return;
-    }
-    if (!DataForm.name.trim()) {
-      toast.error('이름을 입력해주세요.');
-      return;
-    }
-    if (!DataForm.email.trim()) {
-      toast.error('이메일을 입력해주세요.');
-      return;
-    }
-    if (!DataForm.phone.trim()) {
-      toast.error('연락처를 입력해주세요.');
-      return;
-    }
-    if (!DataForm.fieldName.trim()) {
-      toast.error('직무 분야를 입력해주세요.');
-      return;
-    }
-
-    // 이력서 필터링
-    // 필수 항목들은 무조건 포함, 선택 항목들은 state가 true이고 내용이 있을 때만 포함
-    // 선택 항목에서 state가 true이지만 내용이 없으면 에러 알림
-    const filteredDataForm: CreateResumeRequest = { ...DataForm };
-
-    try {
-      items.forEach((item) => {
-        // 선택 항목이 활성화되어 있지만 내용이 없는 경우 에러
-        if (!item.required && item.state && !hasContent(item.name)) {
-          throw new Error(`"${item.name}" 항목의 내용을 모두 입력해주세요.`);
-        }
-
-        // 선택 항목이 비활성화된 경우 해당 속성을 제거
-        if (!item.required && !item.state) {
-          switch (item.meta) {
-            case 'introduction':
-              delete filteredDataForm.introduction;
-              break;
-            case 'education':
-              delete filteredDataForm.educations;
-              break;
-            case 'techStack':
-              delete filteredDataForm.techStacks;
-              break;
-            case 'link':
-              delete filteredDataForm.githubUrl;
-              delete filteredDataForm.blogUrl;
-              delete filteredDataForm.notionUrl;
-              delete filteredDataForm.customLinks;
-              break;
-            case 'career':
-              delete filteredDataForm.careers;
-              break;
-            case 'project':
-              delete filteredDataForm.projects;
-              break;
-            case 'training':
-              delete filteredDataForm.trainings;
-              break;
-            case 'additionalInfo':
-              delete filteredDataForm.additionalInfos;
-              break;
-            default:
-              break;
-          }
-        }
-      });
-    } catch (error) {
-      toast.error((error as Error).message);
-      return;
-    }
-
-    // GPA validation
-    if (!validateGpas(filteredDataForm)) return;
-
-    // 검증 완료 후 템플릿 선택 모달 열기
-    const handleTemplateSelect = (type: ResumeType) => {
-      const finalDataForm = { ...filteredDataForm, type };
-      saveResumeWithCurrentTemplate(finalDataForm);
-      close();
-    };
-
-    const handleCancel = () => {
-      close();
-    };
-
-    open(
-      <ResumeTemplateModal
-        onSelect={handleTemplateSelect}
-        onCancel={handleCancel}
-      />,
-    );
-  };
-
   // 템플릿 선택만 하는 함수 (저장 없음)
   const handleSelectTemplate = () => {
     showTemplateSelectionModal();
@@ -1009,6 +878,7 @@ function RightSection({
 
     open(
       <ResumeTemplateModal
+        template={DataForm.type}
         onSelect={handleTemplateSelect}
         onCancel={handleCancel}
       />,

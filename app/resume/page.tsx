@@ -1,5 +1,3 @@
-import { ResumePage } from '@/pages';
-
 export default function Resume() {
-  return <ResumePage />;
+  return <div></div>;
 }

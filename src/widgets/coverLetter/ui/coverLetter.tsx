@@ -556,7 +556,7 @@ export function CoverLetter({ id }: CoverLetterProps) {
                         className="rounded-xl border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                       />
 
-                      <div className="flex gap-4">
+                      <div className="ictems-center flex justify-between">
                         <div className="group">
                           <Button
                             onClick={analyzeResume}
@@ -579,6 +579,19 @@ export function CoverLetter({ id }: CoverLetterProps) {
                             </div>
                           </Button>
                         </div>
+                        {/*저장 버튼 - AI 분석 결과가 없어도 Step 1에서 작성한 텍스트로 저장할 수 있도록 허용 */}
+                        {
+                          <SaveCoverLetterButton
+                            data={{
+                              title: title,
+                              content: text,
+                              jobField: jobField || '일반',
+                              experienceYears: parseInt(experienceYears) || 0,
+                              isAiImproved: analysisResult ? true : false,
+                            }}
+                            className="transform rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-105 hover:bg-blue-700"
+                          />
+                        }
                       </div>
                     </div>
                   </div>

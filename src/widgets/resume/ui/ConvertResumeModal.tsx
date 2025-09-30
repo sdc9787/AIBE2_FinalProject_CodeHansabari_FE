@@ -8,13 +8,11 @@ import toast from 'react-hot-toast';
 interface ConvertResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
 }
 
 export function ConvertResumeModal({
   isOpen,
   onClose,
-  onSuccess,
 }: ConvertResumeModalProps) {
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -86,7 +84,6 @@ export function ConvertResumeModal({
     convertMutation.mutate(selectedFile, {
       onSuccess: () => {
         setSelectedFile(null);
-        onSuccess();
         onClose();
       },
     });

@@ -5,17 +5,18 @@ import { useState } from 'react';
 import { ResumeType } from '@/entities';
 
 interface ResumeTemplateModalProps {
+  template: ResumeType;
   onSelect: (type: ResumeType) => void;
   onCancel: () => void;
 }
 
 export function ResumeTemplateModal({
+  template,
   onSelect,
   onCancel,
 }: ResumeTemplateModalProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState<ResumeType | null>(
-    null,
-  );
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ResumeType>(template);
 
   const templates = [
     {
