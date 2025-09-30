@@ -419,7 +419,7 @@ export function Document() {
             </h2>
             <div className="flex space-x-3">
               <Button
-                onClick={() => router.push('/cover-letter/new')}
+                onClick={() => router.push('/cover-letter')}
                 variant="primary"
                 className="transform rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
               >
