@@ -246,13 +246,6 @@ export function Document() {
                 <p className="mb-4 text-lg text-gray-500">
                   작성된 이력서가 없습니다.
                 </p>
-                <Button
-                  onClick={handleCreateNew}
-                  variant="primary"
-                  className="rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:bg-blue-700"
-                >
-                  첫 번째 이력서 작성하기
-                </Button>
               </motion.div>
             ) : (
               <div className="grid w-full grid-cols-3 gap-10">
