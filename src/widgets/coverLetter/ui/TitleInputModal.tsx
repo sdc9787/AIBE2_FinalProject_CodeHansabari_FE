@@ -63,7 +63,7 @@ export function TitleInputModal({
         <Button
           onClick={onCancel}
           variant="secondary"
-          className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50"
+          className="flex-1 border-gray-300 text-white hover:bg-gray-600"
         >
           취소
         </Button>
