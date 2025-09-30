@@ -890,7 +890,7 @@ function RightSection({
     mutation.mutate(formData, {
       onSuccess: () => {
         // 성공 토스트는 useCustomMutation의 successMessage에서 처리되므로 중복 방지
-        router.push('/resume'); // 이력서 목록 페이지로 이동
+        router.push('/document'); // 이력서 목록 페이지로 이동
       },
       onError: (error: any) => {
         console.error('이력서 저장 실패:', error);

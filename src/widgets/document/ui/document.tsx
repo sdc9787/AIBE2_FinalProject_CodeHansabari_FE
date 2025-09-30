@@ -7,13 +7,11 @@ import { Button, useModalStore } from '@/shared';
 
 import { useDeleteResumeMutation } from '@/features';
 import { ConvertResumeModal, ResumePreviewModal } from '@/widgets/resume';
-import { CoverLetter } from '@/widgets/coverLetter/ui/coverLetter';
 import { useCoverLetterList } from '@/entities';
 import { useDeleteCoverLetter } from '@/features/delete-coverLetter/model/useDeleteCoverLetter';
 
 export function Document() {
   const router = useRouter();
-  const deleteCoverLetterMutation = useDeleteCoverLetter();
   const [page, setPage] = useState<number>(0);
   const size = 6; // 한 페이지에 보여줄 항목 수
   const [showConvertModal, setShowConvertModal] = useState(false);
@@ -25,7 +23,7 @@ export function Document() {
   const deleteResumeMutation = useDeleteResumeMutation();
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'resume' | 'coverLetter'>(
-    'resume',
+    'coverLetter',
   );
 
   const completedSectionsList = {
@@ -171,16 +169,6 @@ export function Document() {
       {/* 상단 탭: 이력서 / 자기소개서 */}
       <div className="mb-6 flex items-center justify-start gap-4">
         <button
-          onClick={() => setActiveTab('resume')}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            activeTab === 'resume'
-              ? 'bg-blue-600 text-white shadow'
-              : 'border bg-white text-gray-700'
-          }`}
-        >
-          이력서 관리
-        </button>
-        <button
           onClick={() => setActiveTab('coverLetter')}
           className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'coverLetter'
@@ -189,6 +177,16 @@ export function Document() {
           }`}
         >
           자기소개서 관리
+        </button>
+        <button
+          onClick={() => setActiveTab('resume')}
+          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'resume'
+              ? 'bg-blue-600 text-white shadow'
+              : 'border bg-white text-gray-700'
+          }`}
+        >
+          이력서 관리
         </button>
       </div>
 
