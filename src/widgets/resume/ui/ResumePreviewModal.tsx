@@ -439,6 +439,12 @@ const ResumePDFDocument = ({
 
   // metaData에서 degreeLevels를 가져옵니다.
   const degreeLevels = metaData?.degreeLevels || [];
+  // local arrays for stable rendering
+  const educations = resumeData.educations || [];
+  const careers = resumeData.careers || [];
+  const projects = resumeData.projects || [];
+  const trainings = resumeData.trainings || [];
+  const additionalInfos = resumeData.additionalInfos || [];
 
   return (
     <Document>
@@ -524,10 +530,44 @@ const ResumePDFDocument = ({
         )}
 
         {/* 학력 */}
-        {resumeData.educations && resumeData.educations.length > 0 && (
-          <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>학력</Text>
-            {resumeData.educations.map((edu, index: number) => {
+        {educations.length > 0 && (
+          <View style={styles.section}>
+            {/* Title + first item grouped so they don't split across pages */}
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>학력</Text>
+              {/* first item */}
+              {(() => {
+                const edu = educations[0];
+                const degreeDesc =
+                  degreeLevels.find((d) => d.value === edu.degreeLevel)
+                    ?.description || `학위 ${edu.degreeLevel}`;
+                const gpaDisplay =
+                  edu.personalGpa != null
+                    ? `${edu.personalGpa}${edu.totalGpa ? `/${edu.totalGpa}` : ''}`
+                    : '';
+
+                return (
+                  <View key={0} style={styles.itemContainer} wrap={false}>
+                    <View style={{ marginBottom: 10 }}>
+                      <Text style={styles.boldText}>
+                        {edu.schoolName} {' | '} {degreeDesc}
+                      </Text>
+
+                      <Text style={styles.text}>
+                        {edu.major || ''}
+                        {edu.major && gpaDisplay ? ' | ' : ''}
+                        {gpaDisplay}
+                      </Text>
+
+                      <Text style={styles.dateText}>{edu.graduationDate}</Text>
+                    </View>
+                  </View>
+                );
+              })()}
+            </View>
+
+            {/* remaining items: each non-wrapping to avoid overlap */}
+            {educations.slice(1).map((edu, index) => {
               const degreeDesc =
                 degreeLevels.find((d) => d.value === edu.degreeLevel)
                   ?.description || `학위 ${edu.degreeLevel}`;
@@ -537,8 +577,8 @@ const ResumePDFDocument = ({
                   : '';
 
               return (
-                <View key={index} style={styles.itemContainer} wrap={false}>
-                  <View key={index} style={{ marginBottom: 10 }}>
+                <View key={index + 1} style={styles.itemContainer} wrap={false}>
+                  <View style={{ marginBottom: 10 }}>
                     <Text style={styles.boldText}>
                       {edu.schoolName} {' | '} {degreeDesc}
                     </Text>
@@ -558,24 +598,56 @@ const ResumePDFDocument = ({
         )}
 
         {/* 경력 */}
-        {resumeData.careers && resumeData.careers.length > 0 && (
-          <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>경력</Text>
-            {resumeData.careers.map((career, index: number) => (
-              <View key={index} style={styles.itemContainer} wrap={false}>
+        {careers.length > 0 && (
+          <View style={styles.section}>
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>경력</Text>
+              {/* first career */}
+              {(() => {
+                const career = careers[0];
+                return (
+                  <View key={0} style={styles.itemContainer} wrap={false}>
+                    <Text style={styles.itemTitle}>{career.companyName}</Text>
+                    <Text style={styles.text}>{career.departmentPosition}</Text>
+                    <Text style={styles.dateText}>
+                      {career.startDate} ~ {career.endDate}
+                    </Text>
+                    <Text style={styles.descriptionText}>
+                      {career.mainTasks}
+                    </Text>
+                    {career.companyDescription && (
+                      <Text style={styles.descriptionText}>
+                        {career.companyDescription}
+                      </Text>
+                    )}
+                    {career.techStacks && career.techStacks.length > 0 && (
+                      <View style={styles.techStackContainer}>
+                        {career.techStacks.map((tech, techIndex: number) => (
+                          <Text key={techIndex} style={styles.techStack}>
+                            {techMeta.find((t) => t.id === tech.techStackId)
+                              ?.name || `기술 ${techIndex + 1}`}
+                          </Text>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                );
+              })()}
+            </View>
+
+            {careers.slice(1).map((career, index) => (
+              <View key={index + 1} style={styles.itemContainer} wrap={false}>
                 <Text style={styles.itemTitle}>{career.companyName}</Text>
                 <Text style={styles.text}>{career.departmentPosition}</Text>
                 <Text style={styles.dateText}>
                   {career.startDate} ~ {career.endDate}
                 </Text>
                 <Text style={styles.descriptionText}>{career.mainTasks}</Text>
-                {/* 회사 설명 (선택) */}
                 {career.companyDescription && (
                   <Text style={styles.descriptionText}>
                     {career.companyDescription}
                   </Text>
                 )}
-                {/* 경력의 기술 스택 */}
                 {career.techStacks && career.techStacks.length > 0 && (
                   <View style={styles.techStackContainer}>
                     {career.techStacks.map((tech, techIndex: number) => (
@@ -592,16 +664,60 @@ const ResumePDFDocument = ({
         )}
 
         {/* 프로젝트 */}
-        {resumeData.projects && resumeData.projects.length > 0 && (
-          <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>프로젝트</Text>
-            {resumeData.projects.map((project, index: number) => (
-              <View key={index} style={styles.itemContainer} wrap={false}>
+        {projects.length > 0 && (
+          <View style={styles.section}>
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>프로젝트</Text>
+              {/* first project */}
+              {(() => {
+                const project = projects[0];
+                return (
+                  <View key={0} style={styles.itemContainer} wrap={false}>
+                    <Text style={styles.itemTitle}>{project.name}</Text>
+                    <Text style={styles.descriptionText}>
+                      {project.description}
+                    </Text>
+                    {project.detailedDescription && (
+                      <Text style={styles.descriptionText}>
+                        {project.detailedDescription}
+                      </Text>
+                    )}
+                    <Text style={styles.dateText}>
+                      {project.startDate} ~ {project.endDate}
+                    </Text>
+
+                    {project.techStacks && project.techStacks.length > 0 && (
+                      <View style={styles.techStackContainer}>
+                        {project.techStacks.map((tech, techIndex: number) => (
+                          <Text key={techIndex} style={styles.techStack}>
+                            {techMeta.find((t) => t.id === tech.techStackId)
+                              ?.name || `기술 ${techIndex + 1}`}
+                          </Text>
+                        ))}
+                      </View>
+                    )}
+
+                    {project.deployUrl && (
+                      <Text style={styles.linkText}>
+                        배포 URL: {project.deployUrl}
+                      </Text>
+                    )}
+                    {project.repositoryUrl && (
+                      <Text style={styles.linkText}>
+                        저장소: {project.repositoryUrl}
+                      </Text>
+                    )}
+                  </View>
+                );
+              })()}
+            </View>
+
+            {projects.slice(1).map((project, index) => (
+              <View key={index + 1} style={styles.itemContainer} wrap={false}>
                 <Text style={styles.itemTitle}>{project.name}</Text>
                 <Text style={styles.descriptionText}>
                   {project.description}
                 </Text>
-                {/* 상세 설명 (선택) */}
                 {project.detailedDescription && (
                   <Text style={styles.descriptionText}>
                     {project.detailedDescription}
@@ -611,7 +727,6 @@ const ResumePDFDocument = ({
                   {project.startDate} ~ {project.endDate}
                 </Text>
 
-                {/* 기술 스택 */}
                 {project.techStacks && project.techStacks.length > 0 && (
                   <View style={styles.techStackContainer}>
                     {project.techStacks.map((tech, techIndex: number) => (
@@ -623,7 +738,6 @@ const ResumePDFDocument = ({
                   </View>
                 )}
 
-                {/* 링크 정보 */}
                 {project.deployUrl && (
                   <Text style={styles.linkText}>
                     배포 URL: {project.deployUrl}
@@ -640,11 +754,40 @@ const ResumePDFDocument = ({
         )}
 
         {/* 교육 이력 */}
-        {resumeData.trainings && resumeData.trainings.length > 0 && (
-          <View style={styles.section} wrap={false}>
-            <Text style={styles.sectionTitle}>교육 이력</Text>
-            {resumeData.trainings.map((training, index: number) => (
-              <View key={index} style={styles.itemContainer} wrap={false}>
+        {trainings.length > 0 && (
+          <View style={styles.section}>
+            <View wrap={false}>
+              <Text style={styles.sectionTitle}>교육 이력</Text>
+              {/* first training */}
+              {(() => {
+                const training = trainings[0];
+                return (
+                  <View key={0} style={styles.itemContainer} wrap={false}>
+                    <Text style={styles.itemTitle}>{training.courseName}</Text>
+                    <Text style={styles.text}>{training.institutionName}</Text>
+                    <Text style={styles.dateText}>
+                      {training.startDate} ~ {training.endDate}
+                    </Text>
+                    <Text style={styles.descriptionText}>
+                      {training.detailedContent}
+                    </Text>
+                    {training.techStacks && training.techStacks.length > 0 && (
+                      <View style={styles.techStackContainer}>
+                        {training.techStacks.map((tech, techIndex: number) => (
+                          <Text key={techIndex} style={styles.techStack}>
+                            {techMeta.find((t) => t.id === tech.techStackId)
+                              ?.name || `기술 ${techIndex + 1}`}
+                          </Text>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                );
+              })()}
+            </View>
+
+            {trainings.slice(1).map((training, index) => (
+              <View key={index + 1} style={styles.itemContainer} wrap={false}>
                 <Text style={styles.itemTitle}>{training.courseName}</Text>
                 <Text style={styles.text}>{training.institutionName}</Text>
                 <Text style={styles.dateText}>
@@ -653,7 +796,6 @@ const ResumePDFDocument = ({
                 <Text style={styles.descriptionText}>
                   {training.detailedContent}
                 </Text>
-                {/* 교육의 기술 스택 */}
                 {training.techStacks && training.techStacks.length > 0 && (
                   <View style={styles.techStackContainer}>
                     {training.techStacks.map((tech, techIndex: number) => (
@@ -670,24 +812,42 @@ const ResumePDFDocument = ({
         )}
 
         {/* 기타 사항 */}
-        {resumeData.additionalInfos &&
-          resumeData.additionalInfos.length > 0 && (
-            <View style={styles.section} wrap={false}>
+        {additionalInfos.length > 0 && (
+          <View style={styles.section}>
+            <View wrap={false}>
               <Text style={styles.sectionTitle}>기타 사항</Text>
-              {resumeData.additionalInfos.map((info, index: number) => (
-                <View key={index} style={styles.itemContainer} wrap={false}>
-                  <Text style={styles.itemTitle}>{info.activityName}</Text>
-                  <Text style={styles.text}>{info.relatedOrganization}</Text>
-                  <Text style={styles.dateText}>
-                    {info.startDate} ~ {info.endDate}
-                  </Text>
-                  <Text style={styles.descriptionText}>
-                    {info.detailedContent}
-                  </Text>
-                </View>
-              ))}
+              {/* first info */}
+              {(() => {
+                const info = additionalInfos[0];
+                return (
+                  <View key={0} style={styles.itemContainer} wrap={false}>
+                    <Text style={styles.itemTitle}>{info.activityName}</Text>
+                    <Text style={styles.text}>{info.relatedOrganization}</Text>
+                    <Text style={styles.dateText}>
+                      {info.startDate} ~ {info.endDate}
+                    </Text>
+                    <Text style={styles.descriptionText}>
+                      {info.detailedContent}
+                    </Text>
+                  </View>
+                );
+              })()}
             </View>
-          )}
+
+            {additionalInfos.slice(1).map((info, index) => (
+              <View key={index + 1} style={styles.itemContainer} wrap={false}>
+                <Text style={styles.itemTitle}>{info.activityName}</Text>
+                <Text style={styles.text}>{info.relatedOrganization}</Text>
+                <Text style={styles.dateText}>
+                  {info.startDate} ~ {info.endDate}
+                </Text>
+                <Text style={styles.descriptionText}>
+                  {info.detailedContent}
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* 링크 */}
         <View style={styles.section} wrap={false}>
