@@ -20,6 +20,7 @@ export const useCreateCustomQuestionAnswer = ({
       successMessage: '커스텀 질문에 대한 답변이 성공적으로 생성되었습니다.',
       invalidateQueryKeys: [
         [...interviewQuestionsQueryKeys.list(coverLetterId)],
+        ['usageTokens'],
       ],
       loadingType: 'global',
       requireTokenCheck: true,

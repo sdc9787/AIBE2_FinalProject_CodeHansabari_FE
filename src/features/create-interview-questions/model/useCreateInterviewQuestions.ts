@@ -14,7 +14,10 @@ export const useCreateInterviewQuestions = ({
 }: UseCreateInterviewQuestionsArgs) => {
   return useCustomMutation<void, CreateInterviewQuestionsResponse>({
     mutationFn: () => createInterviewQuestions(coverLetterId),
-    invalidateQueryKeys: [[...interviewQuestionsQueryKeys.list(coverLetterId)]],
+    invalidateQueryKeys: [
+      [...interviewQuestionsQueryKeys.list(coverLetterId)],
+      ['usageTokens'],
+    ],
     successMessage: '면접 질문/답변이 성공적으로 생성되었습니다.',
     loadingType: 'global',
     requireTokenCheck: true,

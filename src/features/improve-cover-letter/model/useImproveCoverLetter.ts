@@ -36,6 +36,7 @@ export const useImproveCoverLetterMutation = () => {
     ImproveCoverLetterResponse
   >({
     mutationFn: (requestData) => improveCoverLetter(requestData),
+    invalidateQueryKeys: [['coverLetter'], ['usageTokens']],
     successMessage: '자소서 AI 개선이 완료되었습니다.',
     loadingType: 'global',
     requireTokenCheck: true,
