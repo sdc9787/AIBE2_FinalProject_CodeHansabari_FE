@@ -22,22 +22,15 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { motion } from 'framer-motion';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, ArcElement, Title, Tooltip);
 
 export const AdminMemberStatistics = () => {
-  const { data, isLoading, error, refetch } = useAdminMemberStatistics();
-
-  // Member management state
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
+
+  const { data, isLoading, error, refetch } = useAdminMemberStatistics();
 
   // pendingFilters are updated by UI controls but do NOT trigger fetching.
   // appliedFilters are what the API query uses. We only apply pendingFilters
@@ -552,8 +545,14 @@ export const AdminMemberStatistics = () => {
                   <th className="w-1/8 px-4 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
                     가입일
                   </th>
-                  <th className="w-1/4 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    액션
+                  <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    활성
+                  </th>
+                  <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    권한
+                  </th>
+                  <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    로그아웃
                   </th>
                 </tr>
               </thead>
@@ -616,8 +615,9 @@ export const AdminMemberStatistics = () => {
                         ? new Date(member.createdAt).toLocaleDateString()
                         : '-'}
                     </td>
-                    <td className="px-6 py-4 text-center text-sm font-medium whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-2">
+                    {/* 활성 */}
+                    <td className="px-6 py-4 text-left text-sm font-medium whitespace-nowrap">
+                      <div className="flex items-center justify-start">
                         {(() => {
                           const isSelf = currentUser?.email === member.email;
                           const myRole = (currentUser?.role ?? 'USER') as
@@ -651,44 +651,123 @@ export const AdminMemberStatistics = () => {
 
                           return (
                             <>
-                              <select
-                                value={member.status}
-                                onChange={(e) =>
-                                  updateMemberStatus(
-                                    member.memberId,
-                                    e.target.value as any,
-                                  )
-                                }
-                                className="rounded border px-2 py-1 text-sm"
-                                aria-label={`Change status for ${member.name}`}
-                                disabled={!canChangeStatus}
+                              {/* 상태 토글은 이 칸(활성)에서 렌더링됩니다. */}
+                              <div
+                                role="switch"
+                                aria-checked={member.status === 'ACTIVE'}
+                                tabIndex={canChangeStatus ? 0 : -1}
+                                onKeyDown={(e) => {
+                                  if (!canChangeStatus) return;
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    void updateMemberStatus(
+                                      member.memberId,
+                                      member.status === 'ACTIVE'
+                                        ? 'INACTIVE'
+                                        : 'ACTIVE',
+                                    );
+                                  }
+                                }}
                                 title={statusTitle}
-                              >
-                                <option value="ACTIVE">활성</option>
-                                <option value="INACTIVE">비활성</option>
-                              </select>
-
-                              <select
-                                value={member.role}
-                                onChange={(e) =>
-                                  updateMemberRole(
+                                aria-label={`Toggle status for ${member.name}`}
+                                onClick={() => {
+                                  if (!canChangeStatus) return;
+                                  void updateMemberStatus(
                                     member.memberId,
-                                    e.target.value as any,
-                                  )
-                                }
-                                className="rounded border px-2 py-1 text-sm"
-                                aria-label={`Change role for ${member.name}`}
-                                disabled={!canChangeRole}
-                                title={roleTitle}
+                                    member.status === 'ACTIVE'
+                                      ? 'INACTIVE'
+                                      : 'ACTIVE',
+                                  );
+                                }}
+                                className={`flex items-center justify-start ${
+                                  canChangeStatus
+                                    ? 'cursor-pointer'
+                                    : 'cursor-not-allowed opacity-60'
+                                }`}
                               >
-                                <option value="USER">사용자</option>
-                                <option value="ADMIN">관리자</option>
-                                <option value="ROOT">최고 관리자</option>
-                              </select>
+                                <motion.div
+                                  initial={false}
+                                  animate={{
+                                    backgroundColor:
+                                      member.status === 'ACTIVE'
+                                        ? '#73dd63'
+                                        : '#dedede',
+                                  }}
+                                  className="relative h-5 w-9 rounded-full p-0.5"
+                                >
+                                  <motion.div
+                                    layout
+                                    transition={{
+                                      type: 'spring',
+                                      stiffness: 500,
+                                      damping: 30,
+                                    }}
+                                    className="h-4 w-4 rounded-full bg-white shadow-sm"
+                                    style={{
+                                      x: member.status === 'ACTIVE' ? 16 : 0,
+                                    }}
+                                  />
+                                </motion.div>
+                                <span className="ml-2 text-left text-xs font-medium text-gray-600">
+                                  {member.status === 'ACTIVE'
+                                    ? '활성'
+                                    : '비활성'}
+                                </span>
+                              </div>
                             </>
                           );
                         })()}
+                      </div>
+                    </td>
 
+                    {/* 권한 */}
+                    <td className="px-6 py-4 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center">
+                        {(() => {
+                          const isSelf = currentUser?.email === member.email;
+                          const myRole = (currentUser?.role ?? 'USER') as
+                            | 'USER'
+                            | 'ADMIN'
+                            | 'ROOT';
+
+                          const canChangeRole =
+                            !isSelf &&
+                            !(myRole === 'ADMIN' && member.role === 'ADMIN') &&
+                            !(myRole === 'ROOT' && member.role === 'ROOT');
+                          const roleTitle = isSelf
+                            ? '자기 자신의 역할은 변경할 수 없습니다.'
+                            : myRole === 'ADMIN' && member.role === 'ADMIN'
+                              ? '동급 관리자끼리는 역할 변경 불가'
+                              : myRole === 'ROOT' && member.role === 'ROOT'
+                                ? '동급 관리자끼리는 역할 변경 불가'
+                                : '';
+
+                          return (
+                            <select
+                              value={member.role}
+                              onChange={(e) =>
+                                updateMemberRole(
+                                  member.memberId,
+                                  e.target.value as any,
+                                )
+                              }
+                              className="rounded border border-gray-300 px-2 py-0.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                              aria-label={`Change role for ${member.name}`}
+                              disabled={!canChangeRole}
+                              title={roleTitle}
+                            >
+                              <option value="USER">사용자</option>
+                              <option value="ADMIN">관리자</option>
+                              <option value="ROOT">최고 관리자</option>
+                            </select>
+                          );
+                        })()}
+                      </div>
+                    </td>
+
+                    {/* 로그아웃 */}
+                    <td className="px-6 py-4 text-center text-sm font-medium whitespace-nowrap">
+                      <div className="flex items-center justify-center">
                         <button
                           onClick={() => {
                             if (

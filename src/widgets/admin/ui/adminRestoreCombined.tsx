@@ -342,7 +342,7 @@ export const AdminRestoreCombined = ({
                   <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
                     작성자
                   </th>
-                  <th className="w-4/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="w-6/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     제목
                   </th>
                   <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
@@ -492,7 +492,7 @@ export const AdminRestoreCombined = ({
                   <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
                     작성자
                   </th>
-                  <th className="w-4/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="w-6/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     제목
                   </th>
                   <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">

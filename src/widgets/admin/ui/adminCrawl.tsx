@@ -354,7 +354,7 @@ export const AdminCrawl = () => {
                 <button
                   onClick={handleStartCrawl}
                   disabled={startCrawlMutation.isPending}
-                  className="rounded bg-indigo-500 px-3 py-1.5 text-sm text-white hover:bg-indigo-600"
+                  className="rounded bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
                 >
                   {startCrawlMutation.isPending
                     ? '크롤링 중...'
@@ -368,9 +368,9 @@ export const AdminCrawl = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="w-1/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    ID
+                    크롤링 ID
                   </th>
-                  <th className="w-5/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
+                  <th className="w-7/12 px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
                     내용 미리보기
                   </th>
                   <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
@@ -382,15 +382,18 @@ export const AdminCrawl = () => {
                   <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
                     상태
                   </th>
-                  <th className="w-3/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
-                    작업
+                  <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    수정
+                  </th>
+                  <th className="w-1/12 px-6 py-3 text-center text-xs font-medium tracking-wider text-gray-500 uppercase">
+                    삭제
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
                 {crawlLoading ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center">
+                    <td colSpan={7} className="px-6 py-8 text-center">
                       <div className="flex items-center justify-center">
                         <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
                       </div>
@@ -402,7 +405,7 @@ export const AdminCrawl = () => {
                 ) : crawlPage?.content.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-6 py-8 text-center text-gray-500"
                     >
                       조회된 크롤링 데이터가 없습니다.
@@ -436,7 +439,7 @@ export const AdminCrawl = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center text-sm font-medium whitespace-nowrap">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-center">
                           <button
                             onClick={() =>
                               openEditModal(crawl.coverLetterId, crawl.text)
@@ -446,6 +449,10 @@ export const AdminCrawl = () => {
                           >
                             수정
                           </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center text-sm font-medium whitespace-nowrap">
+                        <div className="flex items-center justify-center">
                           <button
                             onClick={() =>
                               handleDeleteAllCrawl(crawl.coverLetterId)
